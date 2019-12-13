@@ -2,6 +2,34 @@
 
 This plugin helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository.
 
+# Demo project and benchmark
+
+We created a demo project with some popular pods added to compare build time. To try it:
+
+```
+sh BuildBenchMark.sh
+```
+
+The result will vary depends on your machine and network condition.
+
+Total build time + fetch cache:
+
+```
+Build time no cache: [73.0 sec]
+Build time with cache: [35.0 sec]
+```
+
+Build time only:
+
+```
+Build time no cache: [54.722 sec]
+Build time with cache: [14.213 sec]
+```
+
+In our real project with around 15% of swift/ObjC code from vendor pods. After applied this technique and monitored on the CI system, we found that overall, it helped to reduce 10% of build time.
+
+<img src=images/realproj_buildtime_trend.png width=800></img>
+
 # Installation
 
 - Install ruby 2.x version and python 3.x (which are usually available on most developers machine!).
@@ -72,34 +100,6 @@ $pod binary-cache --cmd=fetch
  + In pod pre-install hook, it reads Manifest.lock and Podfile.lock to compare prebuilt lib's version with the one in Podfile.lock, if they're matched -> add to the cache-hit dictionary, otherwise, add to the cache-miss dictionary. Then the plugin intercepts pod install-source flow and base on generated cache hit/miss dictionaries to decide using cached frameworks or original source code.
 
 Because we don't upgrade vendor pods every day, even once in a few months, the cache hit rate will likely be 100 % most of the time.
-
-# Demo project and benchmark
-
-We created a demo project with some popular pods added to compare build time. To try it:
-
-```
-sh BuildBenchMark.sh
-```
-
-The result will vary depends on your machine and network condition.
-
-Total build time + fetch cache:
-
-```
-Build time no cache: [73.0 sec]
-Build time with cache: [35.0 sec]
-```
-
-Build time only:
-
-```
-Build time no cache: [54.722 sec]
-Build time with cache: [14.213 sec]
-```
-
-In our real project with around 15% of swift/ObjC code from vendor pods. After applied this technique and monitored on the CI system, we found that overall, it helped to reduce 10% of build time.
-
-<img src=images/realproj_buildtime_trend.png width=800></img>
 
 # Notes
 
