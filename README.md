@@ -60,11 +60,7 @@ $ bundle install --path <dir_to_install_your_bundle>
 ```
 {
   "prebuilt_cache_repo": "<Link to your git repo to store built frameworks>",
-  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/",
-  "prebuild_path": "Pods/_Prebuild/",
-  "generated_dir_name": "GeneratedFrameworks/",
-  "delta_path": "Pods/_Prebuild_delta/changes.txt",
-  "manifest_file": "Manifest.lock"
+  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/"
 }
 ```
 
