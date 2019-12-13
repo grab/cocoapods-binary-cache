@@ -1,0 +1,36 @@
+platform :ios, '10.0'
+
+def is_pod_binary_cache_enabled
+  ENV['IS_POD_BINARY_CACHE_ENABLED'] == 'true'
+end
+
+plugin 'cocoapods-binary-cache'
+set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "DEBUG_INFORMATION_FORMAT=dwarf", :device => "ARCHS=arm64 DEBUG_INFORMATION_FORMAT=dwarf"
+
+def binary_pod(name, *args)
+  if is_pod_binary_cache_enabled
+    pod name, args, :binary => true
+  else
+    pod name, args
+  end
+end
+
+target 'PodBinCacheExample' do
+  use_frameworks!
+
+  # Pods for PodBinCacheExample
+  # https://www.raywenderlich.com/259-top-10-libraries-for-ios-developers
+
+  # binary_pod 'AFNetworking', '3.2.1'
+  binary_pod 'SDWebImage'
+  binary_pod 'Alamofire'
+  binary_pod 'MBProgressHUD'
+  binary_pod 'Masonry'
+  binary_pod 'SwiftyJSON'
+  binary_pod 'SVProgressHUD'
+  binary_pod 'MJRefresh'
+  binary_pod 'CocoaLumberjack'
+  binary_pod 'Realm'
+  binary_pod 'SnapKit'
+  binary_pod 'Kingfisher'
+end

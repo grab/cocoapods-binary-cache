@@ -1,0 +1,12 @@
+{
+  "prebuilt_cache_repo": "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
+  "prebuilt_cache_tag": "0.0.8",
+  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/",
+  "prebuild_path": "Pods/_Prebuild/",
+  "generated_dir_name": "GeneratedFrameworks/",
+  "delta_path": "Pods/_Prebuild_delta/changes.txt",
+  "manifest_file": "Manifest.lock",
+  "devpod_cache_repo": "git@gitlab.myteksi.net:mobile/dax-ios/dax-ios-dev-pods-cache.git",
+  "devpod_cache_path": "~/Library/Caches/CocoaPods/dax-ios-dev-pods-cache/",
+  "devpod_prebuild_output": "Pods/_Prebuild_delta/devpod_prebuild_output/"
+}
