@@ -27,6 +27,19 @@ $ bundle install --path <dir_to_install_your_bundle>
 
 # Usage
 
+- Add cache config file: At same level with Podfile, add a json file with name `PodBinaryCacheConfig.json` and content similar to this:
+
+```
+{
+  "prebuilt_cache_repo": "<Link to your git repo to store built frameworks>",
+  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/",
+  "prebuild_path": "Pods/_Prebuild/",
+  "generated_dir_name": "GeneratedFrameworks/",
+  "delta_path": "Pods/_Prebuild_delta/changes.txt",
+  "manifest_file": "Manifest.lock"
+}
+```
+
 - Declare pods which need to be prebuilt by adding a flag `:binary => true`:
 
 ```
