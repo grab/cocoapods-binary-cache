@@ -1,6 +1,6 @@
 # Cocoapods binary cache
 
-This plugin helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository.
+This plugin helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository to share across multiple machines.
 
 # Demo project and benchmark
 
@@ -64,16 +64,16 @@ $ bundle install
 
 # Usage
 
-- Add cache config file: At the same level with your Podfile, add a json file with name `PodBinaryCacheConfig.json` (the name is fixed) and content similar to this:
+- Cache config: At the same directory with your Podfile, add a json file and name it `PodBinaryCacheConfig.json` (the name is fixed) and content similar to this:
 
 ```
 {
-  "prebuilt_cache_repo": "<Link to your git repo to store built frameworks>", // can be https and ssh
+  "prebuilt_cache_repo": "<Link to your git repo which will store built frameworks>", // can be https or ssh
   "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/"
 }
 ```
 
-- On top of your Podfile a the plugin, it will auto hook to pod pre-install post-install to do the build, cache stuffs:
+- On top of your Podfile add one line below to enable the plugin, it will hook to pod pre-install, post-install to do the build, cache stuffs:
 
 ```
 plugin 'cocoapods-binary-cache'
@@ -85,34 +85,29 @@ plugin 'cocoapods-binary-cache'
 pod 'Alamofire', :binary => true
 ```
 
-- Run a pod command for the first time adding this plugin, and every time you add/upgrade a pod, you need to run a command:
+- Run a pod command for the first time adding this plugin, and every time you add/upgrade a pod:
 
 ```
 $ pod binary-cache --cmd=prebuild
 ```
 
-It will build frameworks and push to the cache repo and also install prebuilt frameworks to your project. Then just open the Xcode project and build the project as normal.
+It will build frameworks and push to the cache repo and also install prebuilt frameworks to your project. Then just open the Xcode project and build as normal.
 
-- Other members in your team don't need to build again, they just need to fetch prebuilt frameworks from cache:
+- Other members in your team don't need to build again, they just need to fetch prebuilt frameworks from cache and use the project as normal:
 
 ```
 $ pod binary-cache --cmd=fetch
 $ bundle exec pod install
 ```
 
-Then use the project as normal.
-
 # Automate prebuild frameworks on CI
 
-- You can set up to run prebuild periodically on your CI. Eg. our project are using gitlab CI, what we need to do is just create a scheduled job (daily) which call the prebuild command:
+- You can set up to run prebuild frameworks automatically on your CI. Eg. If your project is using gitlab CI, you just need to create a scheduled job (daily) which call the prebuild command:
 
 
 ```
 // In .gitlab-ci.yml file
-
 prebuild_pod:
-  extends: .schedule_chores_job
-  stage: early_chores
   script:
     - $ pod binary-cache --cmd=prebuild
   only:
@@ -122,18 +117,18 @@ prebuild_pod:
 
 # How it works
 
-<img src=images/Pods-cache-flow.jpg width=800></img>
+<img src=images/Pods-cache-flow.png width=800></img>
 
-## 1. Prebuild pods frameworks to binary
+## 1. Prebuild pod frameworks to binary
  + With an added flag (`:binary => true`) to your pod in the Podfile, in the pod pre-install hook, It filters all pods which need to be built, then creates a separated Pod sandbox and generates a Pod.xcproject.
  + Build selected frameworks in the generated project above using xcodebuild command. The products are frameworks and a Manifest file.
  + Compresses all built frameworks to zips and commit to the Binary cache repo.
 
 ## 2. Use cached frameworks
  + It fetches from Binary cache repo and unzip all frameworks.
- + In pod pre-install hook, it reads Manifest.lock and Podfile.lock to compare prebuilt lib's version with the one in Podfile.lock, if they're matched -> add to the cache-hit dictionary, otherwise, add to the cache-miss dictionary. Then the plugin intercepts pod install-source flow and base on generated cache hit/miss dictionaries to decide using cached frameworks or original source code.
+ + In pod pre-install hook, it reads Manifest.lock and Podfile.lock to compare prebuilt lib's version with the one in Podfile.lock, if they're matched -> add to the cache-hit dictionary, otherwise, add to the cache-miss dictionary. Then the plugin intercepts pod install-source flow and base on generated cache hit/miss dictionaries to decide using cached frameworks or source code.
 
-Because we don't upgrade vendor pods every day, even once in a few months, the cache hit rate will likely be 100 % most of the time.
+Because we don't upgrade vendor pods every day, even once in a few months, the cache hit rate will likely be 100% most of the time.
 
 # Notes
 
