@@ -4,26 +4,41 @@ This plugin helps to reduce the build time of Xcode projects which use Cocoapods
 
 # Demo project and benchmark
 
-We created a demo project with some popular pods added to compare build time. To try it:
+To compare build time, we created a demo project with some popular pods added:
 
 ```
-sh BuildBenchMark.sh
+AFNetworking
+SDWebImage
+Alamofire
+MBProgressHUD
+Masonry
+SwiftyJSON
+SVProgressHUD
+MJRefresh
+CocoaLumberjack
+Realm
+SnapKit
+Kingfisher
 ```
 
-The result will vary depends on your machine and network condition.
-
-Total build time + fetch cache:
+To try it:
 
 ```
-Build time no cache: [73.0 sec]
-Build time with cache: [35.0 sec]
+$ cd PodBinaryCacheExample
+$ sh BuildBenchMark.sh
 ```
 
-Build time only:
+And the results:
+
+<img src=images/Buildtime-comparision.png width=800></img>
+
+The result will vary depends on your machine and network condition. This is the spec of the machine we used to test the demo project:
 
 ```
-Build time no cache: [54.722 sec]
-Build time with cache: [14.213 sec]
+MacBook Pro (15-inch, 2018)
+Mac OS 10.14.6
+Processor 2.6 GHz Intel Core i7
+Memory 16 GB 2400 MHz DDR4
 ```
 
 In our real project with around 15% of swift/ObjC code from vendor pods. After applied this technique and monitored on the CI system, we found that overall, it helped to reduce 10% of build time.
@@ -38,7 +53,7 @@ In our real project with around 15% of swift/ObjC code from vendor pods. After a
 - Just add a line to your Gemfile:
 
 ```
-gem 'coccoapods-binary-cache', :path => '<will update>'
+gem 'coccoapods-binary-cache', :path => '<path_to_github_repo>' // Will update later after we publishing to github
 ```
 
 - Then run:
@@ -47,21 +62,21 @@ gem 'coccoapods-binary-cache', :path => '<will update>'
 $ bundle install
 ```
 
-Or
-
-```
-$ bundle install --path <dir_to_install_your_bundle>
-```
-
 # Usage
 
-- Add cache config file: At same level with Podfile, add a json file with name `PodBinaryCacheConfig.json` and content similar to this:
+- Add cache config file: At the same level with your Podfile, add a json file with name `PodBinaryCacheConfig.json` (the name is fixed) and content similar to this:
 
 ```
 {
-  "prebuilt_cache_repo": "<Link to your git repo to store built frameworks>",
+  "prebuilt_cache_repo": "<Link to your git repo to store built frameworks>", // can be https and ssh
   "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/"
 }
+```
+
+- On top of your Podfile a the plugin, it will auto hook to pod pre-install post-install to do the build, cache stuffs:
+
+```
+plugin 'cocoapods-binary-cache'
 ```
 
 - Declare pods which need to be prebuilt by adding a flag `:binary => true`:
@@ -76,34 +91,56 @@ pod 'Alamofire', :binary => true
 $ pod binary-cache --cmd=prebuild
 ```
 
-It will build frameworks and push to a cache repo. Then open the Xcode project and use it as normal.
+It will build frameworks and push to the cache repo and also install prebuilt frameworks to your project. Then just open the Xcode project and build the project as normal.
 
-- On other machines, just need to run:
+- Other members in your team don't need to build again, they just need to fetch prebuilt frameworks from cache:
 
 ```
-$pod binary-cache --cmd=fetch
+$ pod binary-cache --cmd=fetch
+$ bundle exec pod install
+```
+
+Then use the project as normal.
+
+# Automate prebuild frameworks on CI
+
+- You can set up to run prebuild periodically on your CI. Eg. our project are using gitlab CI, what we need to do is just create a scheduled job (daily) which call the prebuild command:
+
+
+```
+// In .gitlab-ci.yml file
+
+prebuild_pod:
+  extends: .schedule_chores_job
+  stage: early_chores
+  script:
+    - $ pod binary-cache --cmd=prebuild
+  only:
+    variables:
+      - $IS_PREBUILD_DEVPOD_JOB == "true"
 ```
 
 # How it works
 
+<img src=images/Pods-cache-flow.jpg width=800></img>
+
 ## 1. Prebuild pods frameworks to binary
- + With an added flag to your pod in the Podfile, in the pod pre-install hook, It filters all pods which need to be built, then creates a separated Pod sandbox and generates a Pod.xcproject.
+ + With an added flag (`:binary => true`) to your pod in the Podfile, in the pod pre-install hook, It filters all pods which need to be built, then creates a separated Pod sandbox and generates a Pod.xcproject.
  + Build selected frameworks in the generated project above using xcodebuild command. The products are frameworks and a Manifest file.
  + Compresses all built frameworks to zips and commit to the Binary cache repo.
 
 ## 2. Use cached frameworks
- + It fetches from Binary cache repo
+ + It fetches from Binary cache repo and unzip all frameworks.
  + In pod pre-install hook, it reads Manifest.lock and Podfile.lock to compare prebuilt lib's version with the one in Podfile.lock, if they're matched -> add to the cache-hit dictionary, otherwise, add to the cache-miss dictionary. Then the plugin intercepts pod install-source flow and base on generated cache hit/miss dictionaries to decide using cached frameworks or original source code.
 
 Because we don't upgrade vendor pods every day, even once in a few months, the cache hit rate will likely be 100 % most of the time.
 
 # Notes
 
-- We don't support local pod for now and it will be adding in the future.
+- We don't support development pod for now and it will be adding in the future.
 - A git repo is used as the cache, but we can change to any FTP server with little modification.
-- You can set up to run prebuild periodically on your CI, but it's not in the scope of this library.
 
 # License
 
 The cocoapods-binary-cache plugin is available as open-source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-It uses cocoapods-rome and cocoapods-binary internally, which are also under MIT License.
+It uses [cocoapods-rome](https://github.com/CocoaPods/Rome) and [cocoapods-binary](https://github.com/leavez/cocoapods-binary) internally, which are also under MIT License.
