@@ -2,14 +2,28 @@ build_project() {
   echo "param: " $1
   rm -rf Pods
   rm -rf DerivedData
+
+  start_fetch_time="$(date -u +%s)"
   if [ $1 = "cache_on" ]; then
     echo "fetch prebuilt binary cache"
     pod binary-cache --cmd=fetch
-  else
-    echo "just instlal"
   fi
+  end_fetch_time="$(date -u +%s)"
+  fetch_cache_time="$(($end_fetch_time-$start_fetch_time))"
+  echo 'fetch_cache_time: ' $fetch_cache_time
+
+  echo "Install pods"
+  start_install_time="$(date -u +%s)"
   bundle exec pod install
-  time xcodebuild -workspace PodBinCacheExample.xcworkspace -scheme PodBinCacheExample -configuration Debug -sdk iphonesimulator ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES 2>&1
+  end_install_time="$(date -u +%s)"
+  pod_install_time="$(($end_install_time-$start_install_time))"
+  echo 'pod_install_time:' $pod_install_time
+
+  start_build_time="$(date -u +%s)"
+  time xcodebuild -workspace PodBinCacheExample.xcworkspace -scheme PodBinCacheExample -configuration Debug -sdk iphonesimulator ARCHS=x86_64 ONLY_ACTIVE_ARCH=YES >/dev/null 2>&1
+  end_build_time="$(date -u +%s)"
+  xcodebuild_time="$(($end_build_time-$start_build_time))"
+  echo 'xcodebuild_time:' $xcodebuild_time
 }
 
 export IS_POD_BINARY_CACHE_ENABLED='false'
