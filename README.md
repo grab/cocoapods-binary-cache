@@ -133,7 +133,7 @@ Because we don't upgrade vendor pods every day, even once in a few months, the c
 # Notes
 
 - We don't support development pod for now and it will be adding in the future.
-- A git repo is used as the cache, but we can change to any FTP server with little modification.
+- A git repo is used as the cache, but we can change to other storages such as S3, FTP server with some modifications to push/fetch cache task.
 
 # License
 
