@@ -33,7 +33,7 @@ class PrebuildLib:
     def __init__(self, **kwargs):
         self.cache_tag = kwargs['cache_tag']
         self.cache_repo = kwargs['cache_repo']
-        self.cache_path = kwargs['cache_path']
+        self.cache_path = os.path.expanduser(kwargs['cache_path'])
         self.prebuild_path = kwargs['prebuild_path']
         self.generated_dir_name = kwargs['generated_dir_name']
         self.delta_path = kwargs['delta_path']
@@ -71,12 +71,12 @@ class PrebuildLib:
     def fetch_cache(self):
         with step('fetch_prebuild_libs'):
             if not os.path.exists(self.cache_path):
-                subprocess.run(['git', 'clone', '--depth=2', self.cache_repo, self.cache_path])
-            git_input_path = ' -C ' + self.cache_path + ' '
-            # Delete all local tag if any
-            os.system('git' + git_input_path + 'tag -l | xargs git' + git_input_path + 'tag -d')
-            os.system('git {} fetch --tags'.format(git_input_path))
-            subprocess.run(['git', '-C', self.cache_path, 'checkout', self.cache_tag])
+                logger.info('Cloning {} -> {}'.format(self.cache_repo, self.cache_path))
+                subprocess.run(['git', 'clone', '--depth=1', self.cache_repo, self.cache_path])
+            else:
+                logger.info('Reuse existing repo: {}'.format(self.cache_path))
+                git_input_path = ' -C ' + self.cache_path + ' '
+                os.system('git' + git_input_path + 'pull')
 
     @print_func_name
     def unzip_cache(self):
