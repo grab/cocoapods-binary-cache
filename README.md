@@ -1,6 +1,6 @@
 # Cocoapods binary cache
 
-This plugin helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository to share across multiple machines.
+A plugin that helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository to share across multiple machines.
 
 # Demo project and benchmark
 
@@ -118,8 +118,8 @@ prebuild_pod:
 # How it works
 
 Terms:
-- Cache-hit: a pod framework is prebuilt and have same version with the one in Pod lock file.
-- Cache-miss: a pod framework is not prebuilt or have different version with the on in Pod lock file.
+- Cache-hit: a pod framework is prebuilt and has same version with the one in Pod lock file.
+- Cache-miss: a pod framework is not prebuilt or has different version with the on in Pod lock file.
 
 <img src=images/Pods-cache-flow.png width=800></img>
 
