@@ -117,6 +117,10 @@ prebuild_pod:
 
 # How it works
 
+Terms:
+- Cache-hit: a pod framework is prebuilt and have same version with the one in Pod lock file.
+- Cache-miss: a pod framework is not prebuilt or have different version with the on in Pod lock file.
+
 <img src=images/Pods-cache-flow.png width=800></img>
 
 ## 1. Prebuild pod frameworks to binary and push to cache
@@ -132,7 +136,7 @@ Because we don't upgrade vendor pods every day, even once in a few months, the c
 
 # Notes
 
-- We don't support development pod for now and it will be adding in the future.
+- Caching development pod will be supported in the future.
 - A git repo is used as the cache, but we can change to other storages such as S3, FTP server with some modifications to push/fetch cache task.
 
 # License
