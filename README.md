@@ -68,8 +68,8 @@ $ bundle install
 
 ```
 {
-  "prebuilt_cache_repo": "<Link to your git repo which will store built frameworks>", // can be https or ssh
-  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/"
+  "prebuilt_cache_repo": "<Link to your git repo which will store built frameworks>", // can be https or ssh.
+  "cache_path": "~/Library/Caches/CocoaPods/<your_cache_dir>" // can be any directory, we recommend to cache frameworks to ~/Library/Caches/ then it's convenience to reuse across multiple projects.
 }
 ```
 
