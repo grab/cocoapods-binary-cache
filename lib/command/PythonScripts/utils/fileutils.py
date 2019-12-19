@@ -92,6 +92,8 @@ class FileUtils:
 
   @staticmethod
   def listdir_nohidden(path):
+    if not os.path.exists(path):
+      return []
     dirs = []
     for f in os.listdir(path):
       if not f.startswith('.'):

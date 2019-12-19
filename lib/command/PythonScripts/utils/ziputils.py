@@ -1,6 +1,8 @@
 from zipfile import ZipFile
 import zipfile
 import os
+from utils.fileutils import FileUtils
+from utils.logger import logger
 
 
 class ZipUtils:
@@ -28,3 +30,11 @@ class ZipUtils:
     zFile = ZipFile(out_file, 'w', zipfile.ZIP_DEFLATED)
     ZipUtils.__zip_dir(in_dir, zFile)
     zFile.close()
+
+  @staticmethod
+  def zip_subdirs(from_dir, to_dir):
+    logger.info('zip_subdirs {} -> {}'.format(from_dir, to_dir))
+    FileUtils.create_dir(to_dir)
+    for dir in FileUtils.listdir_nohidden(from_dir):
+      logger.info('zip dir: {}'.format(dir))
+      ZipUtils.zip_dir('{}/{}'.format(from_dir, dir), '{}/{}.zip'.format(to_dir, dir))
