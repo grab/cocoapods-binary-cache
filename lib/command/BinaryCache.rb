@@ -32,14 +32,7 @@ module Pod
         if not File.exists?(config_file_path)
           raise "#{config_file_path} not exist"
         end
-
-        if @cmd == 'fetch'
-          puts 'fetch'.green
-          system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=fetch --config_path=#{config_file_path}"
-        elsif @cmd == 'prebuild'
-          puts 'prebuild'.green
-          system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=prebuild --config_path=#{config_file_path}"
-        end
+        system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=#{@cmd} --config_path=#{config_file_path}"
       end
     end
   end
