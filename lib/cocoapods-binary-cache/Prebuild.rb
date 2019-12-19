@@ -153,7 +153,7 @@ module Pod
             targets = targets.reject { |pod_target| Podfile::DSL.unbuilt_pods.include?(pod_target.pod_name) }
             targets = targets.reject { |pod_target| Dir.exist?(sandbox.framework_folder_path_for_target_name(pod_target.name)) }
 
-            if !Podfile::DSL.enable_prebuild_localpod
+            if !Podfile::DSL.enable_prebuild_dev_pod
                 targets = targets.reject {|pod_target| sandbox.local?(pod_target.pod_name) }
             end
 

@@ -1,7 +1,7 @@
 require 'fourflusher'
 require 'xcpretty'
 
-CONFIGURATION = "Debug" # TODO (bang): pass from Podfile
+CONFIGURATION = "Test" # TODO (bang): pass from Podfile
 PLATFORMS = { 'iphonesimulator' => 'iOS',
               'appletvsimulator' => 'tvOS',
               'watchsimulator' => 'watchOS' }
