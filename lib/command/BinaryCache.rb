@@ -13,24 +13,18 @@ module Pod
 
       def self.options
         [
-          ['--ignore-lockfile', 'Whether the lockfile should be ignored when calculating the dependency graph'],
-          ['--cmd'],
-          ['--filter-pattern', 'Filters out subtrees from pods with names matching the specified pattern from the --graphviz and --image output. Example --filter-pattern="Tests"'],
+          ['--cmd', 'Commands to fetch, prebuild pod frameworks']
         ].concat(super)
       end
 
       def initialize(argv)
-        puts 'initialize'.green
         @podspec_name = argv.shift_argument
-        @ignore_lockfile = argv.flag?('ignore-lockfile', false)
         @cmd = argv.option('cmd', nil)
-        @filter_pattern = argv.option('filter-pattern', nil)
-        puts "cmd = #{@cmd}"
+        puts "BinaryCache run: #{@cmd}"
         super
       end
 
       def run
-        UI.title "Calculating dependencies"
         puts config.lockfile
         puts config.installation_root
 
