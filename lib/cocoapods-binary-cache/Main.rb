@@ -4,6 +4,7 @@ require_relative 'tool/tool'
 require_relative 'helper/benchmark_show'
 require_relative 'helper/passer'
 require_relative 'PrebuildCache'
+require_relative 'SchemeEditor'
 
 module Pod    
     class Podfile
@@ -232,29 +233,6 @@ Pod::HooksManager.register('cocoapods-binary-cache', :post_install) do |installe
     # Modify pods scheme to support code coverage
     # If we don't prebuild dev pod -> no need to care about this in Pod project because we setup in the main project. Eg. DriverCI scheme
     if Pod.is_prebuild_stage
-        require 'rexml/document'
-        pod_proj_path = installer_context.sandbox.project_path
-        puts "Modify schemes of pod project to support code coverage of prebuilt local pod: #{pod_proj_path}"
-        scheme_files = Dir["#{pod_proj_path}/**/*.xcscheme"]
-        scheme_files.each do |file_path|
-            scheme_name = File.basename(file_path, '.*')
-            next unless installer_context.sandbox.local?(scheme_name)
-
-            puts "Modify scheme to enable coverage symbol when prebuild: #{scheme_name}"
-    
-            doc = File.open(file_path, 'r') { |f| REXML::Document.new(f) }
-            scheme = doc.elements['Scheme']
-            test_action = scheme.elements['TestAction']
-            next if test_action.attributes['codeCoverageEnabled'] == 'YES'
-
-            test_action.add_attribute('codeCoverageEnabled', 'YES')
-            test_action.add_attribute('onlyGenerateCoverageForSpecifiedTargets', 'YES')
-            coverage_targets = REXML::Element.new('CodeCoverageTargets')
-            buildable_ref = scheme.elements['BuildAction'].elements['BuildActionEntries'].elements['BuildActionEntry'].elements['BuildableReference']
-            new_buildable_ref = buildable_ref.clone # Need to clone, otherwise the original one will be move to new place
-            coverage_targets.add_element(new_buildable_ref)
-            test_action.add_element(coverage_targets)
-            File.open(file_path, 'w') { |f| doc.write(f) }
-        end
+        SchemeEditor.edit_to_support_code_coverage(installer_context.sandbox)
     end
 end
