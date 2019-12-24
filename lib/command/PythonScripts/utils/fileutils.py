@@ -1,3 +1,6 @@
+# Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
+
 import os
 import shutil
 import pathlib
@@ -92,6 +95,8 @@ class FileUtils:
 
   @staticmethod
   def listdir_nohidden(path):
+    if not os.path.exists(path):
+      return []
     dirs = []
     for f in os.listdir(path):
       if not f.startswith('.'):

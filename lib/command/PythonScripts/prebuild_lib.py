@@ -1,9 +1,10 @@
-import sys
+# Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
+
 import subprocess
 import re
 import os
 import glob
-from utils.fileutils import FileUtils
 from utils.fileutils import FileUtils
 from utils.ziputils import ZipUtils
 from functools import wraps
@@ -29,30 +30,29 @@ def print_func_name(func):
 
 
 class PrebuildLib:
+    def __init__(self, config):
+        self.cache_repo = config.cache_repo
+        self.cache_path = config.cache_path
+        self.prebuild_path = config.prebuild_path
+        self.generated_dir_name = config.generated_dir_name
+        self.delta_path = config.delta_path
+        self.manifest_file = config.manifest_file
+        self.devpod_cache_repo = config.devpod_cache_repo
+        self.devpod_cache_path = config.devpod_cache_path
+        self.devpod_prebuild_output = config.devpod_prebuild_output
 
-    def __init__(self, **kwargs):
-        self.cache_tag = kwargs['cache_tag']
-        self.cache_repo = kwargs['cache_repo']
-        self.cache_path = os.path.expanduser(kwargs['cache_path'])
-        self.prebuild_path = kwargs['prebuild_path']
-        self.generated_dir_name = kwargs['generated_dir_name']
-        self.delta_path = kwargs['delta_path']
-        self.manifest_file = kwargs['manifest_file']
-        self.generated_path = self.prebuild_path + self.generated_dir_name + '/'
-        self.cache_libs_path = self.cache_path + self.generated_dir_name + '/'
+        self.generated_path = config.generated_path
+        self.cache_libs_path = config.cache_libs_path
+        self.devpod_cache_libs_path = config.devpod_cache_libs_path
 
     @print_func_name
     def zip_to_cache(self, libName):
         if os.path.exists(self.cache_libs_path + libName + '.zip'):
             logger.info('Warning: lib {} already exist'.format(libName))
         else:
-            input_dir = '{}/{}'.format(self.generated_path, libName)
-            output_file = '{}/{}.zip'.format(self.cache_libs_path, libName)
-            print(input_dir)
-            print(output_file)
             ZipUtils.zip_dir(
-                input_dir,
-                output_file
+                '{}/{}'.format(self.generated_path, libName),
+                '{}/{}.zip'.format(self.cache_libs_path, libName)
             )
 
     @print_func_name
@@ -71,12 +71,9 @@ class PrebuildLib:
     def fetch_cache(self):
         with step('fetch_prebuild_libs'):
             if not os.path.exists(self.cache_path):
-                logger.info('Cloning {} -> {}'.format(self.cache_repo, self.cache_path))
                 subprocess.run(['git', 'clone', '--depth=1', self.cache_repo, self.cache_path])
             else:
-                logger.info('Reuse existing repo: {}'.format(self.cache_path))
-                git_input_path = ' -C ' + self.cache_path + ' '
-                os.system('git' + git_input_path + 'pull')
+                subprocess.run(['git', '-C', self.cache_path, 'pull'])
 
     @print_func_name
     def unzip_cache(self):
@@ -94,10 +91,31 @@ class PrebuildLib:
         self.unzip_cache()
 
     @print_func_name
+    def fetch_and_apply_devpod_cache(self):
+        with step('fetch_and_apply_devpod_cache'):
+            logger.info('Fetching devpod cache to {}'.format(self.devpod_cache_path))
+            if not os.path.exists(self.devpod_cache_path):
+                subprocess.run(['git', 'clone', '--depth=1', self.devpod_cache_repo, self.devpod_cache_path])
+
+            subprocess.run(['git', '-C', self.devpod_cache_path, 'reset', '--hard'])
+            subprocess.run(['git', '-C', self.devpod_cache_path, 'pull'])
+            # Unzip devpod libs
+            devpod_temp_dir = self.prebuild_path + 'devpod/'
+            logger.info('Unzip from: {} to: {}'.format(self.devpod_cache_libs_path, devpod_temp_dir))
+            for zip_path in glob.iglob(self.devpod_cache_libs_path + '/*.zip'):
+                ZipUtils.unzip(zip_path, devpod_temp_dir)
+
+    @print_func_name
     def has_libs_change(self):
         if os.path.exists(self.delta_path):
             return True
         return False
+
+    def push_all_to_git(self, git_dir):
+        git_input_path = 'git -C ' + self.cache_path
+        os.system('{} add .'.format(git_input_path))
+        os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
+        os.system('{} push'.format(git_input_path))
 
     @print_func_name
     def prebuild_if_needed(self):
@@ -108,15 +126,14 @@ class PrebuildLib:
         if not os.path.isfile(self.delta_path):
             logger.info('No change in prebuilt frameworks')
             return
-
         try:
             with open(self.delta_path) as f:
                 FileUtils.create_dir(self.cache_path)
                 data = f.read()
                 data = re.sub('"', '', data)
-                matches = re.findall(r'Updated: \[(.*)\]', data)
-                if matches:
-                    updated = matches[0].strip()
+                updatedMatches = re.findall(r'Updated: \[(.*)\]', data)
+                if updatedMatches:
+                    updated = updatedMatches[0].strip()
                     logger.info("Updated frameworks: {}".format(updated))
                     if len(updated):
                         libs = updated.split(',')
@@ -126,7 +143,6 @@ class PrebuildLib:
                             self.zip_to_cache(libName)
 
                 deletedMatches = re.findall(r'Deleted: \[(.*)\]', data)
-                logger.info(deletedMatches)
                 if deletedMatches:
                     deleted = deletedMatches[0].strip()
                     logger.info('Deleted frameworks: {}'.format(deleted))
@@ -136,12 +152,12 @@ class PrebuildLib:
                             self.clean_cache(lib.strip())
                 # Copy manifest file
                 FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
-
-                # Push to cache repo
-                git_input_path = 'git -C ' + self.cache_path
-                os.system('{} add .'.format(git_input_path))
-                os.system('{} commit -m "Prebuild libs"'.format(git_input_path))
-                os.system('{} push'.format(git_input_path))
-
+                self.push_all_to_git(self.cache_path)
         except Exception as e:
             raise e
+
+    @print_func_name
+    def prebuild_devpod(self):
+        self.fetch_and_apply_cache()
+        self.fetch_and_apply_devpod_cache()
+        subprocess.run(['bundle', 'exec', 'fastlane', 'run', 'cocoapods', 'try_repo_update_on_error:true'], check=True)
