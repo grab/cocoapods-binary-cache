@@ -1,3 +1,6 @@
+# Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
+
 require 'fileutils'
 
 module Pod
@@ -13,24 +16,18 @@ module Pod
 
       def self.options
         [
-          ['--ignore-lockfile', 'Whether the lockfile should be ignored when calculating the dependency graph'],
-          ['--cmd'],
-          ['--filter-pattern', 'Filters out subtrees from pods with names matching the specified pattern from the --graphviz and --image output. Example --filter-pattern="Tests"'],
+          ['--cmd', 'Commands to fetch, prebuild pod frameworks']
         ].concat(super)
       end
 
       def initialize(argv)
-        puts 'initialize'.green
         @podspec_name = argv.shift_argument
-        @ignore_lockfile = argv.flag?('ignore-lockfile', false)
         @cmd = argv.option('cmd', nil)
-        @filter_pattern = argv.option('filter-pattern', nil)
-        puts "cmd = #{@cmd}"
+        puts "BinaryCache run: #{@cmd}"
         super
       end
 
       def run
-        UI.title "Calculating dependencies"
         puts config.lockfile
         puts config.installation_root
 
@@ -38,14 +35,7 @@ module Pod
         if not File.exists?(config_file_path)
           raise "#{config_file_path} not exist"
         end
-
-        if @cmd == 'fetch'
-          puts 'fetch'.green
-          system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=fetch --config_path=#{config_file_path}"
-        elsif @cmd == 'prebuild'
-          puts 'prebuild'.green
-          system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=prebuild --config_path=#{config_file_path}"
-        end
+        system "python3 #{__dir__}/PythonScripts/prebuild_lib_cli.py --cmd=#{@cmd} --config_path=#{config_file_path}"
       end
     end
   end

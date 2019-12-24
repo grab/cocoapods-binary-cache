@@ -36,8 +36,8 @@ module Pod
                     should_prebuild = options[Pod::Prebuild.keyword]
                     local = (options[:path] != nil)
                 end
-                
-                if should_prebuild and ((not local) or Podfile::DSL.enable_prebuild_localpod)
+
+                if should_prebuild and ((not local) or Podfile::DSL.enable_prebuild_dev_pod)
                     old_method.bind(self).(name, *args)
                 end
             end

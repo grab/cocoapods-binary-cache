@@ -90,7 +90,7 @@ module Pod
 
                 all += targets
             end
-            if !Podfile::DSL.enable_prebuild_localpod
+            if !Podfile::DSL.enable_prebuild_dev_pod
                 all = all.reject {|pod_target| sandbox.local?(pod_target.pod_name) }
             end
             all.uniq
