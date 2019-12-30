@@ -1,4 +1,6 @@
-# coding: utf-8
+# Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+# Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
+
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'cocoapods-binary-cache/gem_version.rb'

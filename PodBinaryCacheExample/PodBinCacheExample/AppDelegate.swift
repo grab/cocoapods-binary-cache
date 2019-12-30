@@ -1,10 +1,7 @@
-//
-//  AppDelegate.swift
-//  PodBinCacheExample
-//
-//  Created by Bang Nguyen on 12/12/19.
-//  Copyright © 2019 Grab. All rights reserved.
-//
+/*
+Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
+Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
+*/
 
 import UIKit
 
