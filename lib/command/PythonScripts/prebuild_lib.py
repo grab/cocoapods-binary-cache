@@ -67,13 +67,19 @@ class PrebuildLib:
             ZipUtils.zip_dir(self.generated_path + '/' + dir, self.cache_libs_path + '/' + dir + '.zip')
         FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
 
+    def clean_and_pull(self, git_repo_dir):
+        subprocess.run(['git', '-C', git_repo_dir, 'reset', '--hard'])
+        subprocess.run(['git', '-C', git_repo_dir, 'clean', '-df'])
+        subprocess.run(['git', '-C', git_repo_dir, 'checkout', 'master'])
+        subprocess.run(['git', '-C', git_repo_dir, 'pull', '-X', 'theirs'])
+
     @print_func_name
     def fetch_cache(self):
         with step('fetch_prebuild_libs'):
             if not os.path.exists(self.cache_path):
                 subprocess.run(['git', 'clone', '--depth=1', self.cache_repo, self.cache_path])
             else:
-                subprocess.run(['git', '-C', self.cache_path, 'pull'])
+                self.clean_and_pull(self.cache_path)
 
     @print_func_name
     def unzip_cache(self):
@@ -96,9 +102,9 @@ class PrebuildLib:
             logger.info('Fetching devpod cache to {}'.format(self.devpod_cache_path))
             if not os.path.exists(self.devpod_cache_path):
                 subprocess.run(['git', 'clone', '--depth=1', self.devpod_cache_repo, self.devpod_cache_path])
+            else:
+                self.clean_and_pull(self.devpod_cache_path)
 
-            subprocess.run(['git', '-C', self.devpod_cache_path, 'reset', '--hard'])
-            subprocess.run(['git', '-C', self.devpod_cache_path, 'pull'])
             # Unzip devpod libs
             devpod_temp_dir = self.prebuild_path + 'devpod/'
             logger.info('Unzip from: {} to: {}'.format(self.devpod_cache_libs_path, devpod_temp_dir))
