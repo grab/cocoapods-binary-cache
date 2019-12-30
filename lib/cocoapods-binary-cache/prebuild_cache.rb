@@ -4,7 +4,7 @@
 require 'json'
 require 'cocoapods'
 require_relative "helper/checksum"
-require_relative "helper/passer"
+require_relative "pod-binary/helper/passer"
 
 class PodCacheValidator
 
@@ -45,10 +45,18 @@ class PodCacheValidator
 
   # Compare pod lock version and prebuilt version, return cache miss frameworks
   def self.verify_prebuilt_vendor_pods(pod_lockfile, pod_bin_lockfile)
+    outdated_libs = Set.new()
+    if not pod_bin_lockfile
+      puts 'No pod binary lock file.'
+      return outdated_libs
+    end
+    if not pod_lockfile
+      puts 'No pod lock file.'
+      return outdated_libs
+    end
     pod_lock_libs = get_libs_dic(pod_lockfile)
     pod_bin_libs = get_libs_dic(pod_bin_lockfile)
 
-    outdated_libs = Set.new()
     pod_bin_libs.each do |name, prebuilt_ver|
       lock_ver = pod_lock_libs[name]
       if lock_ver

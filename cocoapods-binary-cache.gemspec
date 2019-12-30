@@ -5,8 +5,8 @@ require 'cocoapods-binary-cache/gem_version.rb'
 
 Gem::Specification.new do |spec|
   spec.name          = 'cocoapods-binary-cache'
-  spec.version       = CocoapodsBinary::VERSION
-  spec.authors       = ['bang nguyen']
+  spec.version       = CocoapodsBinaryCache::VERSION
+  spec.authors       = ['Bang Nguyen']
   spec.email         = ['bang.nguyen@grabtaxi.com']
   spec.description   = %q{Reduce build time by building pod frameworks and cache to remote storage, reuse on multiple machines}
   spec.summary       = %q{Reduce build time by building pod frameworks and cache to remote storage, reuse on multiple machines}

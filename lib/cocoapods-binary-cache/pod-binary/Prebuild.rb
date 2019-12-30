@@ -1,7 +1,8 @@
-require_relative 'rome/build_framework'
+require_relative '../pod-rome/build_framework'
 require_relative 'helper/passer'
 require_relative 'helper/target_checker'
 require "fileutils"
+require_relative '../prebuild_output'
 
 # patch prebuild ability
 module Pod
@@ -33,6 +34,13 @@ module Pod
 
 
         public
+
+        def prebuild_output
+            if not @prebuild_output
+                @prebuild_output = PrebuildOutput.new(sandbox)
+            end
+            @prebuild_output
+        end
 
         # check if need to prebuild
         def have_exact_prebuild_cache?
@@ -67,40 +75,6 @@ module Pod
             # just print log
             self.sandbox.exsited_framework_target_names.each do |name|
                 UI.puts "Using #{name}"
-            end
-        end
-
-        def delta_dir
-            return "#{sandbox.root}/../_Prebuild_delta"
-        end
-
-        def delta_file_path
-            return "#{delta_dir}/changes.txt"
-        end
-
-        def clean_delta_file
-            UI.puts "clean_delta_file"
-            system("rm -f #{delta_file_path}")
-        end
-
-        def create_dir_if_needed(dir)
-            if !File.exist?(dir)
-                FileUtils.mkdir_p dir
-            end
-        end
-
-        # Input 2 array of strings, each one is a library name
-        def write_delta_file(updated, deleted)
-            if !updated.empty? || !deleted.empty?
-                create_dir_if_needed(delta_dir)
-                filePath = delta_file_path
-                File.open(filePath, 'w+') do |line|
-                    line.puts "Updated: #{updated}"
-                    line.puts "Deleted: #{deleted}"
-                end
-                UI.puts "Pod prebuild changes were wrote to file: #{filePath}"
-            else
-                UI.puts "No changes in prebuild"
             end
         end
 
@@ -263,28 +237,17 @@ module Pod
                 path.rmtree if path.exist?
             end
 
-
-
-
             updatedTargetNames = targets.map { |i| "#{i.label}" }
             Pod::UI.puts "Targets to prebuild: #{updatedTargetNames}"
             deletedTargetNames = useless_target_names.map { |i| "#{i}" }
             Pod::UI.puts "Targets to cleanup: #{deletedTargetNames}"
-            write_delta_file(updatedTargetNames, deletedTargetNames)
 
-            # Output prebuild devpod
-            puts "Copy prebuilt devpod frameworks to output folder"
-            devpod_output_path = "#{delta_dir}/devpod_prebuild_output/"
-            unless File.directory?(devpod_output_path)
-                FileUtils.mkdir_p(devpod_output_path)
-            end
-            Pod::Prebuild::CacheInfo.cache_miss_local_pods_dic.each do |name, hash|
-                puts "Output dev pod lib: #{name} hash: #{hash}"
-                built_lib_path = sandbox.framework_folder_path_for_target_name(name)
-                if File.directory?(built_lib_path)
-                    FileUtils.cp_r("#{built_lib_path}", "#{devpod_output_path}#{name}_#{hash}")
-                end
-            end
+            prebuild_output.write_delta_file(updatedTargetNames, deletedTargetNames)
+            prebuild_output.process_prebuilt_dev_pods()
+        end
+
+        def clean_delta_file
+            prebuild_output.clean_delta_file
         end
 
 

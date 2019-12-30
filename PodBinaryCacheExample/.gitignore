@@ -1,4 +1,7 @@
-build
-DerivedData
-Pods
-!*.xcodeproj/xcshareddata/
+/build
+/DerivedData
+/Pods
+/.bundle
+__pycache__/
+xcshareddata/
+xcuserdata/
