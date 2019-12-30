@@ -28,9 +28,6 @@ module Pod
       end
 
       def run
-        puts config.lockfile
-        puts config.installation_root
-
         config_file_path = "#{config.installation_root}/PodBinaryCacheConfig.json"
         if not File.exists?(config_file_path)
           raise "#{config_file_path} not exist"
