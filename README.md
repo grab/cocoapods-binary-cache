@@ -53,7 +53,7 @@ In our real project with around 15% of swift/ObjC code from vendor pods. After a
 - Just add a line to your Gemfile:
 
 ```
-gem 'coccoapods-binary-cache', :path => '<path_to_github_repo>' // Will update later after we publishing to github
+gem 'coccoapods-binary-cache', :path => 'https://github.com/grab/cocoapods-binary-cache.git', :tag => '0.0.2'
 ```
 
 - Then run:
