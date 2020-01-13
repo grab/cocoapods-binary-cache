@@ -74,6 +74,10 @@ class PodCacheValidator
   def self.get_libs_dic(lockfile)
     pods = lockfile.to_hash["PODS"]
     libs_hash = {}
+    if !pods
+      puts "No pod libs"
+      return libs_hash
+    end
     pods.each do |item|
       if item.class == Hash
         item = item.keys[0]

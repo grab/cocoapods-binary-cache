@@ -1,4 +1,5 @@
 require_relative 'tool/tool'
+require_relative '../prebuild_config'
 
 module Pod
   class Podfile
@@ -69,6 +70,10 @@ module Pod
       def set_unbuilt_vendor_pods(list)
         DSL.unbuilt_vendor_pods = Set.new(list)
         DSL.unbuilt_pods = DSL.unbuilt_vendor_pods.merge(DSL.unbuilt_dev_pods)
+      end
+
+      def set_prebuild_config(config)
+        PrebuildConfig.CONFIGURATION = config # It's Debug by default
       end
 
       private

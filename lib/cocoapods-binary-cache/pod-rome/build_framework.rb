@@ -1,7 +1,8 @@
 require 'fourflusher'
 require 'xcpretty'
+require_relative '../prebuild_config'
 
-CONFIGURATION = "Test" # TODO (bang): pass from Podfile
+CONFIGURATION = PrebuildConfig.CONFIGURATION
 PLATFORMS = { 'iphonesimulator' => 'iOS',
               'appletvsimulator' => 'tvOS',
               'watchsimulator' => 'watchOS' }
