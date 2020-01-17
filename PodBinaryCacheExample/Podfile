@@ -6,7 +6,13 @@ end
 
 if is_pod_binary_cache_enabled
   plugin 'cocoapods-binary-cache'
-  set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "DEBUG_INFORMATION_FORMAT=dwarf", :device => "ARCHS=arm64 DEBUG_INFORMATION_FORMAT=dwarf"
+  # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "DEBUG_INFORMATION_FORMAT=dwarf", :device => "ARCHS=arm64 DEBUG_INFORMATION_FORMAT=dwarf"
+
+  # TODO: BUILD_LIBRARY_FOR_DISTRIBUTION is to build with library evolution, but it doesn't work in Xcode 10.2 now, need find another way
+  # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", :device => "ARCHS=arm64 BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
+  set_is_prebuild_job(true)
+  enable_devpod_prebuild
+  set_unbuilt_vendor_pods(['ConfigSDK'])
 end
 
 def binary_pod(name, *args)
@@ -35,4 +41,16 @@ target 'PodBinCacheExample' do
   binary_pod 'Realm'
   binary_pod 'SnapKit'
   binary_pod 'Kingfisher'
+
+  # Development/Local Pods
+  pod 'ConfigService', :path => 'DevPods/ConfigService', :binary => true
+  pod 'ConfigSDK', :path => 'DevPods/ConfigSDK', :binary => true
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES' # Only work from Xcode 11
+    end
+  end
 end
