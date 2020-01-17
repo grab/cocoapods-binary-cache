@@ -17,6 +17,10 @@ class PodCacheValidator
     unless File.directory?(target_path)
       FileUtils.mkdir_p(target_path)
     end
+    if !external_sources
+      puts 'No development pods!'
+      return
+    end
     missing_pods_dic = Hash[]
     all_local_pods = Set[]
     external_sources.each do |name, attribs|

@@ -5,14 +5,17 @@ Use of this source code is governed by an MIT-style license that can be found in
 
 import UIKit
 import Alamofire
+import ConfigService
 
 class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    // Do any additional setup after loading the view.
+
+    let serviceVar = ServiceVariable()
+    serviceVar.save()
+    serviceVar.reload()
+    serviceVar.reload2()
   }
-
-
 }
 
