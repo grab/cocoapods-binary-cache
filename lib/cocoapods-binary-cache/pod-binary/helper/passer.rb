@@ -39,15 +39,14 @@ module Pod
         end
 
         class CacheInfo
+            class_attr_accessor :cache_hit_vendor_pods
+            self.cache_hit_vendor_pods = Set[]
 
-            class_attr_accessor :local_pods
-            self.local_pods = Set[]
+            class_attr_accessor :cache_hit_dev_pods_dic
+            self.cache_hit_dev_pods_dic = Hash[]
 
-            class_attr_accessor :cache_miss_local_pods
-            self.cache_miss_local_pods = Set[]
-
-            class_attr_accessor :cache_miss_local_pods_dic
-            self.cache_miss_local_pods_dic = Hash[]
+            class_attr_accessor :cache_miss_dev_pods_dic
+            self.cache_miss_dev_pods_dic = Hash[]
         end
     end
 end

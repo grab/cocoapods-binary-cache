@@ -12,7 +12,7 @@ if is_pod_binary_cache_enabled
   # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", :device => "ARCHS=arm64 BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
   set_is_prebuild_job(true)
   enable_devpod_prebuild
-  set_unbuilt_vendor_pods(['ConfigSDK'])
+  set_unbuilt_dev_pods(['ConfigSDK'])
 end
 
 def binary_pod(name, *args)
@@ -41,6 +41,7 @@ target 'PodBinCacheExample' do
   binary_pod 'Realm'
   binary_pod 'SnapKit'
   binary_pod 'Kingfisher'
+  binary_pod 'RxSwift', '5.0.1'
 
   # Development/Local Pods
   pod 'ConfigService', :path => 'DevPods/ConfigService', :binary => true

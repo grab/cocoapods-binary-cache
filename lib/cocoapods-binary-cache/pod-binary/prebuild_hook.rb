@@ -3,6 +3,9 @@ require_relative 'helper/passer'
 require_relative '../helper/benchmark_show'
 require_relative '../prebuild_cache'
 require_relative '../scheme_editor'
+require_relative '../dependencies_graph/dependencies_graph'
+
+SUPPORTED_LIBRARY_EVOLUTION = false
 
 Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer_context|
   require_relative "helper/feature_switches"
@@ -66,22 +69,45 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   # Verify Vendor pod cache
   manifest_path = prebuild_sandbox.root + "Manifest.lock"
   prebuilt_lockfile = Pod::Lockfile.from_file Pathname.new(manifest_path)
-  missed_vendor_pods = PodCacheValidator.verify_prebuilt_vendor_pods(lockfile, prebuilt_lockfile)
+  cachemiss_vendor_pods, cachehit_vendor_pods = PodCacheValidator.verify_prebuilt_vendor_pods(lockfile, prebuilt_lockfile)
+  Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
   if !Pod::Podfile::DSL.is_prebuild_job
-    Pod::Podfile::DSL.add_unbuilt_pods(missed_vendor_pods)
+    Pod::Podfile::DSL.add_unbuilt_pods(cachemiss_vendor_pods)
   end
 
   # Verify Dev pod cache
   if Pod::Podfile::DSL.enable_prebuild_dev_pod
-    BenchmarkShow.benchmark { PodCacheValidator.verify_devpod_checksum(prebuild_sandbox, lockfile) }
+    BenchmarkShow.benchmark { 
+      cachemiss_pods_dic, cachehit_pods_dic = PodCacheValidator.verify_devpod_checksum(prebuild_sandbox, lockfile)
+      Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic = cachehit_pods_dic
+      Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic = cachemiss_pods_dic
+    }
     if !Pod::Podfile::DSL.is_prebuild_job
-      Pod::Podfile::DSL.add_unbuilt_pods(Pod::Prebuild::CacheInfo.cache_miss_local_pods)
+      Pod::Podfile::DSL.add_unbuilt_pods(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys)
+    end
+  end
+
+  if !SUPPORTED_LIBRARY_EVOLUTION # Will remove after migrating all libraries to Swift 5 + Xcode 11 + support LIBRARY EVOLUTION
+    dependencies_graph = DependenciesGraph.new(lockfile)
+    vendor_pods_clients = dependencies_graph.get_clients(cachemiss_vendor_pods.to_a)
+    dev_pods_clients = dependencies_graph.get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys)
+    Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
+    Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys} \n=> clients #{dev_pods_clients.to_a}"
+
+    Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
+    dev_pods_clients.each do |name|
+      value = Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic[name]
+      Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic.delete(name)
+      Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic[name] = value
+    end
+    if !Pod::Podfile::DSL.is_prebuild_job
+      Pod::Podfile::DSL.add_unbuilt_pods(vendor_pods_clients)
+      Pod::Podfile::DSL.add_unbuilt_pods(dev_pods_clients)
     end
   end
 
   binary_installer.clean_delta_file
-  Pod::UI.puts "Pod update = #{update}"
-  if binary_installer.have_exact_prebuild_cache? && !update
+  if !Pod::Podfile::DSL.is_prebuild_job || (binary_installer.have_exact_prebuild_cache? && !update) # If not in prebuild job, we never rebuild and just use cache
     Pod::UI.puts "cache hit"
     binary_installer.install_when_cache_hit!
   else

@@ -52,7 +52,7 @@ class PrebuildOutput
       file.write(project_root)
     end
 
-    Pod::Prebuild::CacheInfo.cache_miss_local_pods_dic.each do |name, hash|
+    Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.each do |name, hash|
       puts "Output dev pod lib: #{name} hash: #{hash}"
       built_lib_path = @sandbox.framework_folder_path_for_target_name(name)
       if File.directory?(built_lib_path)

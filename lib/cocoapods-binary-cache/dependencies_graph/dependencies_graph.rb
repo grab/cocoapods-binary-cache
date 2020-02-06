@@ -15,7 +15,7 @@ class DependenciesGraph
   end
 
   # Input : a list of library names.
-  # Output: list of library names which are clients (directly and indirectly) of those input libraries.
+  # Output: a set of library names which are clients (directly and indirectly) of those input libraries.
   def get_clients(libnames)
     result = Set.new()
     libnames.each do |lib|
@@ -25,7 +25,7 @@ class DependenciesGraph
         puts "Error: cannot find lib: #{lib}"
       end
     end
-    result.to_a
+    result
   end
 
   def write_graphic_file(output_graphic_fmt, filename='graph', highlight_nodes=Set[])
