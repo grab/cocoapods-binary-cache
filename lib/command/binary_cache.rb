@@ -28,6 +28,16 @@ module Pod
       end
 
       def run
+        if @cmd == 'deps_graph'
+          require_relative '../cocoapods-binary-cache/dependencies_graph/dependencies_graph'
+          dep_graph = DependenciesGraph.new(config.lockfile)
+          fmt = 'png'
+          name = 'graph'
+          dep_graph.write_graphic_file(fmt, filename=name, highlight_nodes=Set[])
+          system("open #{name}.#{fmt}")
+          return
+        end
+
         config_file_path = "#{config.installation_root}/PodBinaryCacheConfig.json"
         if not File.exists?(config_file_path)
           raise "#{config_file_path} not exist"

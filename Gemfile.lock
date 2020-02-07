@@ -4,6 +4,7 @@ PATH
     cocoapods-binary-cache (0.0.2)
       cocoapods (>= 1.5.0)
       fourflusher (~> 2.0)
+      rgl (~> 0.5.6)
       xcpretty (~> 0.3.0)
 
 GEM
@@ -66,6 +67,7 @@ GEM
     i18n (0.9.5)
       concurrent-ruby (~> 1.0)
     json (2.3.0)
+    lazy_priority_queue (0.1.1)
     minitest (5.13.0)
     mocha (1.10.2)
     mocha-on-bacon (0.2.3)
@@ -77,8 +79,12 @@ GEM
     prettybacon (0.0.2)
       bacon (~> 1.2)
     rake (10.5.0)
+    rgl (0.5.6)
+      lazy_priority_queue (~> 0.1.0)
+      stream (~> 0.5.2)
     rouge (2.0.7)
     ruby-macho (1.4.0)
+    stream (0.5.2)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
