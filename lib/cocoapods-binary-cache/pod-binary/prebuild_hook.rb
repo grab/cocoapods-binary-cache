@@ -97,6 +97,8 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
     Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
     dev_pods_clients.each do |name|
       value = Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic[name]
+      next if !value
+
       Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic.delete(name)
       Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic[name] = value
     end
@@ -104,6 +106,11 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
       Pod::Podfile::DSL.add_unbuilt_pods(vendor_pods_clients)
       Pod::Podfile::DSL.add_unbuilt_pods(dev_pods_clients)
     end
+
+    # For debugging
+    cachemiss_libs = cachemiss_vendor_pods + vendor_pods_clients + Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
+    Pod::UI.puts "Cache miss libs: #{cachemiss_libs.count} \n #{cachemiss_libs.to_a}"
+    # dependencies_graph.write_graphic_file('png', filename='graph', highlight_nodes=cachemiss_libs)
   end
 
   binary_installer.clean_delta_file
