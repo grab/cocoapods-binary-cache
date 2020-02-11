@@ -84,8 +84,13 @@ class PodCacheValidator
   def self.get_dev_pods(lockfile)
     dev_pods = Set[]
     external_sources = lockfile.to_hash["EXTERNAL SOURCES"]
-    external_sources.each do |name, _|
-      dev_pods.add(name)
+    external_sources.each do |name, attribs|
+      if attribs.class == Hash
+        path = attribs[:path]
+        if path
+          dev_pods.add(name)
+        end
+      end
     end
     dev_pods
   end
