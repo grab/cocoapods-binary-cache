@@ -2,5 +2,5 @@
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
 module CocoapodsBinaryCache
-    VERSION = "0.0.2"
+    VERSION = "0.0.3"
 end

@@ -32,6 +32,11 @@ module Pod
             @prebuild_pods_changes
         end
 
+        def should_not_prebuild(lib_name)
+            Pod::Podfile::DSL.unbuilt_pods.include?(lib_name) ||
+            Prebuild::CacheInfo.cache_hit_vendor_pods.include?(lib_name) || 
+            Prebuild::CacheInfo.cache_hit_dev_pods_dic.include?(lib_name)
+        end
 
         public
 
@@ -44,7 +49,6 @@ module Pod
 
         # check if need to prebuild
         def have_exact_prebuild_cache?
-            UI.puts "Manifest: #{local_manifest.inspect}"
             # check if need build frameworks
             return false if local_manifest == nil
 
@@ -64,7 +68,10 @@ module Pod
             UI.puts "Deleted frameworks: #{deleted.to_a}"
             UI.puts "Missing frameworks: #{missing.to_a}"
             needed = (added + changed + deleted + missing)
-            needed = needed.reject { |name| Podfile::DSL.unbuilt_pods.include?(name) or Dir.exist?(sandbox.framework_folder_path_for_target_name(name)) }
+            if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
+                needed += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
+            end
+            needed = needed.reject { |name| should_not_prebuild(name) }
             UI.puts "Need to rebuild: #{needed.count} #{needed}"
             return needed.empty?
         end
@@ -105,6 +112,9 @@ module Pod
                 end
 
                 root_names_to_update = (added + changed + missing)
+                if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
+                    root_names_to_update += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
+                end
 
                 # transform names to targets
                 cache = []
@@ -123,10 +133,7 @@ module Pod
                 UI.puts "Rebuild all frameworks"
                 targets = self.pod_targets
             end
-
-            targets = targets.reject { |pod_target| Podfile::DSL.unbuilt_pods.include?(pod_target.pod_name) }
-            targets = targets.reject { |pod_target| Dir.exist?(sandbox.framework_folder_path_for_target_name(pod_target.name)) }
-
+            targets = targets.reject { |pod_target| should_not_prebuild(pod_target.name) }
             if !Podfile::DSL.enable_prebuild_dev_pod
                 targets = targets.reject {|pod_target| sandbox.local?(pod_target.pod_name) }
             end
