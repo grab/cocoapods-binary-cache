@@ -35,8 +35,8 @@ public class ConfigVar {
     print("\(#function)")
   }
 
-  // ⚠️ Has same issue with func above even with "dynamic" keyword
-  public dynamic func reload2() {
+  // ⚠️ Has same issue with func above even with "dynamic" keyword (Xcode 10)
+  public func reload2() {
     print("\(#function)")
   }
   

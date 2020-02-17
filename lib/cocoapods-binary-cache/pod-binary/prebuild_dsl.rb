@@ -82,6 +82,10 @@ module Pod
         DSL.unbuilt_pods = DSL.unbuilt_pods.merge(list)
       end
 
+      def self.set_ignore_checksum_files(file_names)
+        DSL.ignore_checksum_files = file_names
+      end
+
       private
 
       class_attr_accessor :prebuild_all
@@ -122,6 +126,9 @@ module Pod
 
       class_attr_accessor :is_prebuild_job
       self.is_prebuild_job = false
+
+      class_attr_accessor :ignore_checksum_files
+      self.ignore_checksum_files = Set[]
     end
   end
 end
