@@ -114,7 +114,7 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   end
 
   binary_installer.clean_delta_file
-  if !Pod::Podfile::DSL.is_prebuild_job || (binary_installer.have_exact_prebuild_cache? && !update) # If not in prebuild job, we never rebuild and just use cache
+  if (binary_installer.have_exact_prebuild_cache? && !update) # If not in prebuild job, we never rebuild and just use cache
     Pod::UI.puts "cache hit"
     binary_installer.install_when_cache_hit!
   else

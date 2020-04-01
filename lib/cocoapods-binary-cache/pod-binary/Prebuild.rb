@@ -262,7 +262,7 @@ module Pod
         old_method2 = instance_method(:run_plugins_post_install_hooks)
         define_method(:run_plugins_post_install_hooks) do
             old_method2.bind(self).()
-            if Pod::is_prebuild_stage
+            if Pod::is_prebuild_stage and Pod::Podfile::DSL.is_prebuild_job
                 self.prebuild_frameworks!
             end
         end

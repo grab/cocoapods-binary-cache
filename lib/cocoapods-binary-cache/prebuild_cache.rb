@@ -54,15 +54,15 @@ class PodCacheValidator
   def self.verify_prebuilt_vendor_pods(pod_lockfile, pod_bin_lockfile)
     outdated_libs = Set.new()
     cachehit_libs = Set.new()
-    if not pod_bin_lockfile
-      puts 'No pod binary lock file.'
-      return outdated_libs, cachehit_libs
-    end
     if not pod_lockfile
       puts 'No pod lock file.'
       return outdated_libs, cachehit_libs
     end
     pod_lock_libs = get_libs_dic(pod_lockfile)
+    if not pod_bin_lockfile
+      puts 'No pod binary lock file.'
+      return get_vendor_pods(pod_lockfile), cachehit_libs
+    end
     pod_bin_libs = get_libs_dic(pod_bin_lockfile)
 
     dev_pods = get_dev_pods(pod_lockfile)
@@ -95,6 +95,23 @@ class PodCacheValidator
       end
     end
     dev_pods
+  end
+
+  def self.get_vendor_pods(lockfile)
+    libs_dic = get_libs_dic(lockfile)
+    dev_pods = get_dev_pods(lockfile)
+    vendor_libs = Set.new()
+    libs_dic.each do |name, _|
+      next if dev_pods.include?(name)
+      vendor_libs.add(name)
+
+      # for subspec we have pattern: LibName/SubSpec so need to add LibName
+      parts = name.split(File::Separator)
+      if parts.any?
+        vendor_libs.add(parts[0])
+      end
+    end
+    return vendor_libs
   end
 
   def self.get_libs_dic(lockfile)
