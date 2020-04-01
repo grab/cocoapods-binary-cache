@@ -22,7 +22,7 @@ class DependenciesGraph
       if graph.has_vertex?(lib)
         result.merge(traverse_sub_tree(graph, lib))
       else
-        puts "Error: cannot find lib: #{lib}"
+        puts "Warning: cannot find lib: #{lib}"
       end
     end
     result

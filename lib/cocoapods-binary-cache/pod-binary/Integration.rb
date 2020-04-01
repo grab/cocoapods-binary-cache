@@ -78,7 +78,13 @@ module Pod
                         source = child
                         # only make symlink to file and `.framework` folder
                         if child.directory? and [".framework", ".dSYM"].include? child.extname
-                            mirror_with_symlink(source, real_file_folder, target_folder)
+                            if child.extname == ".framework"
+                                mirror_with_symlink(source, real_file_folder, target_folder)
+                            else
+                                # Ignore dsym here to avoid cocoapods from adding install_dsym to buildphase-script
+                                # That can cause duplicated output files error in Xcode 11 (warning in Xcode 10)
+                                # We need more setup to support local debuging with prebuilt dSYM
+                            end
                             next false  # return false means don't go deeper
                         elsif child.file?
                             mirror_with_symlink(source, real_file_folder, target_folder)
