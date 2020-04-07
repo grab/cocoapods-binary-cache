@@ -1,0 +1,4 @@
+include:
+  - project: 'mobile/dax-ios/cicd'
+    ref: master
+    file: '/config/open_source/cocoapods-binary-cache.yml'
