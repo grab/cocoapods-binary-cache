@@ -1,0 +1,16 @@
+[flake8]
+
+ignore =
+  # See the rules at: https://lintlyci.github.io/Flake8Rules/rules/<CODE>.html
+  E111, # indentation is not a multiple of four
+  F403, # unable to detect undefined names
+  E121, # continuation line under-indented for hanging indent
+  E114, # indentation is not a multiple of four (comment)
+  E124, # closing bracket does not match visual indentation
+
+exclude =
+  .git,
+  __pycache__,
+  __init__.py,
+
+max-line-length = 120

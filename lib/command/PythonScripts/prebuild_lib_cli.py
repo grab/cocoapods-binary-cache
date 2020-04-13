@@ -2,11 +2,11 @@
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
 import os
-import json
 from argparse import ArgumentParser
 from utils.logger import logger
 from prebuild_lib import PrebuildLib
 from prebuild_config import PrebuildConfig
+
 
 def main():
   parser = ArgumentParser()
@@ -16,7 +16,7 @@ def main():
 
   try:
     config = PrebuildConfig(args.config_path)
-    prebuild_lib = PrebuildLib(config)  
+    prebuild_lib = PrebuildLib(config)
     if args.cmd == 'fetch':
       prebuild_lib.fetch_and_apply_cache()
     elif args.cmd == 'prebuild':
@@ -29,6 +29,7 @@ def main():
       logger.info('Wrong input, please select --cmd=fetch/prebuild/fetch_devpod')
   except Exception as e:
     raise e
+
 
 if __name__ == "__main__":
   main()
