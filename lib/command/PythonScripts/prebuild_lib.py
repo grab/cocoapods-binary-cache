@@ -47,12 +47,14 @@ class PrebuildLib:
 
     @print_func_name
     def zip_to_cache(self, libName):
-        if os.path.exists(self.cache_libs_path + libName + '.zip'):
+        zip_dest_path = os.path.join(self.cache_libs_path, f'{libName}.zip')
+        if os.path.exists(zip_dest_path):
             logger.info('Warning: lib {} already exist'.format(libName))
         else:
+            os.makedirs(os.path.dirname(zip_dest_path), exist_ok=True)
             ZipUtils.zip_dir(
-                '{}/{}'.format(self.generated_path, libName),
-                '{}/{}.zip'.format(self.cache_libs_path, libName)
+                os.path.join(self.generated_path, libName),
+                zip_dest_path
             )
 
     @print_func_name
