@@ -3,7 +3,6 @@
 
 import os
 import logging
-import colorlog
 
 
 def setup_logger():
@@ -12,8 +11,14 @@ def setup_logger():
   format_str = '[%(asctime)s] [%(levelname)s] %(message)s'
   date_format = '%H:%M:%S'
 
+  try:
+    import colorlog
+    is_colorlog_installed = True
+  except:  # noqa: E722
+    is_colorlog_installed = False
+
   # Enable colorlog if you run from terminal or on CI environment
-  if os.isatty(2) or os.environ.get('CI'):
+  if is_colorlog_installed and (os.isatty(2) or os.environ.get('CI')):
     cformat = '%(log_color)s' + format_str
     colors = {
       'DEBUG': 'white',
