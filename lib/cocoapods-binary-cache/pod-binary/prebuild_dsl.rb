@@ -54,6 +54,10 @@ module Pod
         end
       end
 
+      def prebuild_all_vendor_pods!
+        DSL.prebuild_all_vendor_pods = true
+      end
+
       def enable_devpod_prebuild
         DSL.enable_prebuild_dev_pod = true
       end
@@ -103,6 +107,9 @@ module Pod
       self.custom_build_options_simulator = []
 
       private
+
+      class_attr_accessor :prebuild_all_vendor_pods
+      self.prebuild_all_vendor_pods = false
 
       class_attr_accessor :enable_prebuild_dev_pod
       self.enable_prebuild_dev_pod = false
