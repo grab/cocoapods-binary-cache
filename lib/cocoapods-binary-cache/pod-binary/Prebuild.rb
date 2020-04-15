@@ -32,10 +32,19 @@ module Pod
             @prebuild_pods_changes
         end
 
-        def should_not_prebuild(lib_name)
-            Pod::Podfile::DSL.unbuilt_pods.include?(lib_name) ||
-            Prebuild::CacheInfo.cache_hit_vendor_pods.include?(lib_name) || 
-            Prebuild::CacheInfo.cache_hit_dev_pods_dic.include?(lib_name)
+        def blacklisted?(name)
+            Pod::Podfile::DSL.unbuilt_pods.include?(name)
+        end
+
+        def cache_hit?(name)
+            Prebuild::CacheInfo.cache_hit_vendor_pods.include?(name) ||
+            Prebuild::CacheInfo.cache_hit_dev_pods_dic.include?(name)
+        end
+
+        def should_not_prebuild_vendor_pod(name)
+            return true if blacklisted?(name)
+            return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
+            cache_hit?(name)
         end
 
         public
@@ -71,7 +80,7 @@ module Pod
             if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
                 needed += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
             end
-            needed = needed.reject { |name| should_not_prebuild(name) }
+            needed = needed.reject { |name| blacklisted?(name) || cache_hit?(name) }
             UI.puts "Need to rebuild: #{needed.count} #{needed}"
             return needed.empty?
         end
@@ -95,7 +104,10 @@ module Pod
             bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled
             targets = []
 
-            if local_manifest != nil
+            if Pod::Podfile::DSL.prebuild_all_vendor_pods
+                UI.puts "Rebuild all vendor frameworks"
+                targets = self.pod_targets
+            elsif local_manifest != nil
                 UI.puts "Update some frameworks"
                 changes = prebuild_pods_changes
                 added = changes.added
@@ -133,7 +145,8 @@ module Pod
                 UI.puts "Rebuild all frameworks"
                 targets = self.pod_targets
             end
-            targets = targets.reject { |pod_target| should_not_prebuild(pod_target.name) }
+
+            targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
             if !Podfile::DSL.enable_prebuild_dev_pod
                 targets = targets.reject {|pod_target| sandbox.local?(pod_target.pod_name) }
             end
