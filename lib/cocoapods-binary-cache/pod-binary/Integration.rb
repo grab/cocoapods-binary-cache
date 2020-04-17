@@ -101,6 +101,13 @@ module Pod
                     path_objects = hash[name]
                     if path_objects != nil
                         path_objects.each do |object|
+                            # https://github.com/grab/cocoapods-binary-cache/issues/7
+                            # When ".xib" files are copied to a framework, it sometimes becomes ".nib" files
+                            # --> We need to correct the path extension
+                            if !object.real_file_path.exist? && object.real_file_path.extname == '.xib'
+                                object.real_file_path = object.real_file_path.sub_ext('.nib')
+                                object.target_file_path = Pathname(object.target_file_path).sub_ext('.nib').to_path
+                            end
                             make_link(object.real_file_path, object.target_file_path)
                         end
                     end
