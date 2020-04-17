@@ -126,7 +126,7 @@ class PrebuildLib:
         os.system('{} push'.format(git_input_path))
 
     @print_func_name
-    def prebuild_if_needed(self):
+    def prebuild_if_needed(self, push=True):
         self.fetch_and_apply_cache()
         subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
         # Sync with cache directory
@@ -160,7 +160,8 @@ class PrebuildLib:
                             self.clean_cache(lib.strip())
                 # Copy manifest file
                 FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
-                self.push_all_to_git(self.cache_path)
+                if push:
+                    self.push_all_to_git(self.cache_path)
         except Exception as e:
             raise e
 
