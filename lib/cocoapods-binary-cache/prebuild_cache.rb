@@ -12,7 +12,7 @@ class PodCacheValidator
   def self.verify_devpod_checksum(sandbox, lock_file)
     devpod_path = "#{sandbox.root}/devpod/"
     target_path = sandbox.generate_framework_path
-    puts "verify_devpod_checksum: #{devpod_path}"
+    Pod::UI.puts "verify_devpod_checksum: #{devpod_path}"
     external_sources = lock_file.to_hash["EXTERNAL SOURCES"]
     unless File.directory?(target_path)
       FileUtils.mkdir_p(target_path)
@@ -21,7 +21,7 @@ class PodCacheValidator
     dev_pods_count = 0
     cachehit_pods_dic = Hash[]
     if !external_sources
-      puts 'No development pods!'
+      Pod::UI.puts 'No development pods!'
       return missing_pods_dic, cachehit_pods
     end
     external_sources.each do |name, attribs|
@@ -33,7 +33,7 @@ class PodCacheValidator
           cached_path = "#{devpod_path}#{name}_#{hash}"
           if !Dir.exists?(cached_path)
             missing_pods_dic[name] = hash
-            puts "Missing devpod: #{name}_#{hash}"
+            Pod::UI.puts "Missing devpod: #{name}_#{hash}"
           else
             cachehit_pods_dic[name] = hash
             target_dir = "#{target_path}/#{name}"
@@ -42,10 +42,10 @@ class PodCacheValidator
           end
         end
       else
-        puts "Error, wrong type: #{attribs}"
+        Pod::UI.puts "Error, wrong type: #{attribs}"
       end
     end
-    puts "Local pod cache miss: #{missing_pods_dic.keys.count} / #{dev_pods_count}"
+    Pod::UI.puts "Local pod cache miss: #{missing_pods_dic.keys.count} / #{dev_pods_count}"
     return missing_pods_dic, cachehit_pods_dic
   end
 
@@ -55,24 +55,24 @@ class PodCacheValidator
     outdated_libs = Set.new()
     cachehit_libs = Set.new()
     if not pod_lockfile
-      puts 'No pod lock file.'
+      Pod::UI.puts 'No pod lock file.'
       return outdated_libs, cachehit_libs
     end
     pod_lock_libs = get_libs_dic(pod_lockfile)
     if not pod_bin_lockfile
-      puts 'No pod binary lock file.'
+      Pod::UI.puts 'No pod binary lock file.'
       return get_vendor_pods(pod_lockfile), cachehit_libs
     end
     pod_bin_libs = get_libs_dic(pod_bin_lockfile)
 
-    dev_pods = get_dev_pods(pod_lockfile)
+    dev_pods = get_dev_pods(pod_lockfile) # TODO (thuyen): Review: Why dev_pods inside vendor_pods?
     pod_bin_libs.each do |name, prebuilt_ver|
       next if dev_pods.include?(name)
       lock_ver = pod_lock_libs[name]
       if lock_ver
         if lock_ver != prebuilt_ver
           outdated_libs.add(name)
-          puts("Warning: prebuilt lib was outdated: #{name} #{prebuilt_ver} vs #{lock_ver}".yellow)
+          Pod::UI.puts "Warning: prebuilt lib was outdated: #{name} #{prebuilt_ver} vs #{lock_ver}".yellow
           next
         end
         cachehit_libs.add(name)
@@ -85,7 +85,7 @@ class PodCacheValidator
 
   def self.get_dev_pods(lockfile)
     dev_pods = Set[]
-    external_sources = lockfile.to_hash["EXTERNAL SOURCES"]
+    external_sources = lockfile.to_hash['EXTERNAL SOURCES'] || []
     external_sources.each do |name, attribs|
       if attribs.class == Hash
         path = attribs[:path]
@@ -99,7 +99,7 @@ class PodCacheValidator
 
   def self.get_vendor_pods(lockfile)
     libs_dic = get_libs_dic(lockfile)
-    dev_pods = get_dev_pods(lockfile)
+    dev_pods = get_dev_pods(lockfile) # TODO (thuyen): Review: Why dev_pods inside vendor_pods?
     vendor_libs = Set.new()
     libs_dic.each do |name, _|
       next if dev_pods.include?(name)
@@ -118,7 +118,7 @@ class PodCacheValidator
     pods = lockfile.to_hash["PODS"]
     libs_hash = {}
     if !pods
-      puts "No pod libs"
+      Pod::UI.puts 'No pod libs'
       return libs_hash
     end
     pods.each do |item|

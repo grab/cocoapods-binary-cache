@@ -1,0 +1,7 @@
+inherit_from:
+  - ~/rubocop/default.yml # Embedded inside Docker
+
+AllCops:
+  Exclude:
+    - 'lib/cocoapods-binary-cache/pod-binary/**/*'
+    - 'lib/cocoapods-binary-cache/pod-rome/**/*'
