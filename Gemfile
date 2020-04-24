@@ -10,3 +10,7 @@ group :development do
   gem 'mocha-on-bacon'
   gem 'prettybacon'
 end
+
+group :test do
+  gem 'rspec'
+end
