@@ -4,21 +4,21 @@
 require_relative 'helper/path_utils'
 
 class PrebuildOutput
-  def initialize(prebuildSandbox)
-    @sandbox = prebuildSandbox
+  def initialize(prebuild_sandbox)
+    @sandbox = prebuild_sandbox
   end
 
   def delta_dir
-    return "#{@sandbox.root}/../_Prebuild_delta"
+    "#{@sandbox.root}/../_Prebuild_delta"
   end
 
   def delta_file_path
-    return "#{delta_dir}/changes.txt"
+    "#{delta_dir}/changes.txt"
   end
 
   def clean_delta_file
     puts "clean_delta_file: #{delta_file_path}"
-    FileUtils.remove_entry(delta_file_path, force=true)
+    FileUtils.remove_entry(delta_file_path, force = true)
   end
 
   def create_dir_if_needed(dir)
@@ -36,7 +36,7 @@ class PrebuildOutput
       end
       puts "Pod prebuild changes were writen to file: #{file_path}"
     else
-      puts "No changes in prebuild"
+      puts 'No changes in prebuild'
     end
   end
 
@@ -47,7 +47,7 @@ class PrebuildOutput
 
     # Inject project path (where the framework is built) to support generating code coverage later
     project_root = PathUtils.remove_last_path_component(@sandbox.standard_sanbox_path.to_s)
-    template_file_path = devpod_output_path + "prebuilt_map"
+    template_file_path = devpod_output_path + 'prebuilt_map'
     File.open(template_file_path, 'w') do |file|
       file.write(project_root)
     end
@@ -55,14 +55,12 @@ class PrebuildOutput
     Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.each do |name, hash|
       puts "Output dev pod lib: #{name} hash: #{hash}"
       built_lib_path = @sandbox.framework_folder_path_for_target_name(name)
-      if File.directory?(built_lib_path)
-        FileUtils.cp(template_file_path, "#{built_lib_path}/#{name}.framework")
+      next unless File.directory?(built_lib_path)
 
-        target_dir = "#{devpod_output_path}#{name}_#{hash}"
-        puts "From: #{built_lib_path} -> #{target_dir}"
-        FileUtils.cp_r(built_lib_path, target_dir)
-      end
+      FileUtils.cp(template_file_path, "#{built_lib_path}/#{name}.framework")
+      target_dir = "#{devpod_output_path}#{name}_#{hash}"
+      puts "From: #{built_lib_path} -> #{target_dir}"
+      FileUtils.cp_r(built_lib_path, target_dir)
     end
-    
   end
 end

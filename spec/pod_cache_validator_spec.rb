@@ -24,11 +24,19 @@ describe 'PodCacheValidator' do
 
     context 'some cache miss due to not present' do
       let(:pod_lockfile) { gen_lockfile(pods: pods.merge('D' => '0.0.5')) }
-      it 'returns some missed, some hit', :skip do
+      it 'returns some missed, some hit' do
         skip 'code does not pass this test' # TODO (thuyen): Fix code
 
         expect(@missed).to eq(['D'].to_set)
         expect(@hit).to eq(pods.keys.to_set)
+      end
+    end
+
+    context 'no cache due to no pod_bin_lockfile' do
+      let(:pod_bin_lockfile) { nil }
+      it 'returns all missed' do
+        expect(@missed).to eq(pods.keys.to_set)
+        expect(@hit).to be_empty
       end
     end
   end

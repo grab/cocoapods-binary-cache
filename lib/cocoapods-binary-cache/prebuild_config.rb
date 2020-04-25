@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
 class PrebuildConfig
-  @CONFIGURATION = "Debug"
+  @CONFIGURATION = 'Debug'
 
   class << self
     attr_accessor :CONFIGURATION
