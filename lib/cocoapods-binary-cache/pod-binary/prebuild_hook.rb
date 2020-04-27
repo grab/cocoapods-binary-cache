@@ -127,7 +127,7 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   #   - `PodCacheValidator.verify_devpod_checksum`
   # TODO (thuyen): Simplify this logic
   cache_miss = binary_installer.cache_miss
-  Pod::Podfile::DSL.add_unbuilt_pods(cache_miss)
+  Pod::Podfile::DSL.add_unbuilt_pods(cache_miss) unless Pod::Podfile::DSL.is_prebuild_job
 
   if Pod::Podfile::DSL.prebuild_all_vendor_pods
     Pod::UI.puts "Prebuild all vendor pods"
