@@ -4,5 +4,4 @@ inherit_from:
 AllCops:
   Exclude:
     - 'PodBinaryCacheExample/**/*'
-    - 'lib/cocoapods-binary-cache/pod-binary/**/*'
     - 'lib/cocoapods-binary-cache/pod-rome/**/*'

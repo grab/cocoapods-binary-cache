@@ -56,9 +56,7 @@ module Pod
             @prebuild_output
         end
 
-        # check if need to prebuild
-        def have_exact_prebuild_cache?
-            # check if need build frameworks
+        def cache_miss
             return false if local_manifest == nil
 
             changes = prebuild_pods_changes
@@ -76,15 +74,14 @@ module Pod
             UI.puts "Changed frameworks: #{changed.to_a}"
             UI.puts "Deleted frameworks: #{deleted.to_a}"
             UI.puts "Missing frameworks: #{missing.to_a}"
-            needed = (added + changed + deleted + missing)
+            needed = (added + changed + missing)
             if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
                 needed += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
             end
             needed = needed.reject { |name| blacklisted?(name) || cache_hit?(name) }
             UI.puts "Need to rebuild: #{needed.count} #{needed}"
-            return needed.empty?
+            return needed
         end
-
 
         # The install method when have completed cache
         def install_when_cache_hit!
