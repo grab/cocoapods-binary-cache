@@ -121,10 +121,18 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
     binary_installer.install!
   end
 
+  # Currently, `binary_installer.cache_miss` depends on the output of `Pod::Podfile::DSL.unbuilt_pods`
+  # -> indirectly depends on:
+  #   - `PodCacheValidator.verify_prebuilt_vendor_pods`
+  #   - `PodCacheValidator.verify_devpod_checksum`
+  # TODO (thuyen): Simplify this logic
+  cache_miss = binary_installer.cache_miss
+  Pod::Podfile::DSL.add_unbuilt_pods(cache_miss)
+
   if Pod::Podfile::DSL.prebuild_all_vendor_pods
     Pod::UI.puts "Prebuild all vendor pods"
     installer_exec.call
-  elsif (binary_installer.have_exact_prebuild_cache? && !update) # If not in prebuild job, we never rebuild and just use cache
+  elsif !update && cache_miss.empty? # If not in prebuild job, we never rebuild and just use cache
     Pod::UI.puts "Cache hit"
     binary_installer.install_when_cache_hit!
   else
