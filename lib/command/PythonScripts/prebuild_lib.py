@@ -7,7 +7,6 @@ import os
 import glob
 from utils.fileutils import FileUtils
 from utils.ziputils import ZipUtils
-from functools import wraps
 from utils.logger import logger
 from utils.step import step
 
@@ -19,14 +18,6 @@ from utils.step import step
 # 1. Need to run this script to prebuild/delete the libs which have change.
 # 2. Commit binary changes to cache repo, set tag for it.
 # 3. Update tag in this file. Then submit a new MR.
-
-
-def print_func_name(func):
-    @wraps(func)
-    def echo_func(*func_args, **func_kwargs):
-        logger.info('🚀 Start func: {}'.format(func.__name__))
-        return func(*func_args, **func_kwargs)
-    return echo_func
 
 
 class PrebuildLib:
@@ -45,23 +36,23 @@ class PrebuildLib:
         self.cache_libs_path = config.cache_libs_path
         self.devpod_cache_libs_path = config.devpod_cache_libs_path
 
-    @print_func_name
-    def zip_to_cache(self, libName):
-        zip_dest_path = os.path.join(self.cache_libs_path, f'{libName}.zip')
+    def zip_to_cache(self, lib):
+        zip_dest_path = os.path.join(self.cache_libs_path, f'{lib}.zip')
+        logger.info(f'Zip {lib} to {zip_dest_path}')
         if os.path.exists(zip_dest_path):
-            logger.info('Warning: lib {} already exist'.format(libName))
+            logger.warning(f'Lib {lib} already exists at {zip_dest_path} -> Ignore zipping!')
         else:
             os.makedirs(os.path.dirname(zip_dest_path), exist_ok=True)
             ZipUtils.zip_dir(
-                os.path.join(self.generated_path, libName),
+                os.path.join(self.generated_path, lib),
                 zip_dest_path
             )
 
-    @print_func_name
-    def clean_cache(self, libName):
-        FileUtils.remove_file(self.cache_libs_path + libName + ".zip")
+    def clean_cache(self, lib):
+        lib_path = os.path.join(self.cache_libs_path, f'{lib}.zip')
+        logger.info(f'Clean cache of {lib} at {lib_path}')
+        FileUtils.remove_file(lib_path)
 
-    @print_func_name
     def zip_all_libs_to_cache(self):
         os.system('rm -rf ' + self.cache_libs_path + '/*')
         FileUtils.create_dir(self.cache_libs_path)
@@ -75,30 +66,28 @@ class PrebuildLib:
         subprocess.run(['git', '-C', git_repo_dir, 'checkout', 'master'])
         subprocess.run(['git', '-C', git_repo_dir, 'pull', '-X', 'theirs'])
 
-    @print_func_name
     def fetch_cache(self):
+        logger.info(f'Fetch cache to {self.cache_path}')
         with step('fetch_prebuild_libs'):
             if not os.path.exists(self.cache_path):
                 subprocess.run(['git', 'clone', '--depth=1', self.cache_repo, self.cache_path])
             else:
                 self.clean_and_pull(self.cache_path)
 
-    @print_func_name
     def unzip_cache(self):
+        logger.info(f'Unzip cache, from {self.cache_libs_path} to {self.generated_path}')
         with step('unzip_prebuild_libs'):
             FileUtils.remove_dir(self.prebuild_path)
             FileUtils.create_dir(self.generated_path)
-            FileUtils.copy_file_or_dir(self.cache_path + self.manifest_file, self.prebuild_path)
+            FileUtils.copy_file_or_dir(os.path.join(self.cache_path, self.manifest_file), self.prebuild_path)
             # Unzip libs to pod-binary folder
-            for zipPath in glob.iglob(self.cache_libs_path + '/*.zip'):
-                ZipUtils.unzip(zipPath, self.generated_path)
+            for zip_path in glob.iglob(os.path.join(self.cache_libs_path, '*.zip')):
+                ZipUtils.unzip(zip_path, self.generated_path)
 
-    @print_func_name
     def fetch_and_apply_cache(self):
         self.fetch_cache()
         self.unzip_cache()
 
-    @print_func_name
     def fetch_and_apply_devpod_cache(self):
         with step('fetch_and_apply_devpod_cache'):
             logger.info('Fetching devpod cache to {}'.format(self.devpod_cache_path))
@@ -113,7 +102,6 @@ class PrebuildLib:
             for zip_path in glob.iglob(self.devpod_cache_libs_path + '/*.zip'):
                 ZipUtils.unzip(zip_path, devpod_temp_dir)
 
-    @print_func_name
     def has_libs_change(self):
         if os.path.exists(self.delta_path):
             return True
@@ -125,7 +113,6 @@ class PrebuildLib:
         os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
         os.system('{} push'.format(git_input_path))
 
-    @print_func_name
     def prebuild_if_needed(self, push=True):
         self.fetch_and_apply_cache()
         subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
@@ -150,11 +137,11 @@ class PrebuildLib:
                             self.clean_cache(libName)
                             self.zip_to_cache(libName)
 
-                deletedMatches = re.findall(r'Deleted: \[(.*)\]', data)
-                if deletedMatches:
-                    deleted = deletedMatches[0].strip()
-                    logger.info('Deleted frameworks: {}'.format(deleted))
+                match = re.findall(r'Deleted: \[(.*)\]', data)
+                if match:
+                    deleted = match[0].strip()
                     if len(deleted):
+                        logger.info('Deleted frameworks: {}'.format(deleted))
                         libs = deleted.split(',')
                         for lib in libs:
                             self.clean_cache(lib.strip())
@@ -165,7 +152,6 @@ class PrebuildLib:
         except Exception as e:
             raise e
 
-    @print_func_name
     def prebuild_devpod(self):
         self.fetch_and_apply_cache()
         self.fetch_and_apply_devpod_cache()
