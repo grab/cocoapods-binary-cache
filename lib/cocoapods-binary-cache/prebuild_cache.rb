@@ -52,33 +52,31 @@ class PodCacheValidator
   # Compare pod lock version and prebuilt version
   # Return 2 Hashes of cache miss and cache hit frameworks
   def self.verify_prebuilt_vendor_pods(pod_lockfile, pod_bin_lockfile)
-    outdated_libs = Set.new()
-    cachehit_libs = Set.new()
+    cachemiss_libs = Set.new
+    cachehit_libs = Set.new
     if not pod_lockfile
       Pod::UI.puts 'No pod lock file.'
-      return outdated_libs, cachehit_libs
+      return [cachemiss_libs, cachehit_libs]
     end
     pod_lock_libs = get_libs_dic(pod_lockfile)
     if not pod_bin_lockfile
       Pod::UI.puts 'No pod binary lock file.'
-      return get_vendor_pods(pod_lockfile), cachehit_libs
+      return [get_vendor_pods(pod_lockfile), cachehit_libs]
     end
     pod_bin_libs = get_libs_dic(pod_bin_lockfile)
 
-    dev_pods = get_dev_pods(pod_lockfile) # TODO (thuyen): Review: Why dev_pods inside vendor_pods?
-    pod_bin_libs.each do |name, prebuilt_ver|
+    dev_pods = get_dev_pods(pod_lockfile)
+    pod_lock_libs.each do |name, lock_ver|
       next if dev_pods.include?(name)
-      lock_ver = pod_lock_libs[name]
-      if lock_ver
-        if lock_ver != prebuilt_ver
-          outdated_libs.add(name)
-          Pod::UI.puts "Warning: prebuilt lib was outdated: #{name} #{prebuilt_ver} vs #{lock_ver}".yellow
-          next
-        end
+      prebuilt_ver = pod_bin_libs[name]
+      if lock_ver == prebuilt_ver
         cachehit_libs.add(name)
+      else
+        cachemiss_libs.add(name)
+        Pod::UI.puts "Warning: prebuilt lib was outdated: #{name} #{prebuilt_ver} vs #{lock_ver}".yellow
       end
     end
-    return outdated_libs, cachehit_libs
+    [cachemiss_libs, cachehit_libs]
   end
 
   private
@@ -99,7 +97,7 @@ class PodCacheValidator
 
   def self.get_vendor_pods(lockfile)
     libs_dic = get_libs_dic(lockfile)
-    dev_pods = get_dev_pods(lockfile) # TODO (thuyen): Review: Why dev_pods inside vendor_pods?
+    dev_pods = get_dev_pods(lockfile)
     vendor_libs = Set.new()
     libs_dic.each do |name, _|
       next if dev_pods.include?(name)
