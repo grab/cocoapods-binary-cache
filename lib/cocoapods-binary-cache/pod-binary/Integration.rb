@@ -227,7 +227,8 @@ module Pod
                 empty_source_files(spec)
 
                 # to avoid the warning of missing license
-                spec.attributes_hash["license"] = {}
+                spec.attributes_hash['license'] = {}
+                spec.root.attributes_hash['license'] = {}
 
             end
 
