@@ -1,8 +1,8 @@
+require "fileutils"
 require_relative '../pod-rome/build_framework'
 require_relative 'helper/passer'
 require_relative 'helper/target_checker'
-require "fileutils"
-require_relative '../prebuild_output'
+require_relative "../prebuild_output/output"
 
 # patch prebuild ability
 module Pod
@@ -51,7 +51,7 @@ module Pod
 
         def prebuild_output
             if not @prebuild_output
-                @prebuild_output = PrebuildOutput.new(sandbox)
+                @prebuild_output = PodPrebuild::Output.new(sandbox)
             end
             @prebuild_output
         end
