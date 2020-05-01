@@ -21,12 +21,6 @@ module Pod
                 attr_accessor :real_file_path
                 attr_accessor :target_file_path
             end
-            # Save the resoures for static framework, and used when installing the prebuild framework
-            # static framework needs copy the resurces mannully
-            #
-            # @return [Hash<String, [Passer::ResourcePath]>]
-            class_attr_accessor :resources_to_copy_for_static_framework
-            self.resources_to_copy_for_static_framework = {}
 
             # Some pod won't be build in prebuild stage even if it have `binary=>true`.
             # The targets of this pods have `oshould_build? == true`.
