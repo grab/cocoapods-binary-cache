@@ -69,7 +69,13 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   # Verify Vendor pod cache
   manifest_path = prebuild_sandbox.root + "Manifest.lock"
   prebuilt_lockfile = Pod::Lockfile.from_file Pathname.new(manifest_path)
-  cachemiss_vendor_pods, cachehit_vendor_pods = PodCacheValidator.verify_prebuilt_vendor_pods(lockfile, prebuilt_lockfile)
+
+  cache_validation_result = PodPrebuild::CacheValidator.new(lockfile, prebuilt_lockfile).validate
+  cache_validation_result.print_summary
+  cachemiss_vendor_pods = cache_validation_result.missed
+  cachehit_vendor_pods = cache_validation_result.hit
+
+  # TODO (thuyen): Avoid global mutation
   Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
   if !Pod::Podfile::DSL.is_prebuild_job
     Pod::Podfile::DSL.add_unbuilt_pods(cachemiss_vendor_pods)

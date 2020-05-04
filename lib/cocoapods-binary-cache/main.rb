@@ -3,7 +3,10 @@
 
 require_relative "pod-binary/prebuild_dsl"
 require_relative "pod-binary/prebuild_hook"
+require_relative "cache/validator"
+require_relative "cache/validation_result"
 require_relative "helper/json"
 require_relative "helper/path_utils"
+require_relative "helper/lockfile"
 require_relative "prebuild_output/output"
 require_relative "prebuild_output/metadata"
