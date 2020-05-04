@@ -19,7 +19,7 @@ module PodPrebuild
     end
 
     def save!
-      File.open(@path, "w") { |f| f.write(@data.to_json) }
+      File.open(@path, "w") { |f| f.write(JSON.pretty_generate(@data)) }
     end
 
     private

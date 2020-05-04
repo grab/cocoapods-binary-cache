@@ -96,25 +96,16 @@ module Pod
 
 
                     # symbol link copy resource for static framework
-                    hash = Prebuild::Passer.resources_to_copy_for_static_framework || {}
-                    
-                    path_objects = hash[name]
-                    if path_objects != nil
-                        path_objects.each do |object|
-                            # https://github.com/grab/cocoapods-binary-cache/issues/7
-                            # When ".xib" files are copied to a framework, it sometimes becomes ".nib" files
-                            # --> We need to correct the path extension
-                            if !object.real_file_path.exist? && object.real_file_path.extname == '.xib'
-                                object.real_file_path = object.real_file_path.sub_ext('.nib')
-                                object.target_file_path = Pathname(object.target_file_path).sub_ext('.nib').to_path
-                            end
-                            make_link(object.real_file_path, object.target_file_path)
-                        end
+                    metadata = PodPrebuild::Metadata.in_dir(real_file_folder)
+                    next unless metadata.static_framework?
+
+                    metadata.resources.each do |path|
+                        real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
+                        target_file_path = path.sub("${PODS_ROOT}", sandbox.root.to_path)
+                        make_link(real_file_path, target_file_path)
                     end
-                end # of for each 
-
-            end # of method
-
+                end
+            end
         end
     end
 end

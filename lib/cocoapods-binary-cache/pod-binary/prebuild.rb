@@ -162,34 +162,12 @@ module Pod
                 output_path = sandbox.framework_folder_path_for_target_name(target.name)
                 output_path.mkpath unless output_path.exist?
                 Pod::Prebuild.build(sandbox_path, target, output_path, bitcode_enabled,  Podfile::DSL.custom_build_options,  Podfile::DSL.custom_build_options_simulator)
-
-                # save the resource paths for later installing
-                if target.static_framework? and !target.resource_paths.empty?
-                    framework_path = output_path + target.framework_name
-                    standard_sandbox_path = sandbox.standard_sanbox_path
-
-                    resources = begin
-                        if Pod::VERSION.start_with? "1.5"
-                            target.resource_paths
-                        else
-                            # resource_paths is Hash{String=>Array<String>} on 1.6 and above
-                            # (use AFNetworking to generate a demo data)
-                            # https://github.com/leavez/cocoapods-binary/issues/50
-                            target.resource_paths.values.flatten
-                        end
-                    end
-                    raise "Wrong type: #{resources}" unless resources.kind_of? Array
-
-                    path_objects = resources.map do |path|
-                        object = Prebuild::Passer::ResourcePath.new
-                        object.real_file_path = framework_path + File.basename(path)
-                        object.target_file_path = path.gsub('${PODS_ROOT}', standard_sandbox_path.to_s) if path.start_with? '${PODS_ROOT}'
-                        object.target_file_path = path.gsub("${PODS_CONFIGURATION_BUILD_DIR}", standard_sandbox_path.to_s) if path.start_with? "${PODS_CONFIGURATION_BUILD_DIR}"
-                        object
-                    end
-                    Prebuild::Passer.resources_to_copy_for_static_framework[target.name] = path_objects
-                end
-
+                metadata = PodPrebuild::Metadata.in_dir(output_path)
+                metadata.framework_name = target.framework_name
+                metadata.static_framework = target.static_framework?
+                resource_paths = target.resource_paths
+                metadata.resources = resource_paths.is_a?(Hash) ? resource_paths.values.flatten : resource_paths
+                metadata.save!
             end
             Pod::Prebuild.remove_build_dir(sandbox_path)
 
