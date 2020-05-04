@@ -100,6 +100,9 @@ module Pod
                     next unless metadata.static_framework?
 
                     metadata.resources.each do |path|
+                        # *.bundle will be copied separately by the script `Pods-<Target>-resources.sh`
+                        next if File.extname(path) == ".bundle"
+
                         real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
                         target_file_path = path.sub("${PODS_ROOT}", sandbox.root.to_path)
                         make_link(real_file_path, target_file_path)
