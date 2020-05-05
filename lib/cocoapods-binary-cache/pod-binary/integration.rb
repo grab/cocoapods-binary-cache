@@ -104,7 +104,12 @@ module Pod
                         next if File.extname(path) == ".bundle"
 
                         real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
+                        # https://github.com/grab/cocoapods-binary-cache/issues/7
+                        # When ".xib" files are compiled in a framework, it becomes ".nib" files
+                        # --> We need to correct the path extension
                         target_file_path = path.sub("${PODS_ROOT}", sandbox.root.to_path)
+                        real_file_path = real_file_path.sub_ext(".nib") if real_file_path.extname == ".xib"
+                        target_file_path = target_file_path.sub(".xib", ".nib")
                         make_link(real_file_path, target_file_path)
                     end
                 end
@@ -178,6 +183,31 @@ module Pod
             # prepare
             cache = []
 
+            def tweak_resources_for_xib(spec, platform)
+                # This is a workaround for prebuilt static framework that has `*.xib` files in the resources
+                # (declared by `spec.resources = ...`)
+                # ---------------------------------------------------------------
+                # In the prebuild stage, a XIB file is compiled as a NIB file in the framework.
+                # In the integration stage, this file is added to the script `Pods-<Target>-resources.sh`:
+                #   - If it's a XIB, it's installed to the target bundle by `ibtool`
+                #   - If it's a NIB, it's copied directly to the target bundle
+                # Since the one embedded in the prebuilt framework is a NIB (already compiled)
+                # --> We need to alter the spec so that this file will be copied to the target bundle
+                change_xib_to_nib = ->(path) { path.sub(".xib", ".nib") }
+                update_resources = lambda do |resources|
+                    if resources.is_a?(String)
+                        change_xib_to_nib.call(resources)
+                    elsif resources.is_a?(Array)
+                        resources.map { |item| change_xib_to_nib.call(item) }
+                    end
+                end
+                spec.attributes_hash["resources"] = update_resources.call(spec.attributes_hash["resources"])
+                return if spec.attributes_hash[platform].nil?
+
+                platform_resources = spec.attributes_hash[platform]["resources"]
+                spec.attributes_hash[platform]["resources"] = update_resources.call(platform_resources)
+            end
+
             def add_vendered_framework(spec, platform, added_framework_file_path)
                 if spec.attributes_hash[platform] == nil
                     spec.attributes_hash[platform] = {}
@@ -213,6 +243,7 @@ module Pod
                     framework_file_path = target.framework_name
                     framework_file_path = target.name + "/" + framework_file_path if targets.count > 1
                     add_vendered_framework(spec, target.platform.name.to_s, framework_file_path)
+                    tweak_resources_for_xib(spec, target.platform.name.to_s)
                 end
                 # Clean the source files
                 # we just add the prebuilt framework to specific platform and set no source files 
