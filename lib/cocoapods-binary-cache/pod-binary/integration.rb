@@ -94,22 +94,26 @@ module Pod
                         end
                     end
 
-
                     # symbol link copy resource for static framework
                     metadata = PodPrebuild::Metadata.in_dir(real_file_folder)
                     next unless metadata.static_framework?
 
                     metadata.resources.each do |path|
-                        # *.bundle will be copied separately by the script `Pods-<Target>-resources.sh`
-                        next if File.extname(path) == ".bundle"
-
-                        real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
-                        # https://github.com/grab/cocoapods-binary-cache/issues/7
-                        # When ".xib" files are compiled in a framework, it becomes ".nib" files
-                        # --> We need to correct the path extension
                         target_file_path = path.sub("${PODS_ROOT}", sandbox.root.to_path)
-                        real_file_path = real_file_path.sub_ext(".nib") if real_file_path.extname == ".xib"
-                        target_file_path = target_file_path.sub(".xib", ".nib")
+                                               .sub("${PODS_CONFIGURATION_BUILD_DIR}", sandbox.root.to_path)
+                        real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
+                        case File.extname(path)
+                        when ".xib"
+                            # https://github.com/grab/cocoapods-binary-cache/issues/7
+                            # When ".xib" files are compiled in a framework, it becomes ".nib" files
+                            # --> We need to correct the path extension
+                            real_file_path = real_file_path.sub_ext(".nib")
+                            target_file_path = target_file_path.sub(".xib", ".nib")
+                        when ".bundle"
+                            next if metadata.resource_bundles.include?(File.basename(path))
+
+                            real_file_path = real_file_folder + File.basename(path) unless real_file_path.exist?
+                        end
                         make_link(real_file_path, target_file_path)
                     end
                 end
@@ -183,7 +187,7 @@ module Pod
             # prepare
             cache = []
 
-            def tweak_resources_for_xib(spec, platform)
+            def tweak_resources_for_xib(spec, platforms)
                 # This is a workaround for prebuilt static framework that has `*.xib` files in the resources
                 # (declared by `spec.resources = ...`)
                 # ---------------------------------------------------------------
@@ -202,10 +206,30 @@ module Pod
                     end
                 end
                 spec.attributes_hash["resources"] = update_resources.call(spec.attributes_hash["resources"])
-                return if spec.attributes_hash[platform].nil?
+                platforms.each do |platform|
+                    next if spec.attributes_hash[platform].nil?
 
-                platform_resources = spec.attributes_hash[platform]["resources"]
-                spec.attributes_hash[platform]["resources"] = update_resources.call(platform_resources)
+                    platform_resources = spec.attributes_hash[platform]["resources"]
+                    spec.attributes_hash[platform]["resources"] = update_resources.call(platform_resources)
+                end
+            end
+
+            def tweak_resources_for_resource_bundles(spec, platforms)
+                add_resource_bundles_to_resources = lambda do |attributes|
+                    return if attributes.nil?
+
+                    resource_bundles = attributes["resource_bundles"] || {}
+                    resource_bundle_names = resource_bundles.keys
+                    attributes["resource_bundles"] = nil
+                    attributes["resources"] ||= []
+                    attributes["resources"] = [attributes["resources"]] if attributes["resources"].is_a?(String)
+                    attributes["resources"] += resource_bundle_names.map { |n| n + ".bundle" }
+                end
+
+                add_resource_bundles_to_resources.call(spec.attributes_hash)
+                platforms.each do |platform|
+                    add_resource_bundles_to_resources.call(spec.attributes_hash[platform])
+                end
             end
 
             def add_vendered_framework(spec, platform, added_framework_file_path)
@@ -233,7 +257,6 @@ module Pod
             end)
 
             prebuilt_specs.each do |spec|
-
                 # Use the prebuild framworks as vendered frameworks
                 # get_corresponding_targets
                 targets = Pod.fast_get_targets_for_pod_name(spec.root.name, self.pod_targets, cache)
@@ -243,8 +266,12 @@ module Pod
                     framework_file_path = target.framework_name
                     framework_file_path = target.name + "/" + framework_file_path if targets.count > 1
                     add_vendered_framework(spec, target.platform.name.to_s, framework_file_path)
-                    tweak_resources_for_xib(spec, target.platform.name.to_s)
                 end
+
+                platforms = targets.map { |target| target.platform.name.to_s }
+                tweak_resources_for_xib(spec, platforms)
+                tweak_resources_for_resource_bundles(spec, platforms)
+
                 # Clean the source files
                 # we just add the prebuilt framework to specific platform and set no source files 
                 # for all platform, so it doesn't support the sence that 'a pod perbuild for one

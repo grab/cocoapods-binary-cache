@@ -27,5 +27,13 @@ module PodPrebuild
     def static_framework=(value)
       @data["static_framework"] = value
     end
+
+    def resource_bundles
+      @data["resource_bundles"] || []
+    end
+
+    def resource_bundles=(value)
+      @data["resource_bundles"] = value
+    end
   end
 end
