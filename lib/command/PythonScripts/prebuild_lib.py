@@ -60,19 +60,26 @@ class PrebuildLib:
             ZipUtils.zip_dir(self.generated_path + '/' + dir, self.cache_libs_path + '/' + dir + '.zip')
         FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
 
-    def clean_and_pull(self, git_repo_dir):
+    def clean_and_pull(self, git_repo_dir, branch='master'):
         subprocess.run(['git', '-C', git_repo_dir, 'reset', '--hard'])
         subprocess.run(['git', '-C', git_repo_dir, 'clean', '-df'])
-        subprocess.run(['git', '-C', git_repo_dir, 'checkout', 'master'])
+        subprocess.run(['git', '-C', git_repo_dir, 'checkout', branch])
         subprocess.run(['git', '-C', git_repo_dir, 'pull', '-X', 'theirs'])
 
-    def fetch_cache(self):
-        logger.info(f'Fetch cache to {self.cache_path}')
+    def fetch_cache(self, branch='master'):
+        logger.info(f'Fetch cache to {self.cache_path} (branch: {branch})')
         with step('fetch_prebuild_libs'):
-            if not os.path.exists(self.cache_path):
-                subprocess.run(['git', 'clone', '--depth=1', self.cache_repo, self.cache_path])
+            if os.path.exists(self.cache_path):
+                self.clean_and_pull(self.cache_path, branch=branch)
             else:
-                self.clean_and_pull(self.cache_path)
+                subprocess.run([
+                    'git',
+                    'clone',
+                    '--depth=1',
+                    f'--branch={branch}',
+                    self.cache_repo,
+                    self.cache_path
+                ])
 
     def unzip_cache(self):
         logger.info(f'Unzip cache, from {self.cache_libs_path} to {self.generated_path}')
@@ -84,8 +91,8 @@ class PrebuildLib:
             for zip_path in glob.iglob(os.path.join(self.cache_libs_path, '*.zip')):
                 ZipUtils.unzip(zip_path, self.generated_path)
 
-    def fetch_and_apply_cache(self):
-        self.fetch_cache()
+    def fetch_and_apply_cache(self, branch='master'):
+        self.fetch_cache(branch=branch)
         self.unzip_cache()
 
     def fetch_and_apply_devpod_cache(self):
@@ -113,8 +120,8 @@ class PrebuildLib:
         os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
         os.system('{} push'.format(git_input_path))
 
-    def prebuild_if_needed(self, push=True):
-        self.fetch_and_apply_cache()
+    def prebuild_if_needed(self, push=True, branch=None):
+        self.fetch_and_apply_cache(branch=branch)
         subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
         # Sync with cache directory
 

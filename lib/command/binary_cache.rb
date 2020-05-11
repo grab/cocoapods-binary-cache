@@ -22,8 +22,9 @@ module Pod
 
       def initialize(argv)
         @podspec_name = argv.shift_argument
-        @cmd = argv.option('cmd', nil)
-        @push_vendor_pods = argv.option('push_vendor_pods', nil)
+        @cmd = argv.option("cmd", nil)
+        @cache_branch = argv.option("cache_branch", nil)
+        @push_vendor_pods = argv.option("push_vendor_pods", nil)
         Pod::UI.puts "BinaryCache run: #{@cmd}"
         super
       end
@@ -43,10 +44,11 @@ module Pod
         raise "#{config_file_path} not exist" unless File.exist?(config_file_path)
 
         py_cmd = []
-        py_cmd << 'python3' << "#{__dir__}/PythonScripts/prebuild_lib_cli.py"
+        py_cmd << "python3" << "#{__dir__}/PythonScripts/prebuild_lib_cli.py"
         py_cmd << "--cmd #{@cmd}" << "--config_path #{config_file_path}"
+        py_cmd << "--cache_branch #{@cache_branch}" unless @cache_branch.nil?
         py_cmd << "--push_vendor_pods #{@push_vendor_pods}" unless @push_vendor_pods.nil?
-        system py_cmd.join(' ')
+        system py_cmd.join(" ")
       end
     end
   end

@@ -11,6 +11,7 @@ def main():
   parser = ArgumentParser()
   parser.add_argument('--cmd', dest='cmd', type=str)
   parser.add_argument('--config_path', dest='config_path', type=str)
+  parser.add_argument('--cache_branch', dest='cache_branch', type=str)
   parser.add_argument('--push_vendor_pods', dest='push_vendor_pods', type=lambda x: x == 'true', default=False)
   args = parser.parse_args()
 
@@ -18,7 +19,7 @@ def main():
     config = PrebuildConfig(args.config_path)
     prebuild_lib = PrebuildLib(config)
     if args.cmd == 'fetch':
-      prebuild_lib.fetch_and_apply_cache()
+      prebuild_lib.fetch_and_apply_cache(branch=args.cache_branch or 'master')
     elif args.cmd == 'prebuild':
       prebuild_lib.prebuild_if_needed(push=args.push_vendor_pods)
     elif args.cmd == 'fetch_devpod':
