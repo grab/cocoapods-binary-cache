@@ -39,6 +39,7 @@ def build_for_iosish_platform(sandbox,
   module_name = target.product_module_name
   device_framework_path = "#{build_dir}/#{CONFIGURATION}-#{device}/#{target_name}/#{module_name}.framework"
   simulator_framework_path = "#{build_dir}/#{CONFIGURATION}-#{simulator}/#{target_name}/#{module_name}.framework"
+  simulator_target_products_path = "#{build_dir}/#{CONFIGURATION}-#{simulator}/#{target_name}"
 
   if !Dir.exist?(simulator_framework_path)
     is_succeed, _ = xcodebuild(sandbox, target_label, simulator, deployment_target, other_options + custom_build_options_simulator)
@@ -46,15 +47,12 @@ def build_for_iosish_platform(sandbox,
   else
     puts "Simulator framework already exist at: #{simulator_framework_path}"
   end
-  if !enable_device_build
-    FileUtils.cp_r simulator_framework_path, output_path
 
-    simulator_dsym = "#{simulator_framework_path}.dSYM"
-    if File.exist? simulator_dsym
-      FileUtils.mv simulator_dsym, output_path, :force => true
-    end
+  unless enable_device_build
+    FileUtils.cp_r Dir["#{simulator_target_products_path}/*"], output_path
     return
   end
+
   if !Dir.exist?(device_framework_path)
     is_succeed, _ = xcodebuild(sandbox, target_label, device, deployment_target, other_options + custom_build_options)
     raise "Build device framework failed: #{target_label}" unless is_succeed

@@ -154,20 +154,28 @@ module Pod
 
             Pod::Prebuild.remove_build_dir(sandbox_path)
             targets.each do |target|
-                if !target.should_build?
-                    UI.puts "Prebuilding #{target.label}"
+                unless target.should_build?
+                    Pod::UI.puts "Skip prebuilding #{target.label} because of no source files".yellow
                     next
+                    # TODO (thuyen): Fix an issue in this scenario:
+                    # - Frameworks are shipped as vendor frameworks (-> skipped during prebuild)
+                    # -> The dir structure of this framework in Pods is incorrect.
+                    #    - Expected: Pods/MyFramework/<my_files>
+                    #    - Actual: Pods/MyFramework/MyFramework/<my_files>. Sometimes, Pods/MyFramework is empty :|
+                    # -> Better to detect such targets EARLY and add them to the blacklist (DSL.unbuilt_pods)
                 end
 
                 output_path = sandbox.framework_folder_path_for_target_name(target.name)
                 output_path.mkpath unless output_path.exist?
-                Pod::Prebuild.build(sandbox_path, target, output_path, bitcode_enabled,  Podfile::DSL.custom_build_options,  Podfile::DSL.custom_build_options_simulator)
-                metadata = PodPrebuild::Metadata.in_dir(output_path)
-                metadata.framework_name = target.framework_name
-                metadata.static_framework = target.static_framework?
-                resource_paths = target.resource_paths
-                metadata.resources = resource_paths.is_a?(Hash) ? resource_paths.values.flatten : resource_paths
-                metadata.save!
+                Pod::Prebuild.build(
+                    sandbox_path,
+                    target,
+                    output_path,
+                    bitcode_enabled,
+                    Podfile::DSL.custom_build_options,
+                    Podfile::DSL.custom_build_options_simulator
+                )
+                collect_metadata(target, output_path)
             end
             Pod::Prebuild.remove_build_dir(sandbox_path)
 
@@ -245,6 +253,18 @@ module Pod
             prebuild_output.clean_delta_file
         end
 
+        def collect_metadata(target, output_path)
+            metadata = PodPrebuild::Metadata.in_dir(output_path)
+            metadata.framework_name = target.framework_name
+            metadata.static_framework = target.static_framework?
+            resource_paths = target.resource_paths
+            metadata.resources = resource_paths.is_a?(Hash) ? resource_paths.values.flatten : resource_paths
+            metadata.resource_bundles = target.file_accessors
+                                              .map { |f| f.resource_bundles.keys }
+                                              .flatten
+                                              .map { |name| "#{name}.bundle" }
+            metadata.save!
+        end
 
         # patch the post install hook
         old_method2 = instance_method(:run_plugins_post_install_hooks)
