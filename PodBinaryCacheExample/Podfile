@@ -12,7 +12,7 @@ if is_pod_binary_cache_enabled
   # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", :device => "ARCHS=arm64 BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
   set_is_prebuild_job(true)
   enable_devpod_prebuild
-  set_unbuilt_dev_pods(['ConfigSDK'])
+  # set_unbuilt_dev_pods(['ConfigSDK']) // To test ABI breaking (crash, call wrong function) when there're code change in ConfigSDK and don't rebuild it's clients (ConfigService)
 end
 
 def binary_pod(name, *args)

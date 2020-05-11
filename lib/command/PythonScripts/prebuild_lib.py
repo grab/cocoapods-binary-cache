@@ -25,7 +25,7 @@ class PrebuildLib:
         self.cache_repo = config.cache_repo
         self.cache_path = config.cache_path
         self.prebuild_path = config.prebuild_path
-        self.generated_dir_name = config.generated_dir_name
+        # self.generated_dir_name = config.generated_dir_name
         self.delta_path = config.delta_path
         self.manifest_file = config.manifest_file
         self.devpod_cache_repo = config.devpod_cache_repo
@@ -115,14 +115,15 @@ class PrebuildLib:
         return False
 
     def push_all_to_git(self, git_dir):
-        git_input_path = 'git -C ' + self.cache_path
-        os.system('{} add .'.format(git_input_path))
-        os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
-        os.system('{} push'.format(git_input_path))
+        with step('push to cache from dir: {}'.format(git_dir)):
+            git_input_path = 'git -C ' + git_dir
+            os.system('{} add .'.format(git_input_path))
+            os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
+            os.system('{} push'.format(git_input_path))
 
     def prebuild_if_needed(self, push=True, branch='master'):
         self.fetch_and_apply_cache(branch=branch)
-        subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
+        self.pod_install_update_ifneeded()
         # Sync with cache directory
 
         if not os.path.isfile(self.delta_path):
@@ -162,4 +163,17 @@ class PrebuildLib:
     def prebuild_devpod(self):
         self.fetch_and_apply_cache()
         self.fetch_and_apply_devpod_cache()
-        subprocess.run(['bundle', 'exec', 'fastlane', 'run', 'cocoapods', 'try_repo_update_on_error:true'], check=True)
+        self.pod_install_update_ifneeded()
+
+    # If you use other things for file caching such as S3 or FTP server =>
+    # use prebuild_devpod function and do the upload/download separately
+    def prebuild_devpod_and_push(self):
+        self.prebuild_devpod()
+        ZipUtils.zip_subdirs(self.devpod_prebuild_output, self.devpod_cache_libs_path)
+        self.push_all_to_git(self.devpod_cache_libs_path)
+
+    def pod_install_update_ifneeded(self):
+        try:
+            subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
+        except subprocess.CalledProcessError:
+            subprocess.run(['bundle', 'exec', 'pod', 'install', '--repo-update'], check=True)

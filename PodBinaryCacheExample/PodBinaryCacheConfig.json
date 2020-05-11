@@ -6,7 +6,7 @@
   "generated_dir_name": "GeneratedFrameworks/",
   "delta_path": "Pods/_Prebuild_delta/changes.txt",
   "manifest_file": "Manifest.lock",
-  "devpod_cache_repo": "git@gitlab.myteksi.net:mobile/dax-ios/dax-ios-dev-pods-cache.git",
-  "devpod_cache_path": "~/Library/Caches/CocoaPods/dax-ios-dev-pods-cache/",
+  "devpod_cache_repo": "https://github.com/bigbangvn/demo-pod-binary-cache-devpod.git",
+  "devpod_cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-devpods/",
   "devpod_prebuild_output": "Pods/_Prebuild_delta/devpod_prebuild_output/"
 }

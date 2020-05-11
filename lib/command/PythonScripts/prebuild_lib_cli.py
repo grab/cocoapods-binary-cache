@@ -26,6 +26,8 @@ def main():
       prebuild_lib.fetch_and_apply_devpod_cache()
     elif args.cmd == 'prebuild_devpod':
       prebuild_lib.prebuild_devpod()
+    elif args.cmd == 'prebuild_devpod_and_push':
+      prebuild_lib.prebuild_devpod_and_push()
     else:
       logger.info('Wrong input, please select --cmd=fetch/prebuild/fetch_devpod')
   except Exception as e:
