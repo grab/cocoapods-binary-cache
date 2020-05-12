@@ -57,7 +57,7 @@ module Pod
         end
 
         def cache_miss
-            return false if local_manifest == nil
+            return Set.new if local_manifest.nil?
 
             changes = prebuild_pods_changes
             added = changes.added

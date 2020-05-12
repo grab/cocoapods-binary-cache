@@ -48,7 +48,8 @@ module Pod
         py_cmd << "--cmd #{@cmd}" << "--config_path #{config_file_path}"
         py_cmd << "--cache_branch #{@cache_branch}" unless @cache_branch.nil?
         py_cmd << "--push_vendor_pods #{@push_vendor_pods}" unless @push_vendor_pods.nil?
-        system py_cmd.join(" ")
+        cmd = py_cmd.join(" ")
+        system(cmd) || (raise "Fail to run #{cmd}")
       end
     end
   end
