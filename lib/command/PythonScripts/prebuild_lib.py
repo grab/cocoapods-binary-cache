@@ -120,7 +120,7 @@ class PrebuildLib:
         os.system('{} commit -m "Prebuild pod libs"'.format(git_input_path))
         os.system('{} push'.format(git_input_path))
 
-    def prebuild_if_needed(self, push=True, branch=None):
+    def prebuild_if_needed(self, push=True, branch='master'):
         self.fetch_and_apply_cache(branch=branch)
         subprocess.run(['bundle', 'exec', 'pod', 'install'], check=True)
         # Sync with cache directory

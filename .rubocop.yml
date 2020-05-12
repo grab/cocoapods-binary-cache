@@ -2,6 +2,11 @@ inherit_from:
   - ~/rubocop/default.yml # Embedded inside Docker
 
 AllCops:
+  Include:
+    - 'lib/**/*Gemfile'
+    - 'lib/**/*.rb'
+    - 'spec/**/*'
   Exclude:
-    - 'PodBinaryCacheExample/**/*'
     - 'lib/cocoapods-binary-cache/pod-rome/**/*'
+    - 'integration_tests/**/*'
+    - 'PodBinaryCacheExample/**/*'

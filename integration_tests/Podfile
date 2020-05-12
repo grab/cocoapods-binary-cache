@@ -1,0 +1,70 @@
+platform :ios, '12.0'
+use_frameworks!
+
+source 'https://cdn.cocoapods.org/'
+
+def binary_pod(name, *args, **kwargs)
+  kwargs_cloned = kwargs.clone
+  if kwargs_cloned[:binary].nil?
+    kwargs_cloned[:binary] = true
+  end
+  pod name, *args, **kwargs_cloned
+end
+
+def enabled_prebuilt_vendor_pods
+  ENV['ENABLE_PREBUILT_POD_LIBS'] == 'true'
+end
+
+def enabled_prebuilt_pods
+  enabled_prebuilt_vendor_pods
+end
+
+if enabled_prebuilt_pods
+  plugin 'cocoapods-binary-cache'
+
+  unbuilt_vendor_pods = [
+    'GoogleMaps',
+    'GoogleSignIn'
+  ]
+
+  set_is_prebuild_job(ENV['PREBUILD_VENDOR_PODS_JOB'] == 'true')
+  prebuild_all_vendor_pods! if ENV['FORCE_PREBUILD_ALL_VENDOR_PODS'] == 'true'
+  set_unbuilt_vendor_pods(unbuilt_vendor_pods)
+
+end
+
+target 'PrebuiltPodIntegration' do
+  # Has `*.bundle` outside the framework
+  binary_pod 'SwiftDate', '6.1.0'
+  binary_pod 'BKMoneyKit', '0.0.12'
+  binary_pod 'IQKeyboardManagerSwift', '6.1.1'
+  binary_pod 'GoogleSignIn', '4.2.0'
+
+  # Has `*.bundle` inside the framework
+  binary_pod 'GoogleMaps', '2.7.0'
+
+  target 'PrebuiltPodIntegrationTests' do
+    inherit! :search_paths
+
+  end
+end
+
+pre_install do |installer|
+  must_be_dynamic_frameworks = []
+
+  def make_static(pod)
+    pod.instance_variable_set(:@build_type, ::Pod::Target::BuildType.new(linkage: :static, packaging: :framework))
+  end
+
+  def make_dynamic(pod)
+    pod.instance_variable_set(:@build_type, ::Pod::Target::BuildType.new(linkage: :dynamic, packaging: :framework))
+  end
+
+  installer.pod_targets.each do |pod|
+    if must_be_dynamic_frameworks.include?(pod.name)
+      make_dynamic(pod)
+    else
+      make_static(pod)
+    end
+  end
+end
