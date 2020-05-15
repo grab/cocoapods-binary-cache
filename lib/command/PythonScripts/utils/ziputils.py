@@ -14,25 +14,34 @@ class ZipUtils:
     with ZipFile(in_file, 'r') as zip:
         zip.extractall(out_path)
 
-  # Note that it will ignore empty folders
-  @staticmethod
-  def __zip_dir(path, ziphandler):
-    dir_name = os.path.dirname(path)
-    dir_name_len = len(dir_name)
-    for root, _, files in os.walk(path):
-        out_root = root
-        if dir_name_len > 0 and out_root.startswith(dir_name):
-            out_root = out_root[dir_name_len:]
-        for file in files:
-            name = os.path.join(root, file)
-            out_name = os.path.join(out_root, file)
-            ziphandler.write(name, out_name)
-
   @staticmethod
   def zip_dir(in_dir, out_file):
-    zFile = ZipFile(out_file, 'w', zipfile.ZIP_DEFLATED)
-    ZipUtils.__zip_dir(in_dir, zFile)
-    zFile.close()
+    logger.info(f'Zip dir: {in_dir} -> {out_file}')
+    root_len = len(os.path.dirname(in_dir))
+    with zipfile.ZipFile(out_file, 'w', compression=zipfile.ZIP_DEFLATED) as zip_out:
+      def _zip_dir(dir):
+        contents = os.listdir(dir)
+        # http://www.velocityreviews.com/forums/t318840-add-empty-directory-using-zipfile.html
+        if not contents:
+          archive_root = dir[root_len:].lstrip('/')
+          zip_info = zipfile.ZipInfo(archive_root + '/')
+          zip_out.writestr(zip_info, '')
+
+        for item in contents:
+          full_path = os.path.join(dir, item)
+          if os.path.isdir(full_path) and not os.path.islink(full_path):
+            _zip_dir(full_path)
+          else:
+            archive_root = full_path[root_len:].lstrip('/')
+            if not os.path.islink(full_path):
+              zip_out.write(full_path, archive_root, zipfile.ZIP_DEFLATED)
+            else:
+              # http://www.mail-archive.com/python-list@python.org/msg34223.html
+              zip_info = zipfile.ZipInfo(archive_root)
+              zip_info.external_attr = 0xA1ED0000  # Symlink magic number
+              zip_out.writestr(zip_info, os.readlink(full_path))
+
+      _zip_dir(in_dir)
 
   @staticmethod
   def zip_subdirs(from_dir, to_dir):
