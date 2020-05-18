@@ -1,9 +1,9 @@
 # Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
-from zipfile import ZipFile
-import zipfile
 import os
+import subprocess
+import zipfile
 from utils.fileutils import FileUtils
 from utils.logger import logger
 
@@ -11,8 +11,12 @@ from utils.logger import logger
 class ZipUtils:
   @staticmethod
   def unzip(in_file, out_path=None):
-    with ZipFile(in_file, 'r') as zip:
-        zip.extractall(out_path)
+    # `zipfile.ZipFile` does not preserve symlinks when unzipping the file
+    # --> Use the `unzip` command instead
+    args = ['unzip', in_file]
+    if out_path:
+      args += ['-d', out_path]
+    subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
 
   @staticmethod
   def zip_dir(in_dir, out_file):
