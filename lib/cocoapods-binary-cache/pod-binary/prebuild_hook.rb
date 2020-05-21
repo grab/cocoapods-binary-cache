@@ -1,25 +1,24 @@
-require_relative 'helper/podfile_options'
-require_relative 'helper/passer'
-require_relative '../helper/benchmark_show'
-require_relative '../prebuild_cache'
-require_relative '../scheme_editor'
-require_relative '../dependencies_graph/dependencies_graph'
+require_relative "helper/podfile_options"
+require_relative "helper/passer"
+require_relative "../helper/benchmark_show"
+require_relative "../prebuild_cache"
+require_relative "../scheme_editor"
+require_relative "../dependencies_graph/dependencies_graph"
 
 SUPPORTED_LIBRARY_EVOLUTION = false
 
 Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer_context|
   require_relative "helper/feature_switches"
-  if Pod.is_prebuild_stage
-    next
-  end
+  next if Pod.is_prebuild_stage
 
   # [Check Environment]
   # check user_framework is on
   podfile = installer_context.podfile
   podfile.target_definition_list.each do |target_definition|
     next if target_definition.prebuild_framework_pod_names.empty?
-    if not target_definition.uses_frameworks?
-      STDERR.puts "[!] Cocoapods-binary requires `use_frameworks!`".red
+
+    unless target_definition.uses_frameworks?
+      warn "[!] Cocoapods-binary requires `use_frameworks!`".red
       exit
     end
   end
@@ -77,9 +76,7 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
 
   # TODO (thuyen): Avoid global mutation
   Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
-  if !Pod::Podfile::DSL.is_prebuild_job
-    Pod::Podfile::DSL.add_unbuilt_pods(cachemiss_vendor_pods)
-  end
+  Pod::Podfile::DSL.add_unbuilt_pods(cachemiss_vendor_pods) unless Pod::Podfile::DSL.is_prebuild_job
 
   # Verify Dev pod cache
   if Pod::Podfile::DSL.enable_prebuild_dev_pod
@@ -88,27 +85,31 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
       Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic = cachehit_pods_dic
       Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic = cachemiss_pods_dic
     }
-    if !Pod::Podfile::DSL.is_prebuild_job
+    unless Pod::Podfile::DSL.is_prebuild_job
       Pod::Podfile::DSL.add_unbuilt_pods(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys)
     end
   end
 
-  if !SUPPORTED_LIBRARY_EVOLUTION # Will remove after migrating all libraries to Swift 5 + Xcode 11 + support LIBRARY EVOLUTION
+  # Will remove after migrating all libraries to Swift 5 + Xcode 11 + support LIBRARY EVOLUTION
+  unless SUPPORTED_LIBRARY_EVOLUTION
     dependencies_graph = DependenciesGraph.new(lockfile)
-    vendor_pods_clients, devpod_clients_of_vendorpods = dependencies_graph.get_clients(cachemiss_vendor_pods.to_a).partition { |name| cachehit_vendor_pods.include?(name) }
-    dev_pods_clients = dependencies_graph.get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) + devpod_clients_of_vendorpods
+    vendor_pods_clients, devpod_clients_of_vendorpods = dependencies_graph
+      .get_clients(cachemiss_vendor_pods.to_a)
+      .partition { |name| cachehit_vendor_pods.include?(name) }
+    dev_pods_clients = dependencies_graph.get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
+      + devpod_clients_of_vendorpods
     Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
     Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys} \n=> clients #{dev_pods_clients.to_a}"
 
     Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
     dev_pods_clients.each do |name|
       value = Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic[name]
-      next if !value
+      next unless value
 
       Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic.delete(name)
       Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic[name] = value
     end
-    if !Pod::Podfile::DSL.is_prebuild_job
+    unless Pod::Podfile::DSL.is_prebuild_job
       Pod::Podfile::DSL.add_unbuilt_pods(vendor_pods_clients)
       Pod::Podfile::DSL.add_unbuilt_pods(dev_pods_clients)
     end
@@ -163,11 +164,10 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
 end
 
 Pod::HooksManager.register("cocoapods-binary-cache", :post_install) do |installer_context|
-  next unless Pod::Podfile::DSL.enable_prebuild_dev_pod and installer_context.sandbox.instance_of?(Pod::PrebuildSandbox)
+  next unless Pod::Podfile::DSL.enable_prebuild_dev_pod && installer_context.sandbox.instance_of?(Pod::PrebuildSandbox)
 
   # Modify pods scheme to support code coverage
-  # If we don't prebuild dev pod -> no need to care about this in Pod project because we setup in the main project. Eg. DriverCI scheme
-  if Pod.is_prebuild_stage
-    SchemeEditor.edit_to_support_code_coverage(installer_context.sandbox)
-  end
+  # If we don't prebuild dev pod -> no need to care about this in Pod project
+  # because we setup in the main project (ex. DriverCI scheme)
+  SchemeEditor.edit_to_support_code_coverage(installer_context.sandbox) if Pod.is_prebuild_stage
 end
