@@ -39,10 +39,10 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   repo_update = nil
 
   include ObjectSpace
-  ObjectSpace.each_object(Pod::Installer) { |installer|
+  ObjectSpace.each_object(Pod::Installer) do |installer|
     update = installer.update
     repo_update = installer.repo_update
-  }
+  end
 
   # control features
   Pod::UI.puts "control features"
@@ -69,7 +69,12 @@ Pod::HooksManager.register("cocoapods-binary-cache", :pre_install) do |installer
   manifest_path = prebuild_sandbox.root + "Manifest.lock"
   prebuilt_lockfile = Pod::Lockfile.from_file Pathname.new(manifest_path)
 
-  cache_validation_result = PodPrebuild::CacheValidator.new(lockfile, prebuilt_lockfile).validate
+  cache_validation_result = PodPrebuild::CacheValidator.new(
+    pod_lockfile: lockfile,
+    prebuilt_lockfile: prebuilt_lockfile,
+    validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
+    generated_framework_path: prebuild_sandbox.generate_framework_path
+  ).validate
   cache_validation_result.print_summary
   cachemiss_vendor_pods = cache_validation_result.missed
   cachehit_vendor_pods = cache_validation_result.hit

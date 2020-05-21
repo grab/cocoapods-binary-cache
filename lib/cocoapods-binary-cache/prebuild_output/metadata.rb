@@ -35,5 +35,13 @@ module PodPrebuild
     def resource_bundles=(value)
       @data["resource_bundles"] = value
     end
+
+    def build_settings
+      @data["build_settings"] || {}
+    end
+
+    def build_settings=(value)
+      @data["build_settings"] = value
+    end
   end
 end
