@@ -80,6 +80,22 @@ module Pod
         PrebuildConfig.CONFIGURATION = config # It's Debug by default
       end
 
+      # A proc to validate the provided build settings (per target) with the build settings of the prebuilt frameworks
+      # For example, in Podfile:
+      # -----------------------------------------------
+      #   validate_prebuilt_settings do |target|
+      #     settings = {}
+      #     settings["MACH_O_TYPE"] == "staticlib"
+      #     settings["SWIFT_VERSION"] == swift_version_of(target)
+      #     settings
+      #   end
+      # -----------------------------------------------
+      class_attr_accessor :validate_prebuilt_settings
+      self.validate_prebuilt_settings = nil
+      def validate_prebuilt_settings(&proc)
+        DSL.validate_prebuilt_settings = proc
+      end
+
       private
 
       def self.add_unbuilt_pods(list)

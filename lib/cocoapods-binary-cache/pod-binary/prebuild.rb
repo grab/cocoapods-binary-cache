@@ -251,6 +251,11 @@ module Pod
         .map { |f| f.resource_bundles.keys }
         .flatten
         .map { |name| "#{name}.bundle" }
+      metadata.build_settings = pods_project.targets
+        .detect { |native_target| native_target.name == target.name }
+        .build_configurations
+        .detect { |config| config.name == PrebuildConfig.CONFIGURATION }
+        .build_settings
       metadata.save!
     end
 
