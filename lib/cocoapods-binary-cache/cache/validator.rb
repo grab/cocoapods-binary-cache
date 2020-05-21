@@ -52,7 +52,9 @@ module PodPrebuild
       prebuilt_build_settings = read_prebuilt_build_settings(name)
       validate_prebuilt_settings&.(name)&.each do |key, value|
         prebuilt_value = prebuilt_build_settings[key]
-        settings_diff[key] = { :current => value, :prebuilt => prebuilt_value } unless value == prebuilt_value
+        unless prebuilt_value.nil? || value == prebuilt_value
+          settings_diff[key] = { :current => value, :prebuilt => prebuilt_value }
+        end
       end
       settings_diff
     end
