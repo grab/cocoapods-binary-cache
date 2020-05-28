@@ -6,7 +6,7 @@ require_relative "helper/target_checker"
 
 # patch prebuild ability
 module Pod
-  class Installer
+  class PrebuildInstaller < Installer
     private
 
     def local_manifest
