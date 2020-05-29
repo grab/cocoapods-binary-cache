@@ -1,4 +1,5 @@
 require "cocoapods-core"
+require "cocoapods"
 require "cocoapods-binary-cache"
 require "cocoapods_plugin"
 
