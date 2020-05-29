@@ -23,6 +23,7 @@ module PodPrebuild
       install!
       reset_environment
       log_section "🤖  Resume pod installation"
+      require_relative "../pod-binary/integration"
     end
 
     private
