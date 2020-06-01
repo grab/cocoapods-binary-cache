@@ -2,6 +2,9 @@
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
 require_relative "cache/validation_result"
+require_relative "cache/validator_base"
+require_relative "cache/validator_non_dev_pods"
+require_relative "cache/validator_dev_pods"
 require_relative "cache/validator"
 require_relative "dependencies_graph/dependencies_graph"
 require_relative "helper/benchmark_show"
