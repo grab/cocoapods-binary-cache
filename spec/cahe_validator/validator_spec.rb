@@ -1,4 +1,4 @@
-describe "PodCacheValidator" do
+describe "PodPrebuild::CacheValidator" do
   describe "verify prebuilt vendor pods" do
     let(:pods) do
       {
@@ -7,6 +7,7 @@ describe "PodCacheValidator" do
         "C" => { :version => "0.0.5" }
       }
     end
+    let(:podfile) { nil }
     let(:pod_lockfile) { gen_lockfile(pods: pods) }
     let(:prebuilt_lockfile) { gen_lockfile(pods: pods) }
     let(:validate_prebuilt_settings) { nil }
@@ -23,6 +24,7 @@ describe "PodCacheValidator" do
       allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(prebuilt_settings)
 
       validation_result = PodPrebuild::CacheValidator.new(
+        podfile: podfile,
         pod_lockfile: pod_lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: validate_prebuilt_settings,
@@ -76,6 +78,21 @@ describe "PodCacheValidator" do
       it "returns incompatible cache as missed" do
         expect(@missed).to eq(Set["A", "B"])
         expect(@hit).to eq(pods.keys.to_set - Set["A", "B"])
+      end
+    end
+
+    context "no Podfile.lock" do
+      let(:podfile) do
+        Pod::Podfile.new do
+          source "https://cdn.cocoapods.org/"
+          pod "A", "0.0.5"
+          pod "B", "0.0.5"
+        end
+      end
+      let(:pod_lockfile) { nil }
+      it "checks against pods in Podfile" do
+        expect(@missed).to eq(Set["A", "B"])
+        expect(@hit).to be_empty
       end
     end
   end
