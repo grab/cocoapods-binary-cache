@@ -3,12 +3,14 @@ use_frameworks!
 
 source 'https://cdn.cocoapods.org/'
 
+$binary_pods = Set.new
+
 def binary_pod(name, *args, **kwargs)
   kwargs_cloned = kwargs.clone
-  if kwargs_cloned[:binary].nil?
-    kwargs_cloned[:binary] = true
-  end
+  kwargs_cloned[:binary] = enabled_prebuilt_pods if kwargs_cloned[:binary].nil?
   pod name, *args, **kwargs_cloned
+
+  $binary_pods << name if kwargs_cloned[:binary]
 end
 
 def enabled_prebuilt_vendor_pods
@@ -19,13 +21,13 @@ def enabled_prebuilt_pods
   enabled_prebuilt_vendor_pods
 end
 
+unbuilt_vendor_pods = [
+  'GoogleMaps',
+  'GoogleSignIn'
+]
+
 if enabled_prebuilt_pods
   plugin 'cocoapods-binary-cache'
-
-  unbuilt_vendor_pods = [
-    'GoogleMaps',
-    'GoogleSignIn'
-  ]
 
   set_is_prebuild_job(ENV['PREBUILD_VENDOR_PODS_JOB'] == 'true')
   prebuild_all_vendor_pods! if ENV['FORCE_PREBUILD_ALL_VENDOR_PODS'] == 'true'
@@ -67,4 +69,9 @@ pre_install do |installer|
       make_static(pod)
     end
   end
+end
+
+post_install do |installer|
+  FileUtils.mkdir_p(".stats")
+  File.open(".stats/prebuilt_binary_pods.txt", "w") { |f| f.puts(($binary_pods - unbuilt_vendor_pods).to_a) }
 end

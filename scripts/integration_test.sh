@@ -18,12 +18,7 @@ xcodebuild_test() {
   test
 }
 
-run_test() {
-  cd "${INTEGRATION_TESTS_DIR}"
-  rm -rf Pods
-  bundle exec pod binary-cache --cmd=fetch
-  bundle exec pod install || bundle exec pod install --repo-update
-
+check_xcodebuild_test() {
   if bundle exec xcpretty --version &> /dev/null; then
     xcodebuild_test | bundle exec xcpretty
   elif which xcpretty &> /dev/null; then
@@ -31,6 +26,30 @@ run_test() {
   else
     xcodebuild_test
   fi
+}
+
+check_prebuilt_integration() {
+  local should_fail=false
+  for pod in $(cat ".stats/prebuilt_binary_pods.txt"); do
+    local framework_dir="Pods/${pod}/${pod}.framework"
+    if [[ ! -f "${framework_dir}/${pod}" ]]; then
+      should_fail=true
+      echo "🚩 Prebuilt framework ${pod} was not integrated. Expect to have: ${framework_dir}"
+    fi
+  done
+  if [[ ${should_fail} == "true" ]]; then
+    exit 1
+  fi
+}
+
+run_test() {
+  cd "${INTEGRATION_TESTS_DIR}"
+  rm -rf Pods
+  bundle exec pod binary-cache --cmd=fetch
+  bundle exec pod install || bundle exec pod install --repo-update
+
+  check_prebuilt_integration
+  check_xcodebuild_test
 }
 
 handle_error() {

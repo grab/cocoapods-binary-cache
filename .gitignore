@@ -11,3 +11,5 @@ xcuserdata/
 Pods/
 
 .bundle/
+
+.stats/
