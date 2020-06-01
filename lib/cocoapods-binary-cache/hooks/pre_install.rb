@@ -2,13 +2,14 @@ module PodPrebuild
   class PreInstallHook
     include ObjectSpace
 
-    attr_reader :installer_context, :podfile, :prebuild_sandbox
+    attr_reader :installer_context, :podfile, :prebuild_sandbox, :cache_validation
 
     def initialize(installer_context)
       @installer_context = installer_context
       @podfile = installer_context.podfile
       @pod_install_options = {}
       @prebuild_sandbox = nil
+      @cache_validation = nil
     end
 
     def run
@@ -75,15 +76,16 @@ module PodPrebuild
 
     def validate_cache
       prebuilt_lockfile = Pod::Lockfile.from_file(prebuild_sandbox.root + "Manifest.lock")
-      cache_validation_result = PodPrebuild::CacheValidator.new(
+      @cache_validation = PodPrebuild::CacheValidator.new(
+        podfile: Pod::Podfile.from_ruby(podfile.defined_in_file),
         pod_lockfile: installer_context.lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path
       ).validate
-      cache_validation_result.print_summary
-      cachemiss_vendor_pods = cache_validation_result.missed
-      cachehit_vendor_pods = cache_validation_result.hit
+      cache_validation.print_summary
+      cachemiss_vendor_pods = cache_validation.missed
+      cachehit_vendor_pods = cache_validation.hit
 
       # TODO (thuyen): Avoid global mutation
       Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
@@ -106,13 +108,15 @@ module PodPrebuild
 
       # Will remove after migrating all libraries to Swift 5 + Xcode 11 + support LIBRARY EVOLUTION
       return if library_evolution_supported?
+      return if installer_context.lockfile.nil?
 
       dependencies_graph = DependenciesGraph.new(installer_context.lockfile)
       vendor_pods_clients, devpod_clients_of_vendorpods = dependencies_graph
         .get_clients(cachemiss_vendor_pods.to_a)
         .partition { |name| cachehit_vendor_pods.include?(name) }
-      dev_pods_clients = dependencies_graph.get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
-        + devpod_clients_of_vendorpods
+      dev_pods_clients = dependencies_graph
+        .get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
+          + devpod_clients_of_vendorpods
       Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
       Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys} \n=> clients #{dev_pods_clients.to_a}"
 
@@ -136,9 +140,10 @@ module PodPrebuild
 
     def install!
       binary_installer = Pod::PrebuildInstaller.new(
-        prebuild_sandbox,
-        Pod::Podfile.from_ruby(podfile.defined_in_file),
-        installer_context.lockfile
+        sandbox: prebuild_sandbox,
+        podfile: Pod::Podfile.from_ruby(podfile.defined_in_file),
+        lockfile: installer_context.lockfile,
+        cache_validation: cache_validation
       )
 
       binary_installer.clean_delta_file
@@ -149,23 +154,19 @@ module PodPrebuild
         binary_installer.install!
       end
 
-      # Currently, `binary_installer.cache_miss` depends on the output of `Pod::Podfile::DSL.unbuilt_pods`
-      # -> indirectly depends on:
-      #   - `PodCacheValidator.verify_prebuilt_vendor_pods`
-      #   - `PodCacheValidator.verify_devpod_checksum`
-      # TODO (thuyen): Simplify this logic
-      cache_miss = binary_installer.cache_miss
-      Pod::Podfile::DSL.add_unbuilt_pods(cache_miss) unless Pod::Podfile::DSL.is_prebuild_job
+      # TODO (Vince): Do not mutate Pod::Podfile::DSL as it's reloaded
+      # when creating an installer (Pod::Installer)
+      Pod::Podfile::DSL.add_unbuilt_pods(cache_validation.missed) unless Pod::Podfile::DSL.is_prebuild_job
 
       if Pod::Podfile::DSL.prebuild_all_vendor_pods
         Pod::UI.puts "Prebuild all vendor pods"
         installer_exec.call
-      elsif !@pod_install_options[:update] && cache_miss.empty?
+      elsif !@pod_install_options[:update] && cache_validation.missed.empty?
         # If not in prebuild job, we never rebuild and just use cache
         Pod::UI.puts "Cache hit"
         binary_installer.install_when_cache_hit!
       else
-        Pod::UI.puts "Cache miss -> need to update"
+        Pod::UI.puts "Cache miss -> need to update: #{cache_validation.missed.to_a}"
         installer_exec.call
       end
     end

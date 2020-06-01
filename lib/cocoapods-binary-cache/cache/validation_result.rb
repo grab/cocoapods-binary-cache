@@ -1,18 +1,30 @@
 module PodPrebuild
   class CacheValidationResult
-    attr_reader :hit
-    def initialize(missed, hit)
-      @missed = missed
+    attr_reader :hit, :missed_with_reasons
+
+    def initialize(missed_with_reasons, hit)
+      @missed_with_reasons = missed_with_reasons
       @hit = hit
     end
 
     def missed
-      @missed.keys.to_set
+      @missed_with_reasons.keys.to_set
+    end
+
+    def hit?(name)
+      @hit.include(name)
+    end
+
+    def merge(other)
+      PodPrebuild::CacheValidationResult.new(
+        @missed_with_reasons.merge(other.missed_with_reasons),
+        @hit + other.hit
+      )
     end
 
     def print_summary
       Pod::UI.puts "Cache validation: hit #{@hit.to_a}"
-      @missed.each do |name, reason|
+      @missed_with_reasons.each do |name, reason|
         Pod::UI.puts "Cache validation: missed #{name}. Reason: #{reason}".yellow
       end
     end

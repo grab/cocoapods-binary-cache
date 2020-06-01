@@ -7,6 +7,11 @@ require_relative "helper/target_checker"
 # patch prebuild ability
 module Pod
   class PrebuildInstaller < Installer
+    def initialize(options)
+      super(options[:sandbox], options[:podfile], options[:lockfile])
+      @cache_validation = options[:cache_validation]
+    end
+
     private
 
     def local_manifest
@@ -37,8 +42,7 @@ module Pod
     end
 
     def cache_hit?(name)
-      Prebuild::CacheInfo.cache_hit_vendor_pods.include?(name) ||
-        Prebuild::CacheInfo.cache_hit_dev_pods_dic.include?(name)
+      @cache_validation.hit?(name)
     end
 
     def should_not_prebuild_vendor_pod(name)
@@ -52,31 +56,6 @@ module Pod
 
     def prebuild_output
       @prebuild_output ||= PodPrebuild::Output.new(sandbox)
-    end
-
-    def cache_miss
-      return Set.new if local_manifest.nil?
-
-      changes = prebuild_pods_changes
-      added = changes.added
-      changed = changes.changed
-      unchanged = changes.unchanged
-      deleted = changes.deleted
-
-      exsited_framework_pod_names = sandbox.exsited_framework_pod_names
-      missing = unchanged.reject { |pod_name| exsited_framework_pod_names.include?(pod_name) }
-
-      UI.puts "Added frameworks: #{added.to_a}"
-      UI.puts "Changed frameworks: #{changed.to_a}"
-      UI.puts "Deleted frameworks: #{deleted.to_a}"
-      UI.puts "Missing frameworks: #{missing.to_a}"
-      needed = (added + changed + missing)
-      if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
-        needed += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
-      end
-      needed = needed.reject { |name| blacklisted?(name) || cache_hit?(name) }
-      UI.puts "Need to rebuild: #{needed.count} #{needed}"
-      needed
     end
 
     # The install method when have completed cache
