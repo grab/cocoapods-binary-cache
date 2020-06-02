@@ -1,4 +1,3 @@
-require_relative "helper/feature_switches"
 require_relative "helper/passer"
 require_relative "helper/podfile_options"
 require_relative "helper/prebuild_sandbox"
