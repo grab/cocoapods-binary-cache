@@ -13,6 +13,7 @@ module PodPrebuild
     end
 
     def run
+      require_relative "../pod-binary/helper/feature_switches"
       return if Pod.is_prebuild_stage
 
       log_section "🚀  Prebuild frameworks"
