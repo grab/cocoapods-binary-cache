@@ -21,7 +21,7 @@ check_pod_install_when_prebuilt_disabled() {
   export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
   rm -rf Pods
-  bundle exec pod install
+  bundle exec pod install || bundle exec pod install --repo-update
 }
 
 check_pod_install_when_prebuilt_enabled() {
