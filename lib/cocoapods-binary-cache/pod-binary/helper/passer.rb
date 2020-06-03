@@ -26,11 +26,18 @@ module Pod
       class_attr_accessor :cache_hit_vendor_pods
       self.cache_hit_vendor_pods = Set[]
 
+      class_attr_accessor :cache_miss_vendor_pods
+      self.cache_miss_vendor_pods = Set[]
+
       class_attr_accessor :cache_hit_dev_pods_dic
       self.cache_hit_dev_pods_dic = Hash[]
 
       class_attr_accessor :cache_miss_dev_pods_dic
       self.cache_miss_dev_pods_dic = Hash[]
+
+      def self.is_cache_miss_pod?(name)
+        cache_miss_vendor_pods.include?(name) || cache_miss_dev_pods_dic.include?(name)
+      end
     end
   end
 end

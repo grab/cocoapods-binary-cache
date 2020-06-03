@@ -99,10 +99,6 @@ module Pod
 
       private
 
-      def self.add_unbuilt_pods(list)
-        DSL.unbuilt_pods = DSL.unbuilt_pods.merge(list)
-      end
-
       def self.set_ignore_checksum_files(file_names)
         DSL.ignore_checksum_files = file_names
       end

@@ -64,35 +64,38 @@ end
 module Pod
   class Installer
     def prebuild_pod_targets
-      @prebuild_pod_targets ||= (all = []
+      @prebuild_pod_targets ||= begin
+        all = []
         aggregate_targets = self.aggregate_targets
         aggregate_targets.each do |aggregate_target|
-        target_definition = aggregate_target.target_definition
-        targets = aggregate_target.pod_targets || []
+          target_definition = aggregate_target.target_definition
+          targets = aggregate_target.pod_targets || []
 
-        # filter prebuild
-        prebuild_names = target_definition.prebuild_framework_pod_names
-        if not Podfile::DSL.prebuild_all
-          targets = targets.select { |pod_target| prebuild_names.include?(pod_target.pod_name) }
+          # filter prebuild
+          prebuild_names = target_definition.prebuild_framework_pod_names
+          unless Podfile::DSL.prebuild_all
+            targets = targets.select { |pod_target| prebuild_names.include?(pod_target.pod_name) }
+          end
+          dependency_targets = targets.map(&:recursive_dependent_targets).flatten.uniq || []
+          targets = (targets + dependency_targets).uniq
+
+          # filter should not prebuild
+          explict_should_not_names = target_definition.should_not_prebuild_framework_pod_names
+          targets = targets.reject { |pod_target| explict_should_not_names.include?(pod_target.pod_name) }
+
+          all += targets
         end
-        dependency_targets = targets.map { |t| t.recursive_dependent_targets }.flatten.uniq || []
-        targets = (targets + dependency_targets).uniq
-
-        # filter should not prebuild
-        explict_should_not_names = target_definition.should_not_prebuild_framework_pod_names
-        targets = targets.reject { |pod_target| explict_should_not_names.include?(pod_target.pod_name) }
-
-        all += targets
+        all = all.reject { |pod_target| Podfile::DSL.unbuilt_pods.include?(pod_target.pod_name) }
+        unless Podfile::DSL.enable_prebuild_dev_pod
+          all = all.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
+        end
+        all.uniq
       end
-        if !Podfile::DSL.enable_prebuild_dev_pod
-        all = all.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
-      end
-        all.uniq)
     end
 
     # the root names who needs prebuild, including dependency pods.
     def prebuild_pod_names
-      @prebuild_pod_names ||= self.prebuild_pod_targets.map(&:pod_name).reject { |name| Podfile::DSL.unbuilt_pods.include?(name) }
+      @prebuild_pod_names ||= prebuild_pod_targets.map(&:pod_name)
     end
 
     def validate_every_pod_only_have_one_form
