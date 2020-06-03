@@ -1,14 +1,14 @@
 # Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
-require 'fileutils'
+require "fileutils"
 
 module Pod
   class Command
     class BinaryCache < Command
       include Command::ProjectDirectory
 
-      self.summary = 'Pod Binary Cache commands'
+      self.summary = "Pod Binary Cache commands"
 
       self.description = <<-DESC
         Fetch/Prebuild pod frameworks
@@ -16,7 +16,7 @@ module Pod
 
       def self.options
         [
-          ['--cmd', 'Commands to fetch, prebuild pod frameworks']
+          ["--cmd", "Commands to fetch, prebuild pod frameworks"],
         ].concat(super)
       end
 
@@ -30,11 +30,11 @@ module Pod
       end
 
       def run
-        if @cmd == 'deps_graph'
-          require_relative '../cocoapods-binary-cache/dependencies_graph/dependencies_graph'
+        if @cmd == "deps_graph"
+          require_relative "../cocoapods-binary-cache/dependencies_graph/dependencies_graph"
           dep_graph = DependenciesGraph.new(config.lockfile)
-          fmt = 'png'
-          name = 'graph'
+          fmt = "png"
+          name = "graph"
           dep_graph.write_graphic_file(fmt, filename = name, highlight_nodes = Set[])
           system("open #{name}.#{fmt}")
           return

@@ -1,5 +1,5 @@
-require_relative 'tool/tool'
-require_relative '../prebuild_config'
+require_relative "tool/tool"
+require_relative "../prebuild_config"
 
 module Pod
   class Podfile
@@ -92,6 +92,7 @@ module Pod
       # -----------------------------------------------
       class_attr_accessor :validate_prebuilt_settings
       self.validate_prebuilt_settings = nil
+
       def validate_prebuilt_settings(&proc)
         DSL.validate_prebuilt_settings = proc
       end
