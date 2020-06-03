@@ -39,13 +39,14 @@ check_pod_install_when_prebuilt_enabled() {
 
 xcodebuild_test() {
   xcodebuild \
-  -workspace PrebuiltPodIntegration.xcworkspace \
-  -scheme PrebuiltPodIntegration \
-  -configuration Debug \
-  -sdk "iphonesimulator" \
-  -destination "platform=iOS Simulator,name=${TEST_DEVICE}" \
-  -derivedDataPath "${DERIVED_DATA_PATH}" \
-  test
+    -workspace PrebuiltPodIntegration.xcworkspace \
+    -scheme PrebuiltPodIntegration \
+    -configuration Debug \
+    -sdk "iphonesimulator" \
+    -destination "platform=iOS Simulator,name=${TEST_DEVICE}" \
+    -derivedDataPath "${DERIVED_DATA_PATH}" \
+    clean \
+    test
 }
 
 check_xcodebuild_test() {
