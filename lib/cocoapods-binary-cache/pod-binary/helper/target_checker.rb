@@ -1,4 +1,3 @@
-
 module Pod
   class Prebuild
 
@@ -6,8 +5,7 @@ module Pod
     #
     # @param [Array<PodTarget>] prebuilt_targets
     def self.check_one_pod_should_have_only_one_target(prebuilt_targets)
-
-      targets_have_different_platforms = prebuilt_targets.select {|t| t.pod_name != t.name }
+      targets_have_different_platforms = prebuilt_targets.select { |t| t.pod_name != t.name }
 
       if targets_have_different_platforms.count > 0
         names = targets_have_different_platforms.map(&:pod_name)
@@ -43,7 +41,5 @@ Related pods: #{names}, target names: #{raw_names}
         raise Informative, message
       end
     end
-
-
   end
 end

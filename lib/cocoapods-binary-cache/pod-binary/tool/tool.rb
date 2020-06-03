@@ -8,5 +8,5 @@
 #   ```
 #
 def class_attr_accessor(symbol)
-    self.class.send(:attr_accessor, symbol)
+  self.class.send(:attr_accessor, symbol)
 end
