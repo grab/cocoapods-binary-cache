@@ -90,7 +90,7 @@ module PodPrebuild
 
       # TODO (thuyen): Avoid global mutation
       Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
-      Pod::Podfile::DSL.add_unbuilt_pods(cachemiss_vendor_pods) unless Pod::Podfile::DSL.is_prebuild_job
+      Pod::Prebuild::CacheInfo.cache_miss_vendor_pods = cachemiss_vendor_pods
 
       # Verify Dev pod cache
       if Pod::Podfile::DSL.enable_prebuild_dev_pod
@@ -101,9 +101,6 @@ module PodPrebuild
           )
           Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic = cachehit_pods_dic
           Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic = cachemiss_pods_dic
-        end
-        unless Pod::Podfile::DSL.is_prebuild_job
-          Pod::Podfile::DSL.add_unbuilt_pods(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys)
         end
       end
 
@@ -118,10 +115,10 @@ module PodPrebuild
       dev_pods_clients = dependencies_graph
         .get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
           + devpod_clients_of_vendorpods
-      Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
-      Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys} \n=> clients #{dev_pods_clients.to_a}"
 
       Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
+      Pod::Prebuild::CacheInfo.cache_miss_vendor_pods += vendor_pods_clients
+
       dev_pods_clients.each do |name|
         value = Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic[name]
         next unless value
@@ -129,10 +126,10 @@ module PodPrebuild
         Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic.delete(name)
         Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic[name] = value
       end
-      unless Pod::Podfile::DSL.is_prebuild_job
-        Pod::Podfile::DSL.add_unbuilt_pods(vendor_pods_clients)
-        Pod::Podfile::DSL.add_unbuilt_pods(dev_pods_clients)
-      end
+
+      Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
+      Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys}
+        \n=> clients #{dev_pods_clients.to_a}"
 
       # For debugging
       cachemiss_libs = cachemiss_vendor_pods + vendor_pods_clients + Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
@@ -154,10 +151,6 @@ module PodPrebuild
         binary_installer.repo_update = @pod_install_options[:repo_update]
         binary_installer.install!
       end
-
-      # TODO (Vince): Do not mutate Pod::Podfile::DSL as it's reloaded
-      # when creating an installer (Pod::Installer)
-      Pod::Podfile::DSL.add_unbuilt_pods(cache_validation.missed) unless Pod::Podfile::DSL.is_prebuild_job
 
       if Pod::Podfile::DSL.prebuild_all_vendor_pods
         Pod::UI.puts "Prebuild all vendor pods"

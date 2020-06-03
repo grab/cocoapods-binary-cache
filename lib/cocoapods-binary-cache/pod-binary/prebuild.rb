@@ -48,6 +48,7 @@ module Pod
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
       return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
+      return true if !Pod::Podfile::DSL.is_prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
 
       cache_hit?(name)
     end

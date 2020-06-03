@@ -122,9 +122,7 @@ module Pod
       end
 
       specs = self.analysis_result.specifications
-      prebuilt_specs = (specs.select do |spec|
-        self.prebuild_pod_names.include? spec.root.name
-      end)
+      prebuilt_specs = specs.select { |spec| should_integrate_prebuilt_pod?(spec.root.name) }
 
       prebuilt_specs.each do |spec|
         # Use the prebuild framworks as vendered frameworks
@@ -162,7 +160,7 @@ module Pod
       pod_installer = create_pod_installer(pod_name)
       # \copy from original
 
-      if self.prebuild_pod_names.include? pod_name
+      if should_integrate_prebuilt_pod?(pod_name)
         pod_installer.install_for_prebuild!(self.sandbox)
       else
         pod_installer.install!
@@ -171,6 +169,12 @@ module Pod
       # copy from original
       @installed_specs.concat(pod_installer.specs_by_platform.values.flatten.uniq)
       # \copy from original
+    end
+
+    def should_integrate_prebuilt_pod?(name)
+      return false if !Pod::Podfile::DSL.is_prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
+
+      prebuild_pod_names.include?(name)
     end
   end
 end
