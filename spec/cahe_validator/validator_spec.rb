@@ -81,18 +81,30 @@ describe "PodPrebuild::CacheValidator" do
       end
     end
 
-    context "no Podfile.lock" do
+    context "there are changes from Podfile" do
       let(:podfile) do
         Pod::Podfile.new do
           source "https://cdn.cocoapods.org/"
-          pod "A", "0.0.5"
+          pod "A", "0.0.6"  # Updated
           pod "B", "0.0.5"
+          pod "C", "0.0.5"
+          pod "D", "0.0.5"  # Added
         end
       end
-      let(:pod_lockfile) { nil }
-      it "checks against pods in Podfile" do
-        expect(@missed).to eq(Set["A", "B"])
-        expect(@hit).to be_empty
+      context "no Podfile.lock" do
+        let(:pod_lockfile) { nil }
+        it "checks against pods in Podfile" do
+          expect(@missed).to eq(Set["A", "D"])
+          expect(@hit).to eq(Set["B", "C"])
+        end
+      end
+
+      context "exist changes in Podfile.lock" do
+        let(:pod_lockfile) { gen_lockfile(pods: pods.merge("C" => { :version => "0.0.6" })) }
+        it "treats changes as missed" do
+          expect(@missed).to eq(Set["A", "C", "D"])
+          expect(@hit).to eq(Set["B"])
+        end
       end
     end
   end

@@ -4,7 +4,7 @@ module PodPrebuild
 
     def initialize(missed_with_reasons, hit)
       @missed_with_reasons = missed_with_reasons
-      @hit = hit
+      @hit = hit - missed_with_reasons.keys
     end
 
     def missed
