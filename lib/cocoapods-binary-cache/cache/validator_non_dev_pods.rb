@@ -22,14 +22,7 @@ module PodPrebuild
           end
         end
       end
-      PodPrebuild::CacheValidationResult.new(missed, hit)
-    end
-
-    private
-
-    def validate_with_podfile
-      missed = pods_from_podfile.map { |pod| [pod, "Podfile.lock is not present"] }.to_h
-      PodPrebuild::CacheValidationResult.new(missed, Set.new)
+      validate_with_podfile.merge(PodPrebuild::CacheValidationResult.new(missed, hit))
     end
   end
 end

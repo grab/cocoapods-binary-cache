@@ -15,10 +15,19 @@ module PodPrebuild
       raise NotImplementedError
     end
 
-    def pods_from_podfile
-      raw_changes = @prebuilt_lockfile.lockfile.detect_changes_with_podfile(@podfile)
-      changes = Pod::Installer::Analyzer::SpecsState.new(raw_changes)
-      changes.added + changes.changed + changes.unchanged
+    def changes_of_prebuilt_lockfile_vs_podfile
+      @changes_of_prebuilt_lockfile_vs_podfile ||= Pod::Installer::Analyzer::SpecsState.new(
+        @prebuilt_lockfile.lockfile.detect_changes_with_podfile(@podfile)
+      )
+    end
+
+    def validate_with_podfile
+      return PodPrebuild::CacheValidationResult.new({}, Set.new) if @prebuilt_lockfile.nil? || @podfile.nil?
+
+      changes = changes_of_prebuilt_lockfile_vs_podfile
+      missed = changes.added.map { |pod| [pod, "Added from Podfile"] }.to_h
+      missed.merge!(changes.changed.map { |pod| [pod, "Updated from Podfile"] }.to_h)
+      PodPrebuild::CacheValidationResult.new(missed, changes.unchanged)
     end
 
     def read_prebuilt_build_settings(name)
