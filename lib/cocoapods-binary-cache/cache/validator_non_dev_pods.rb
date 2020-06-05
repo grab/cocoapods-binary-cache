@@ -22,7 +22,7 @@ module PodPrebuild
           end
         end
       end
-      validate_with_podfile.merge(PodPrebuild::CacheValidationResult.new(missed, hit))
+      validate_with_podfile.merge(PodPrebuild::CacheValidationResult.new(missed, hit)).exclude_pods(@ignored_pods)
     end
   end
 end

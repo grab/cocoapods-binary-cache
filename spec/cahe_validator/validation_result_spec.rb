@@ -21,4 +21,16 @@ describe "PodPrebuild::CacheValidationResult" do
       end
     end
   end
+
+  describe "exclude_pods behavior" do
+    let(:data) { [{ "A" => "missing", "B" => "missing" }, Set["X", "Y", "Z"]] }
+    before do
+      @excluded = PodPrebuild::CacheValidationResult.new(*data).exclude_pods(Set["A", "Y"])
+    end
+
+    it "returns correct result" do
+      expect(@excluded.missed).to eq(Set["B"])
+      expect(@excluded.hit).to eq(Set["X", "Z"])
+    end
+  end
 end
