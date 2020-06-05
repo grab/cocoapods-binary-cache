@@ -40,6 +40,12 @@ module PodPrebuild
       @non_dev_pods ||= pods.reject { |name, _| dev_pod_names_.include?(name) }
     end
 
+    def subspec_pods
+      pods.keys
+        .select { |k| k.include?("/") }
+        .group_by { |k| k.split("/")[0] }
+    end
+
     private
 
     # Parse an item under `PODS` section of a Lockfile

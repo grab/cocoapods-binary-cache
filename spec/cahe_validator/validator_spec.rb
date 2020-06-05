@@ -124,5 +124,52 @@ describe "PodPrebuild::CacheValidator" do
         expect(@hit).not_to include("B", "D")
       end
     end
+
+    context "has subspec pods" do
+      let(:subspec_pods) do
+        {
+          "S/A" => { :version => "0.0.5" },
+          "S/B" => { :version => "0.0.5" }
+        }
+      end
+      let(:prebuilt_subspec_pods) do
+        {
+          "S/A" => { :version => "0.0.5" },
+          "S/B" => { :version => "0.0.5" }
+        }
+      end
+      let(:pod_lockfile) { gen_lockfile(pods: pods.merge(subspec_pods)) }
+      let(:prebuilt_lockfile) { gen_lockfile(pods: pods.merge(prebuilt_subspec_pods)) }
+
+      context "all subspec pods are hit" do
+        it "returns the parent pod as hit" do
+          expect(@missed).not_to include("S")
+          expect(@hit).to include("S")
+        end
+      end
+
+      context "a subspec pod is missing" do
+        let(:prebuilt_subspec_pods) do
+          { "S/A" => { :version => "0.0.5" } }
+        end
+        it "returns the parent pod as missed" do
+          expect(@missed).to include("S")
+          expect(@hit).not_to include("S")
+        end
+      end
+
+      context "a subspec pod is outdated" do
+        let(:prebuilt_subspec_pods) do
+          {
+            "S/A" => { :version => "0.0.5" },
+            "S/B" => { :version => "0.0.4" }
+          }
+        end
+        it "returns the parent pod as missed" do
+          expect(@missed).to include("S")
+          expect(@hit).not_to include("S")
+        end
+      end
+    end
   end
 end
