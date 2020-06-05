@@ -22,6 +22,13 @@ module PodPrebuild
       )
     end
 
+    def exclude_pods(names)
+      PodPrebuild::CacheValidationResult.new(
+        @missed_with_reasons.reject { |name, _| names.include?(name) },
+        @hit - names
+      )
+    end
+
     def print_summary
       Pod::UI.puts "Cache validation: hit #{@hit.to_a}"
       @missed_with_reasons.each do |name, reason|

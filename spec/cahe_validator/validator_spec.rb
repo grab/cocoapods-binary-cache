@@ -20,6 +20,7 @@ describe "PodPrebuild::CacheValidator" do
         }
       }
     end
+    let(:ignored_pods) { nil }
     before do
       allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(prebuilt_settings)
 
@@ -28,7 +29,8 @@ describe "PodPrebuild::CacheValidator" do
         pod_lockfile: pod_lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: validate_prebuilt_settings,
-        generated_framework_path: generated_framework_path
+        generated_framework_path: generated_framework_path,
+        ignored_pods: ignored_pods
       ).validate
       @missed = validation_result.missed
       @hit = validation_result.hit
@@ -105,6 +107,21 @@ describe "PodPrebuild::CacheValidator" do
           expect(@missed).to eq(Set["A", "C", "D"])
           expect(@hit).to eq(Set["B"])
         end
+      end
+    end
+
+    context "has ignored_pods" do
+      let(:pod_lockfile) do
+        merged_pods = pods.merge(
+          "A" => { :version => "0.0.1" }, # outdated
+          "D" => { :version => "0.0.5" } # not present
+        )
+        gen_lockfile(pods: merged_pods)
+      end
+      let(:ignored_pods) { Set["B", "D"] }
+      it "excludes them from the result" do
+        expect(@missed).not_to include("B", "D")
+        expect(@hit).not_to include("B", "D")
       end
     end
   end

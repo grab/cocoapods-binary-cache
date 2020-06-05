@@ -82,7 +82,8 @@ module PodPrebuild
         pod_lockfile: installer_context.lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
-        generated_framework_path: prebuild_sandbox.generate_framework_path
+        generated_framework_path: prebuild_sandbox.generate_framework_path,
+        ignored_pods: Pod::Podfile::DSL.unbuilt_pods
       ).validate
       cache_validation.print_summary
       cachemiss_vendor_pods = cache_validation.missed
@@ -115,6 +116,9 @@ module PodPrebuild
       dev_pods_clients = dependencies_graph
         .get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
           + devpod_clients_of_vendorpods
+
+      vendor_pods_clients -= Pod::Podfile::DSL.unbuilt_pods.to_a
+      dev_pods_clients -= Pod::Podfile::DSL.unbuilt_pods.to_a
 
       Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
       Pod::Prebuild::CacheInfo.cache_miss_vendor_pods += vendor_pods_clients
