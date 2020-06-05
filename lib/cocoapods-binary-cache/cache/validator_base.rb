@@ -31,6 +31,48 @@ module PodPrebuild
       PodPrebuild::CacheValidationResult.new(missed, changes.unchanged).exclude_pods(@ignored_pods)
     end
 
+    def validate_pods(options)
+      pods = options[:pods]
+      subspec_pods = options[:subspec_pods]
+      prebuilt_pods = options[:prebuilt_pods]
+
+      missed = {}
+      hit = Set.new
+
+      check_pod = lambda do |name|
+        version = pods[name]
+        prebuilt_version = prebuilt_pods[name]
+        result = false
+        if prebuilt_version.nil?
+          missed[name] = "Not available (#{version})"
+        elsif prebuilt_version != version
+          missed[name] = "Outdated: (prebuilt: #{prebuilt_version}) vs (#{version})"
+        else
+          settings_diff = incompatible_build_settings(name)
+          if settings_diff.empty?
+            hit << name
+            result = true
+          else
+            missed[name] = "Incompatible build settings: #{settings_diff}"
+          end
+        end
+        result
+      end
+
+      subspec_pods.each do |parent, children|
+        missed_children = children.reject { |child| check_pod.call(child) }
+        if missed_children.empty?
+          hit << parent
+        else
+          missed[parent] = "Subspec pods were missed: #{missed_children}"
+        end
+      end
+
+      non_subspec_pods = pods.reject { |pod| subspec_pods.include?(pod) }
+      non_subspec_pods.each { |pod, _| check_pod.call(pod) }
+      PodPrebuild::CacheValidationResult.new(missed, hit)
+    end
+
     def read_prebuilt_build_settings(name)
       return {} if generated_framework_path.nil?
 

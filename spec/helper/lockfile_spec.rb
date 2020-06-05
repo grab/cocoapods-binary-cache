@@ -26,5 +26,23 @@ describe "Lockfile" do
       expect(@lockfile.dev_pods.keys).to eq(dev_pods.keys)
       expect(@lockfile.non_dev_pods.keys).to eq(non_dev_pods.keys)
     end
+
+    context "has subspec pods" do
+      let(:external_remote_pods) do
+        {
+          "C_remote" => { :git => "remote_url", :tag => "0.0.1" },
+          "S/A" => { :git => "remote_url", :tag => "0.0.1" },
+          "S/B" => { :git => "remote_url", :tag => "0.0.1" },
+          "T/C" => { :git => "remote_url", :tag => "0.0.1" }
+        }
+      end
+      it "extracts subspec pods correctly" do
+        subspec_pods = {
+          "S" => ["S/A", "S/B"],
+          "T" => ["T/C"]
+        }
+        expect(@lockfile.subspec_pods).to eq(subspec_pods)
+      end
+    end
   end
 end
