@@ -5,6 +5,7 @@ require "cocoapods_plugin"
 
 require_relative "spec_helper/lockfile"
 require_relative "spec_helper/tempfile"
+require_relative "spec_helper/tempdir"
 
 module Pod
   UI.disable_wrap = true
