@@ -63,7 +63,7 @@ describe "Pod::Installer" do
       end
 
       it "treats the missed pod differently if in a prebuild_job" do
-        allow(Pod::Podfile::DSL).to receive(:is_prebuild_job).and_return(true)
+        allow(Pod::Podfile::DSL).to receive(:prebuild_job).and_return(true)
 
         expect(@source_installer).to receive(:install_for_prebuild!)
         expect(@source_installer).not_to receive(:install!)

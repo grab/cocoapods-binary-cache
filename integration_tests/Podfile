@@ -1,7 +1,7 @@
-platform :ios, '12.0'
+platform :ios, "12.0"
 use_frameworks!
 
-source 'https://cdn.cocoapods.org/'
+source "https://cdn.cocoapods.org/"
 
 $binary_pods = Set.new
 
@@ -14,7 +14,7 @@ def binary_pod(name, *args, **kwargs)
 end
 
 def enabled_prebuilt_vendor_pods
-  ENV['ENABLE_PREBUILT_POD_LIBS'] == 'true'
+  ENV["ENABLE_PREBUILT_POD_LIBS"] == "true"
 end
 
 def enabled_prebuilt_pods
@@ -25,30 +25,28 @@ pods_originally_distributed_as_vendor = [
   "GoogleMaps",
   "GoogleSignIn"
 ]
-unbuilt_vendor_pods = []
 
 if enabled_prebuilt_pods
-  plugin 'cocoapods-binary-cache'
-
-  set_is_prebuild_job(ENV['PREBUILD_VENDOR_PODS_JOB'] == 'true')
-  prebuild_all_vendor_pods! if ENV['FORCE_PREBUILD_ALL_VENDOR_PODS'] == 'true'
-  set_unbuilt_vendor_pods(unbuilt_vendor_pods)
-
+  plugin "cocoapods-binary-cache"
+  config_cocoapods_binary_cache(
+    prebuild_job: ENV["PREBUILD_VENDOR_PODS_JOB"] == "true",
+    prebuild_all_vendor_pods: ENV["FORCE_PREBUILD_ALL_VENDOR_PODS"] == "true",
+    excluded_pods: []
+  )
 end
 
-target 'PrebuiltPodIntegration' do
+target "PrebuiltPodIntegration" do
   # Has `*.bundle` outside the framework
-  binary_pod 'SwiftDate', '6.1.0'
-  binary_pod 'BKMoneyKit', '0.0.12'
-  binary_pod 'IQKeyboardManagerSwift', '6.1.1'
-  binary_pod 'GoogleSignIn', '4.2.0'
+  binary_pod "SwiftDate", "6.1.0"
+  binary_pod "BKMoneyKit", "0.0.12"
+  binary_pod "IQKeyboardManagerSwift", "6.1.1"
+  binary_pod "GoogleSignIn", "4.2.0"
 
   # Has `*.bundle` inside the framework
-  binary_pod 'GoogleMaps', '2.7.0'
+  binary_pod "GoogleMaps", "2.7.0"
 
-  target 'PrebuiltPodIntegrationTests' do
+  target "PrebuiltPodIntegrationTests" do
     inherit! :search_paths
-
   end
 end
 
@@ -72,7 +70,7 @@ pre_install do |installer|
   end
 end
 
-post_install do |installer|
+post_install do |_|
   FileUtils.mkdir_p(".stats")
   pods_to_integrate = ($binary_pods - pods_originally_distributed_as_vendor).to_a
   File.open(".stats/pods_to_integrate.txt", "w") { |f| f.puts(pods_to_integrate) }
