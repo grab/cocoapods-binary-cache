@@ -65,7 +65,7 @@ check_prebuilt_integration() {
   log_section "Checking prebuilt integration..."
 
   local should_fail=false
-  for pod in $(cat ".stats/prebuilt_binary_pods.txt"); do
+  for pod in $(cat ".stats/pods_to_integrate.txt"); do
     local framework_dir="Pods/${pod}/${pod}.framework"
     if [[ ! -f "${framework_dir}/${pod}" ]]; then
       should_fail=true

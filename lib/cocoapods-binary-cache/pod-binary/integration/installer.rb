@@ -154,7 +154,9 @@ module Pod
     def should_integrate_prebuilt_pod?(name)
       return false if !Pod::Podfile::DSL.is_prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
 
-      prebuild_pod_names.include?(name)
+      prebuild_pod_names
+        .reject { |pod| PodPrebuild::StateStore.excluded_pods.include?(pod) }
+        .include?(name)
     end
   end
 end
