@@ -21,10 +21,11 @@ def enabled_prebuilt_pods
   enabled_prebuilt_vendor_pods
 end
 
-unbuilt_vendor_pods = [
-  'GoogleMaps',
-  'GoogleSignIn'
+pods_originally_distributed_as_vendor = [
+  "GoogleMaps",
+  "GoogleSignIn"
 ]
+unbuilt_vendor_pods = []
 
 if enabled_prebuilt_pods
   plugin 'cocoapods-binary-cache'
@@ -73,5 +74,6 @@ end
 
 post_install do |installer|
   FileUtils.mkdir_p(".stats")
-  File.open(".stats/prebuilt_binary_pods.txt", "w") { |f| f.puts(($binary_pods - unbuilt_vendor_pods).to_a) }
+  pods_to_integrate = ($binary_pods - pods_originally_distributed_as_vendor).to_a
+  File.open(".stats/pods_to_integrate.txt", "w") { |f| f.puts(pods_to_integrate) }
 end

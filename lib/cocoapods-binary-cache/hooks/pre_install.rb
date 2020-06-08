@@ -18,10 +18,11 @@ module PodPrebuild
 
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
-      save_pod_install_options
+      save_installation_states
       prepare_environment
       create_prebuild_sandbox
-      validate_cache
+      Pod::UI.section("Detect implicit dependencies") { detect_implicit_dependencies }
+      Pod::UI.section("Validate prebuilt cache") { validate_cache }
       install!
       reset_environment
       log_section "🤖  Resume pod installation"
@@ -30,13 +31,18 @@ module PodPrebuild
 
     private
 
+    def save_installation_states
+      save_pod_install_options
+      save_states_from_dsl
+    end
+
     def save_pod_install_options
       # Fetch original installer (which is running this pre-install hook) options,
       # then pass them to our installer to perform update if needed
       # Looks like this is the most appropriate way to figure out that something should be updated
-      original_installer = ObjectSpace.each_object(Pod::Installer).first
-      @pod_install_options[:update] = original_installer.update
-      @pod_install_options[:repo_update] = original_installer.repo_update
+      @original_installer = ObjectSpace.each_object(Pod::Installer).first
+      @pod_install_options[:update] = @original_installer.update
+      @pod_install_options[:repo_update] = @original_installer.repo_update
     end
 
     def ensure_valid_podfile
@@ -69,10 +75,28 @@ module PodPrebuild
       Pod::UserInterface.warnings = [] # clean the warning in the prebuild step, it's duplicated.
     end
 
+    def save_states_from_dsl
+      # Note: DSL is reloaded when creating an installer (Pod::Installer.new).
+      # Any mutation to DSL is highly discouraged
+      # --> Rather, perform mutation on PodPrebuild::StateStore instead
+      PodPrebuild::StateStore.excluded_pods += Pod::Podfile::DSL.unbuilt_pods
+    end
+
     def create_prebuild_sandbox
       standard_sandbox = installer_context.sandbox
       @prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sandbox)
       Pod::UI.puts "Create prebuild sandbox at #{@prebuild_sandbox.root}"
+    end
+
+    def detect_implicit_dependencies
+      @original_installer.resolve_dependencies
+      specs = @original_installer.analysis_result.specifications
+
+      pods_with_empty_source_files = specs.select(&:empty_source_files?).map(&:name)
+      PodPrebuild::StateStore.excluded_pods += pods_with_empty_source_files
+      Pod::UI.puts "Exclude pods with empty source files: #{pods_with_empty_source_files}"
+
+      # TODO (thuyen): Detect dependencies of a prebuilt pod and treat them as prebuilt pods as well
     end
 
     def validate_cache
@@ -83,7 +107,7 @@ module PodPrebuild
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path,
-        ignored_pods: Pod::Podfile::DSL.unbuilt_pods
+        ignored_pods: PodPrebuild::StateStore.excluded_pods
       ).validate
       cache_validation.print_summary
       cachemiss_vendor_pods = cache_validation.missed
@@ -117,8 +141,8 @@ module PodPrebuild
         .get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
           + devpod_clients_of_vendorpods
 
-      vendor_pods_clients -= Pod::Podfile::DSL.unbuilt_pods.to_a
-      dev_pods_clients -= Pod::Podfile::DSL.unbuilt_pods.to_a
+      vendor_pods_clients -= PodPrebuild::StateStore.excluded_pods.to_a
+      dev_pods_clients -= PodPrebuild::StateStore.excluded_pods.to_a
 
       Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
       Pod::Prebuild::CacheInfo.cache_miss_vendor_pods += vendor_pods_clients

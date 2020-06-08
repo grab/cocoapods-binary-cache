@@ -38,7 +38,7 @@ module Pod
     end
 
     def blacklisted?(name)
-      Pod::Podfile::DSL.unbuilt_pods.include?(name)
+      PodPrebuild::StateStore.excluded_pods.include?(name)
     end
 
     def cache_hit?(name)
@@ -130,12 +130,6 @@ module Pod
         unless target.should_build?
           Pod::UI.puts "Skip prebuilding #{target.label} because of no source files".yellow
           next
-          # TODO (thuyen): Fix an issue in this scenario:
-          # - Frameworks are shipped as vendor frameworks (-> skipped during prebuild)
-          # -> The dir structure of this framework in Pods is incorrect.
-          #    - Expected: Pods/MyFramework/<my_files>
-          #    - Actual: Pods/MyFramework/MyFramework/<my_files>. Sometimes, Pods/MyFramework is empty :|
-          # -> Better to detect such targets EARLY and add them to the blacklist (DSL.unbuilt_pods)
         end
 
         output_path = sandbox.framework_folder_path_for_target_name(target.name)
