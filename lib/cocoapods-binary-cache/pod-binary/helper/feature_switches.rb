@@ -35,9 +35,7 @@ module Pod
           local = (options[:path] != nil)
         end
 
-        if should_prebuild and ((not local) or Podfile::DSL.enable_prebuild_dev_pod)
-          old_method.bind(self).(name, *args)
-        end
+        old_method.bind(self).call(name, *args) if should_prebuild && (!local || Podfile::DSL.dev_pods_enabled)
       end
     end
   end

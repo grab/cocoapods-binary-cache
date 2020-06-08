@@ -19,7 +19,7 @@ module Pod
 
       updated_names.each do |name|
         root_name = Specification.root_name(name)
-        next if !Pod::Podfile.enable_prebuild_dev_pod && sandbox.local?(root_name)
+        next if !Pod::Podfile::DSL.dev_pods_enabled && sandbox.local?(root_name)
 
         UI.puts "Delete cached files: #{root_name}"
         target_path = sandbox.pod_dir(root_name)
@@ -152,7 +152,7 @@ module Pod
     end
 
     def should_integrate_prebuilt_pod?(name)
-      return false if !Pod::Podfile::DSL.is_prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
+      return false if !Pod::Podfile::DSL.prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
 
       prebuild_pod_names
         .reject { |pod| PodPrebuild::StateStore.excluded_pods.include?(pod) }

@@ -79,7 +79,7 @@ module PodPrebuild
       # Note: DSL is reloaded when creating an installer (Pod::Installer.new).
       # Any mutation to DSL is highly discouraged
       # --> Rather, perform mutation on PodPrebuild::StateStore instead
-      PodPrebuild::StateStore.excluded_pods += Pod::Podfile::DSL.unbuilt_pods
+      PodPrebuild::StateStore.excluded_pods += Pod::Podfile::DSL.excluded_pods
     end
 
     def create_prebuild_sandbox
@@ -118,7 +118,7 @@ module PodPrebuild
       Pod::Prebuild::CacheInfo.cache_miss_vendor_pods = cachemiss_vendor_pods
 
       # Verify Dev pod cache
-      if Pod::Podfile::DSL.enable_prebuild_dev_pod
+      if Pod::Podfile::DSL.dev_pods_enabled
         BenchmarkShow.benchmark do
           cachemiss_pods_dic, cachehit_pods_dic = PodCacheValidator.verify_devpod_checksum(
             prebuild_sandbox,

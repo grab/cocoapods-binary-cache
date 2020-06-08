@@ -11,9 +11,7 @@ module Pod
   class Installer
     class PodSourceInstaller
       def install_for_prebuild!(standard_sanbox)
-        if !Podfile::DSL.enable_prebuild_dev_pod
-          return if standard_sanbox.local? self.name
-        end
+        return if !Podfile::DSL.dev_pods_enabled && standard_sanbox.local?(name)
 
         # make a symlink to target folder
         prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sanbox)

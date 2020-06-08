@@ -48,7 +48,7 @@ module Pod
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
       return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
-      return true if !Pod::Podfile::DSL.is_prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
+      return true if !Pod::Podfile::DSL.prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
 
       cache_hit?(name)
     end
@@ -94,7 +94,7 @@ module Pod
         missing = unchanged.reject { |pod_name| exsited_framework_pod_names.include?(pod_name) }
 
         root_names_to_update = (added + changed + missing)
-        if Pod::Podfile::DSL.enable_prebuild_dev_pod && Pod::Podfile::DSL.is_prebuild_job
+        if Pod::Podfile::DSL.dev_pods_enabled && Pod::Podfile::DSL.prebuild_job
           root_names_to_update += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
         end
 
@@ -117,9 +117,7 @@ module Pod
       end
 
       targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
-      unless Podfile::DSL.enable_prebuild_dev_pod
-        targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
-      end
+      targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) } unless Podfile::DSL.dev_pods_enabled
 
       # build!
       Pod::UI.puts "Prebuild frameworks (total #{targets.count})"
@@ -139,8 +137,8 @@ module Pod
           target,
           output_path,
           bitcode_enabled,
-          Podfile::DSL.custom_build_options,
-          Podfile::DSL.custom_build_options_simulator
+          Podfile::DSL.custom_device_build_options,
+          Podfile::DSL.custom_simulator_build_options
         )
         collect_metadata(target, output_path)
       end
@@ -237,7 +235,7 @@ module Pod
     old_method2 = instance_method(:run_plugins_post_install_hooks)
     define_method(:run_plugins_post_install_hooks) do
       old_method2.bind(self).call
-      prebuild_frameworks! if Pod.is_prebuild_stage && Pod::Podfile::DSL.is_prebuild_job
+      prebuild_frameworks! if Pod.is_prebuild_stage && Pod::Podfile::DSL.prebuild_job
     end
   end
 end
