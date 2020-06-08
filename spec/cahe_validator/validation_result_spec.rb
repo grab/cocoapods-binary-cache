@@ -23,14 +23,18 @@ describe "PodPrebuild::CacheValidationResult" do
   end
 
   describe "exclude_pods behavior" do
-    let(:data) { [{ "A" => "missing", "B" => "missing" }, Set["X", "Y", "Z"]] }
+    let(:data) do
+      cache_miss = { "A" => "missing", "B" => "missing", "C" => "missing", "C/Sub" => "missing" }
+      cache_hit = Set["X", "Y", "Z/Sub"]
+      [cache_miss, cache_hit]
+    end
     before do
-      @excluded = PodPrebuild::CacheValidationResult.new(*data).exclude_pods(Set["A", "Y"])
+      @excluded = PodPrebuild::CacheValidationResult.new(*data).exclude_pods(Set["B", "C", "Y", "Z"])
     end
 
-    it "returns correct result" do
-      expect(@excluded.missed).to eq(Set["B"])
-      expect(@excluded.hit).to eq(Set["X", "Z"])
+    it "excludes pods with/without subspec and keeps correct pods" do
+      expect(@excluded.missed).to eq(Set["A"])
+      expect(@excluded.hit).to eq(Set["X"])
     end
   end
 end

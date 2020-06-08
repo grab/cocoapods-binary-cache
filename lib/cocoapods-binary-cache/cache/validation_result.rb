@@ -23,9 +23,12 @@ module PodPrebuild
     end
 
     def exclude_pods(names)
+      should_exclude_pod = lambda do |pod_name|
+        names.any? { |name| pod_name == name || pod_name.start_with?(name + "/") }
+      end
       PodPrebuild::CacheValidationResult.new(
-        @missed_with_reasons.reject { |name, _| names.include?(name) },
-        @hit - names
+        @missed_with_reasons.reject { |pod_name, _| should_exclude_pod.call(pod_name) },
+        @hit.reject { |pod_name| should_exclude_pod.call(pod_name) }.to_set
       )
     end
 
