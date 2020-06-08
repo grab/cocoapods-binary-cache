@@ -20,8 +20,6 @@ module Pod
         apply_config.call(:custom_device_build_options)
         apply_config.call(:custom_simulator_build_options)
         apply_config.call(:validate_prebuilt_settings)
-
-        # require "pry"; binding.pry
       end
 
       @prebuild_job = false
