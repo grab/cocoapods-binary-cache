@@ -12,7 +12,7 @@ module PodPrebuild
     end
 
     def hit?(name)
-      @hit.include(name)
+      @hit.include?(name)
     end
 
     def merge(other)
