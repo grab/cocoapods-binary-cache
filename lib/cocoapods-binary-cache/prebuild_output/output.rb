@@ -51,7 +51,11 @@ module PodPrebuild
         file.write(project_root)
       end
 
-      Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.each do |name, hash|
+      # FIXME (thuyen): Revise usage of cache_miss_dev_pods_dic
+      # The behavior of processing outputs of dev pods and non-dev pods should be very SIMILAR
+      cache_miss_dev_pods_dic = {}
+
+      cache_miss_dev_pods_dic.each do |name, hash|
         Pod::UI.puts "Output dev pod lib: #{name} hash: #{hash}"
         built_lib_path = @sandbox.framework_folder_path_for_target_name(name)
         next unless File.directory?(built_lib_path)

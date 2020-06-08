@@ -9,9 +9,9 @@ class PodCacheValidator
 
   # Cache miss/hit checking for development pods
   # Return 2 Hashes for cache miss and cache hit libraries
-  def self.verify_devpod_checksum(sandbox, lock_file)
-    devpod_path = "#{sandbox.root}/devpod/"
-    target_path = sandbox.generate_framework_path
+  def self.verify_devpod_checksum(sandbox_root, generated_framework_path, lock_file)
+    devpod_path = "#{sandbox_root}/devpod/"
+    target_path = generated_framework_path
     Pod::UI.puts "verify_devpod_checksum: #{devpod_path}"
     external_sources = lock_file.to_hash["EXTERNAL SOURCES"]
     unless File.directory?(target_path)
@@ -33,7 +33,6 @@ class PodCacheValidator
           cached_path = "#{devpod_path}#{name}_#{hash}"
           if !Dir.exists?(cached_path)
             missing_pods_dic[name] = hash
-            Pod::UI.puts "Missing devpod: #{name}_#{hash}"
           else
             cachehit_pods_dic[name] = hash
             target_dir = "#{target_path}/#{name}"
@@ -45,7 +44,6 @@ class PodCacheValidator
         Pod::UI.puts "Error, wrong type: #{attribs}"
       end
     end
-    Pod::UI.puts "Local pod cache miss: #{missing_pods_dic.keys.count} / #{dev_pods_count}"
     return missing_pods_dic, cachehit_pods_dic
   end
 end

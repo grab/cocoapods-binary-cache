@@ -12,7 +12,7 @@ module PodPrebuild
       @ignored_pods = options[:ignored_pods] || Set.new
     end
 
-    def validate
+    def validate(*)
       raise NotImplementedError
     end
 
@@ -23,7 +23,7 @@ module PodPrebuild
     end
 
     def validate_with_podfile
-      return PodPrebuild::CacheValidationResult.new({}, Set.new) if @prebuilt_lockfile.nil? || @podfile.nil?
+      return PodPrebuild::CacheValidationResult.new if @prebuilt_lockfile.nil? || @podfile.nil?
 
       changes = changes_of_prebuilt_lockfile_vs_podfile
       missed = changes.added.map { |pod| [pod, "Added from Podfile"] }.to_h

@@ -107,61 +107,11 @@ module PodPrebuild
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path,
+        sandbox_root: prebuild_sandbox.root,
         ignored_pods: PodPrebuild::StateStore.excluded_pods
       ).validate
       cache_validation.print_summary
-      cachemiss_vendor_pods = cache_validation.missed
-      cachehit_vendor_pods = cache_validation.hit
-
-      # TODO (thuyen): Avoid global mutation
-      Pod::Prebuild::CacheInfo.cache_hit_vendor_pods = cachehit_vendor_pods
-      Pod::Prebuild::CacheInfo.cache_miss_vendor_pods = cachemiss_vendor_pods
-
-      # Verify Dev pod cache
-      if Pod::Podfile::DSL.dev_pods_enabled
-        BenchmarkShow.benchmark do
-          cachemiss_pods_dic, cachehit_pods_dic = PodCacheValidator.verify_devpod_checksum(
-            prebuild_sandbox,
-            installer_context.lockfile
-          )
-          Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic = cachehit_pods_dic
-          Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic = cachemiss_pods_dic
-        end
-      end
-
-      # Will remove after migrating all libraries to Swift 5 + Xcode 11 + support LIBRARY EVOLUTION
-      return if library_evolution_supported?
-      return if installer_context.lockfile.nil?
-
-      dependencies_graph = DependenciesGraph.new(installer_context.lockfile)
-      vendor_pods_clients, devpod_clients_of_vendorpods = dependencies_graph
-        .get_clients(cachemiss_vendor_pods.to_a)
-        .partition { |name| cachehit_vendor_pods.include?(name) }
-      dev_pods_clients = dependencies_graph
-        .get_clients(Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys) \
-          + devpod_clients_of_vendorpods
-
-      vendor_pods_clients -= PodPrebuild::StateStore.excluded_pods.to_a
-      dev_pods_clients -= PodPrebuild::StateStore.excluded_pods.to_a
-
-      Pod::Prebuild::CacheInfo.cache_hit_vendor_pods -= vendor_pods_clients
-      Pod::Prebuild::CacheInfo.cache_miss_vendor_pods += vendor_pods_clients
-
-      dev_pods_clients.each do |name|
-        value = Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic[name]
-        next unless value
-
-        Pod::Prebuild::CacheInfo.cache_hit_dev_pods_dic.delete(name)
-        Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic[name] = value
-      end
-
-      Pod::UI.puts "Vendor pod cache miss: #{cachemiss_vendor_pods.to_a} \n=> clients: #{vendor_pods_clients.to_a}"
-      Pod::UI.puts "Dev pod cache-miss: #{Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys}
-        \n=> clients #{dev_pods_clients.to_a}"
-
-      # For debugging
-      cachemiss_libs = cachemiss_vendor_pods + vendor_pods_clients + Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
-      Pod::UI.puts "Cache miss libs: #{cachemiss_libs.count} \n #{cachemiss_libs.to_a}"
+      PodPrebuild::StateStore.cache_validation = cache_validation
     end
 
     def install!
@@ -197,10 +147,6 @@ module PodPrebuild
       Pod::UI.puts "-----------------------------------------"
       Pod::UI.puts message
       Pod::UI.puts "-----------------------------------------"
-    end
-
-    def library_evolution_supported?
-      false
     end
   end
 end
