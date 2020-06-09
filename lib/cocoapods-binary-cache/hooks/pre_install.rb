@@ -92,9 +92,12 @@ module PodPrebuild
       @original_installer.resolve_dependencies
       specs = @original_installer.analysis_result.specifications
 
-      pods_with_empty_source_files = specs.select(&:empty_source_files?).map(&:name)
+      pods_with_empty_source_files = specs
+        .select(&:empty_source_files?)
+        .flat_map { |spec| [spec.name, spec.name.split("/")[0]] }
+        .to_set
       PodPrebuild::StateStore.excluded_pods += pods_with_empty_source_files
-      Pod::UI.puts "Exclude pods with empty source files: #{pods_with_empty_source_files}"
+      Pod::UI.puts "Exclude pods with empty source files: #{pods_with_empty_source_files.to_a}"
 
       # TODO (thuyen): Detect dependencies of a prebuilt pod and treat them as prebuilt pods as well
     end
