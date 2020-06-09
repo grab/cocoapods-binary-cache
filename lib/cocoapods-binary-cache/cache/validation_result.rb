@@ -2,13 +2,17 @@ module PodPrebuild
   class CacheValidationResult
     attr_reader :hit, :missed_with_reasons
 
-    def initialize(missed_with_reasons, hit)
+    def initialize(missed_with_reasons = {}, hit = Set.new)
       @missed_with_reasons = missed_with_reasons
       @hit = hit - missed_with_reasons.keys
     end
 
     def missed
       @missed_with_reasons.keys.to_set
+    end
+
+    def missed?(name)
+      @missed_with_reasons.key?(name)
     end
 
     def hit?(name)

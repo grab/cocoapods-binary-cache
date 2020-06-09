@@ -53,7 +53,8 @@ describe "Pod::Installer" do
 
     context "has cache miss" do
       before do
-        allow(Pod::Prebuild::CacheInfo).to receive(:is_cache_miss_pod?).with("A").and_return(true)
+        cache_validation = PodPrebuild::CacheValidationResult.new({ "A" => "missing" }, Set.new)
+        allow(PodPrebuild::StateStore).to receive(:cache_validation).and_return(cache_validation)
       end
 
       it "treats the missed pod as normal" do

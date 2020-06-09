@@ -48,7 +48,6 @@ module Pod
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
       return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
-      return true if !Pod::Podfile::DSL.prebuild_job && Pod::Prebuild::CacheInfo.is_cache_miss_pod?(name)
 
       cache_hit?(name)
     end
@@ -94,9 +93,7 @@ module Pod
         missing = unchanged.reject { |pod_name| exsited_framework_pod_names.include?(pod_name) }
 
         root_names_to_update = (added + changed + missing)
-        if Pod::Podfile::DSL.dev_pods_enabled && Pod::Podfile::DSL.prebuild_job
-          root_names_to_update += Pod::Prebuild::CacheInfo.cache_miss_dev_pods_dic.keys
-        end
+        root_names_to_update += PodPrebuild::StateStore.cache_validation.missed
 
         # transform names to targets
         cache = []
