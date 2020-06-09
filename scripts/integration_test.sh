@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-# set -o pipefail
 
 export WORKING_DIR=$(PWD)
 export INTEGRATION_TESTS_DIR="${WORKING_DIR}/integration_tests"
@@ -27,9 +26,7 @@ check_pod_install_when_prebuilt_disabled() {
 check_pod_install_when_prebuilt_enabled() {
   log_section "Checking pod install when prebuilt frameworks are ENABLED..."
 
-  export PREBUILD_VENDOR_PODS_JOB=true
   export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=true
 
   rm -rf Pods
   bundle exec pod install
@@ -53,9 +50,9 @@ check_xcodebuild_test() {
   log_section "Checking xcodebuild test..."
 
   if bundle exec xcpretty --version &> /dev/null; then
-    xcodebuild_test | bundle exec xcpretty
+    set -o pipefail && xcodebuild_test | bundle exec xcpretty
   elif which xcpretty &> /dev/null; then
-    xcodebuild_test | xcpretty
+    set -o pipefail && xcodebuild_test | xcpretty
   else
     xcodebuild_test
   fi
@@ -78,16 +75,47 @@ check_prebuilt_integration() {
 }
 
 run_test() {
+  local test_mode="${1:-all}"
   cd "${INTEGRATION_TESTS_DIR}"
-
-  check_pod_install_when_prebuilt_disabled
-  check_pod_install_when_prebuilt_enabled
-
-  check_prebuilt_integration
-  check_xcodebuild_test
+  echo "Running test with mode: ${test_mode}..."
+  case ${test_mode} in
+    flag-off ) run_test_flag_off ;;
+    flag-on ) run_test_flag_on ;;
+    prebuild-changes ) run_test_prebuild_changes ;;
+    prebuild-all ) run_test_prebuild_all ;;
+    all ) run_test_all ;;
+    * ) break ;;
+  esac
 }
 
+run_test_all() {
+  run_test_flag_off
+  run_test_flag_on
+  run_test_prebuild_all
+  run_test_prebuild_changes
+}
+run_test_flag_off() {
+  check_pod_install_when_prebuilt_disabled
+  check_xcodebuild_test
+}
+run_test_flag_on() {
+  check_pod_install_when_prebuilt_enabled
+  check_xcodebuild_test
+}
+run_test_prebuild_all() {
+  export PREBUILD_VENDOR_PODS_JOB=true
+  export FORCE_PREBUILD_ALL_VENDOR_PODS=true
+  run_test_flag_on
+  check_prebuilt_integration
+}
+run_test_prebuild_changes() {
+  echo "🚩 FIXME (thuyen): This test currently fails"
+  # export PREBUILD_VENDOR_PODS_JOB=true
+  # run_test_flag_on
+  # check_prebuilt_integration
+}
 # -------------------------
+
 echo "Working dir: ${WORKING_DIR}"
 echo "Integeration tests dir: ${INTEGRATION_TESTS_DIR}"
-run_test
+run_test "$1"
