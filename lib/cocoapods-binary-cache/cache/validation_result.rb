@@ -27,8 +27,9 @@ module PodPrebuild
     end
 
     def exclude_pods(names)
+      base_names = names.map { |name| name.split("/")[0] }.to_set
       should_exclude_pod = lambda do |pod_name|
-        names.any? { |name| pod_name == name || pod_name.start_with?(name + "/") }
+        base_names.include?(pod_name.split("/")[0])
       end
       PodPrebuild::CacheValidationResult.new(
         @missed_with_reasons.reject { |pod_name, _| should_exclude_pod.call(pod_name) },
