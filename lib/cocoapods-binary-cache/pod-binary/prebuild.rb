@@ -15,13 +15,7 @@ module Pod
     private
 
     def local_manifest
-      unless @local_manifest_inited
-        @local_manifest_inited = true
-        raise "This method should be call before generate project" unless analysis_result.nil?
-
-        @local_manifest = sandbox.manifest
-      end
-      @local_manifest
+      @local_manifest ||= sandbox.manifest
     end
 
     # @return [Analyzer::SpecsState]
