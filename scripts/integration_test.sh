@@ -26,7 +26,9 @@ check_pod_install_when_prebuilt_disabled() {
 check_pod_install_when_prebuilt_enabled() {
   log_section "Checking pod install when prebuilt frameworks are ENABLED..."
 
-  export ENABLE_PREBUILT_POD_LIBS=true
+  export PREBUILD_VENDOR_PODS_JOB=true
+  export ENABLE_PREBUILT_POD_LIBS=false
+  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
   rm -rf Pods
   bundle exec pod install
@@ -104,6 +106,7 @@ run_test_flag_on() {
 }
 run_test_prebuild_all() {
   export PREBUILD_VENDOR_PODS_JOB=true
+  export ENABLE_PREBUILT_POD_LIBS=true
   export FORCE_PREBUILD_ALL_VENDOR_PODS=true
   run_test_flag_on
   check_prebuilt_integration
@@ -111,6 +114,8 @@ run_test_prebuild_all() {
 run_test_prebuild_changes() {
   echo "🚩 FIXME (thuyen): This test currently fails"
   # export PREBUILD_VENDOR_PODS_JOB=true
+  # export ENABLE_PREBUILT_POD_LIBS=true
+  # export FORCE_PREBUILD_ALL_VENDOR_PODS=false
   # run_test_flag_on
   # check_prebuilt_integration
 }
