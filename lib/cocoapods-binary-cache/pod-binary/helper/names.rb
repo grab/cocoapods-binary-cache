@@ -17,6 +17,7 @@
 # Tool to transform Pod_name to target efficiently
 module Pod
   def self.fast_get_targets_for_pod_name(pod_name, targets, cache)
+    pod_name = pod_name.split("/")[0] # Look for parent spec instead of subspecs
     pod_name_to_targets_hash = nil
     if cache.empty?
       pod_name_to_targets_hash = targets.reduce({}) do |sum, target|

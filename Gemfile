@@ -1,24 +1,30 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-# Specify your gem's dependencies in cocoapods-binary-cache.gemspec
+# Specify your gem"s dependencies in cocoapods-binary-cache.gemspec
 gemspec
 
 group :development do
-  gem 'cocoapods'
-  gem 'mocha'
-  gem 'bacon'
-  gem 'mocha-on-bacon'
-  gem 'prettybacon'
+  gem "bacon"
+  gem "cocoapods"
+  gem "mocha"
+  gem "mocha-on-bacon"
+  gem "prettybacon"
 end
 
 group :test do
-  gem 'rspec'
+  gem "rspec"
 end
 
 group :integration_test do
-  gem 'xcpretty'
+  gem "xcpretty"
 end
 
 group :lint do
-  gem 'rubocop'
+  gem "rubocop"
+end
+
+group :debug do
+  gem "pry"
+  gem "pry-nav"
+  gem "pry-rescue"
 end

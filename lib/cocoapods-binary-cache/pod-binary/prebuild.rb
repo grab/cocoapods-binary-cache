@@ -92,10 +92,9 @@ module Pod
         # transform names to targets
         cache = []
         targets = root_names_to_update.map do |pod_name|
-          tars = Pod.fast_get_targets_for_pod_name(pod_name, pod_targets, cache)
-          if tars.nil? || tars.empty?
-            raise "There's no target named (#{pod_name}) in Pod.xcodeproj.\n #{pod_targets.map(&:name)}" if t.nil?
-          end
+          tars = Pod.fast_get_targets_for_pod_name(pod_name, pod_targets, cache) || []
+          raise "There's no target named (#{pod_name}) in Pod.xcodeproj" if tars.empty?
+
           tars
         end.flatten
 
