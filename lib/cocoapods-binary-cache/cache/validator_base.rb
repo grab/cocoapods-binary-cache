@@ -23,8 +23,6 @@ module PodPrebuild
     end
 
     def validate_with_podfile
-      return PodPrebuild::CacheValidationResult.new if @prebuilt_lockfile.nil? || @podfile.nil?
-
       changes = changes_of_prebuilt_lockfile_vs_podfile
       missed = changes.added.map { |pod| [pod, "Added from Podfile"] }.to_h
       missed.merge!(changes.changed.map { |pod| [pod, "Updated from Podfile"] }.to_h)
