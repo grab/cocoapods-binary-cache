@@ -105,7 +105,7 @@ module PodPrebuild
     def validate_cache
       prebuilt_lockfile = Pod::Lockfile.from_file(prebuild_sandbox.root + "Manifest.lock")
       @cache_validation = PodPrebuild::CacheValidator.new(
-        podfile: Pod::Podfile.from_ruby(podfile.defined_in_file),
+        podfile: podfile,
         pod_lockfile: installer_context.lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
@@ -120,7 +120,7 @@ module PodPrebuild
     def install!
       binary_installer = Pod::PrebuildInstaller.new(
         sandbox: prebuild_sandbox,
-        podfile: Pod::Podfile.from_ruby(podfile.defined_in_file),
+        podfile: podfile,
         lockfile: installer_context.lockfile,
         cache_validation: cache_validation
       )
