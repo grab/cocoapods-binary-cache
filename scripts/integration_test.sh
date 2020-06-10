@@ -15,20 +15,12 @@ log_section() {
 check_pod_install_when_prebuilt_disabled() {
   log_section "Checking pod install when prebuilt frameworks are DISABLED..."
 
-  export PREBUILD_VENDOR_PODS_JOB=false
-  export ENABLE_PREBUILT_POD_LIBS=false
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
-
   rm -rf Pods
   bundle exec pod install || bundle exec pod install --repo-update
 }
 
 check_pod_install_when_prebuilt_enabled() {
   log_section "Checking pod install when prebuilt frameworks are ENABLED..."
-
-  export PREBUILD_VENDOR_PODS_JOB=true
-  export ENABLE_PREBUILT_POD_LIBS=false
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
   rm -rf Pods
   bundle exec pod install
@@ -97,26 +89,38 @@ run_test_all() {
   run_test_prebuild_changes
 }
 run_test_flag_off() {
+  export ENABLE_PREBUILT_POD_LIBS=false
+  export PREBUILD_VENDOR_PODS_JOB=false
+  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
+
   check_pod_install_when_prebuilt_disabled
   check_xcodebuild_test
 }
 run_test_flag_on() {
+  export ENABLE_PREBUILT_POD_LIBS=true
+  export PREBUILD_VENDOR_PODS_JOB=false
+  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
+
   check_pod_install_when_prebuilt_enabled
   check_xcodebuild_test
 }
 run_test_prebuild_all() {
-  export PREBUILD_VENDOR_PODS_JOB=true
   export ENABLE_PREBUILT_POD_LIBS=true
+  export PREBUILD_VENDOR_PODS_JOB=true
   export FORCE_PREBUILD_ALL_VENDOR_PODS=true
-  run_test_flag_on
+
+  check_pod_install_when_prebuilt_enabled
+  check_xcodebuild_test
   check_prebuilt_integration
 }
 run_test_prebuild_changes() {
   echo "🚩 FIXME (thuyen): This test currently fails"
-  # export PREBUILD_VENDOR_PODS_JOB=true
   # export ENABLE_PREBUILT_POD_LIBS=true
+  # export PREBUILD_VENDOR_PODS_JOB=true
   # export FORCE_PREBUILD_ALL_VENDOR_PODS=false
-  # run_test_flag_on
+
+  # check_pod_install_when_prebuilt_enabled
+  # check_xcodebuild_test
   # check_prebuilt_integration
 }
 # -------------------------
