@@ -26,6 +26,14 @@ module PodPrebuild
       )
     end
 
+    def update_to(path)
+      FileUtils.mkdir_p(File.dirname(path))
+      json_file = PodPrebuild::JSONFile.new(path)
+      json_file["cache_missed"] = missed.to_a
+      json_file["cache_hit"] = hit.to_a
+      json_file.save!
+    end
+
     def exclude_pods(names)
       base_names = names.map { |name| name.split("/")[0] }.to_set
       should_exclude_pod = lambda do |pod_name|

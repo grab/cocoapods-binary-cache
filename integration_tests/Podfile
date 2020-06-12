@@ -31,7 +31,8 @@ if enabled_prebuilt_pods
   config_cocoapods_binary_cache(
     prebuild_job: ENV["PREBUILD_VENDOR_PODS_JOB"] == "true",
     prebuild_all_vendor_pods: ENV["FORCE_PREBUILD_ALL_VENDOR_PODS"] == "true",
-    excluded_pods: []
+    excluded_pods: [],
+    save_cache_validation_to: ".stats/cocoapods_binary_cache.json"
   )
 end
 
