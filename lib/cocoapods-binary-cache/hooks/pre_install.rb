@@ -113,6 +113,8 @@ module PodPrebuild
         sandbox_root: prebuild_sandbox.root,
         ignored_pods: PodPrebuild::StateStore.excluded_pods
       ).validate
+      path_to_save_cache_validation = Pod::Podfile::DSL.save_cache_validation_to
+      @cache_validation.update_to(path_to_save_cache_validation) unless path_to_save_cache_validation.nil?
       cache_validation.print_summary
       PodPrebuild::StateStore.cache_validation = cache_validation
     end

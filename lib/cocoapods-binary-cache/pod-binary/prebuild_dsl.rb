@@ -19,6 +19,7 @@ module Pod
         apply_config.call(:dont_remove_source_code)
         apply_config.call(:custom_device_build_options)
         apply_config.call(:custom_simulator_build_options)
+        apply_config.call(:save_cache_validation_to)
         apply_config.call(:validate_prebuilt_settings)
       end
 
@@ -31,6 +32,7 @@ module Pod
       @dont_remove_source_code = false
       @custom_device_build_options = []
       @custom_simulator_build_options = []
+      @save_cache_validation_to = nil
       # A proc to validate the provided build settings (per target) with the build settings of the prebuilt frameworks
       # For example, in Podfile:
       # -----------------------------------------------
@@ -53,6 +55,7 @@ module Pod
         attr_accessor :dont_remove_source_code
         attr_accessor :custom_device_build_options
         attr_accessor :custom_simulator_build_options
+        attr_accessor :save_cache_validation_to
         attr_accessor :validate_prebuilt_settings
       end
     end
