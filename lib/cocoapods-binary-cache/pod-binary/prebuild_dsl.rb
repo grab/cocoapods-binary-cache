@@ -57,6 +57,11 @@ module Pod
         attr_accessor :custom_simulator_build_options
         attr_accessor :save_cache_validation_to
         attr_accessor :validate_prebuilt_settings
+
+        alias prebuild_job? prebuild_job
+        alias prebuild_all? prebuild_all
+        alias prebuild_all_vendor_pods? prebuild_all_vendor_pods
+        alias dev_pods_enabled? dev_pods_enabled
       end
     end
   end
