@@ -16,7 +16,7 @@ check_pod_install_when_prebuilt_disabled() {
   log_section "Checking pod install when prebuilt frameworks are DISABLED..."
 
   rm -rf Pods
-  bundle exec pod install || bundle exec pod install --repo-update
+  bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 
 check_pod_install_when_prebuilt_enabled() {
@@ -24,7 +24,7 @@ check_pod_install_when_prebuilt_enabled() {
 
   rm -rf Pods
   bundle exec pod binary-cache --cmd=fetch
-  bundle exec pod install || bundle exec pod install --repo-update
+  bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 
 xcodebuild_test() {
