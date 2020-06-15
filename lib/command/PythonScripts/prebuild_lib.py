@@ -59,11 +59,14 @@ class PrebuildLib:
             ZipUtils.zip_dir(self.generated_path + '/' + dir, self.cache_libs_path + '/' + dir + '.zip')
         FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
 
-    def clean_and_pull(self, git_repo_dir, branch='master'):
-        subprocess.run(['git', '-C', git_repo_dir, 'reset', '--hard'])
-        subprocess.run(['git', '-C', git_repo_dir, 'clean', '-df'])
-        subprocess.run(['git', '-C', git_repo_dir, 'checkout', branch])
-        subprocess.run(['git', '-C', git_repo_dir, 'pull', '-X', 'theirs'])
+    def clean_and_pull(self, repo_dir, branch='master'):
+        def git(*cmd, **kwargs):
+            subprocess.run(['git', '-C', repo_dir] + list(cmd), **kwargs)
+
+        git('fetch', 'origin', branch, check=True)
+        git('checkout', '-f', f'FETCH_HEAD', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        git('branch', '-D', branch, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        git('checkout', '-b', branch, check=True)
 
     def fetch_cache(self, branch='master'):
         logger.info(f'Fetch cache to {self.cache_path} (branch: {branch})')
@@ -78,7 +81,7 @@ class PrebuildLib:
                     f'--branch={branch}',
                     self.cache_repo,
                     self.cache_path
-                ])
+                ], check=True)
 
     def unzip_cache(self):
         logger.info(f'Unzip cache, from {self.cache_libs_path} to {self.generated_path}')
