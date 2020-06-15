@@ -1,8 +1,6 @@
 require 'fourflusher'
-require 'xcpretty'
-require_relative '../prebuild_config'
+require 'xcpretty' # TODO (thuyen): Revise this dependency
 
-CONFIGURATION = PrebuildConfig.CONFIGURATION
 PLATFORMS = { 'iphonesimulator' => 'iOS',
               'appletvsimulator' => 'tvOS',
               'watchsimulator' => 'watchOS' }
@@ -15,6 +13,7 @@ def build_for_iosish_platform(sandbox,
                               build_dir, 
                               output_path,
                               target, 
+                              configuration,
                               device, 
                               simulator,
                               bitcode_enabled,
@@ -37,12 +36,19 @@ def build_for_iosish_platform(sandbox,
   # paths
   target_name = target.name # equals target.label, like "AFNeworking-iOS" when AFNetworking is used in multiple platforms.
   module_name = target.product_module_name
-  device_framework_path = "#{build_dir}/#{CONFIGURATION}-#{device}/#{target_name}/#{module_name}.framework"
-  simulator_framework_path = "#{build_dir}/#{CONFIGURATION}-#{simulator}/#{target_name}/#{module_name}.framework"
-  simulator_target_products_path = "#{build_dir}/#{CONFIGURATION}-#{simulator}/#{target_name}"
+  device_framework_path = "#{build_dir}/#{configuration}-#{device}/#{target_name}/#{module_name}.framework"
+  simulator_framework_path = "#{build_dir}/#{configuration}-#{simulator}/#{target_name}/#{module_name}.framework"
+  simulator_target_products_path = "#{build_dir}/#{configuration}-#{simulator}/#{target_name}"
 
   if !Dir.exist?(simulator_framework_path)
-    is_succeed, _ = xcodebuild(sandbox, target_label, simulator, deployment_target, other_options + custom_build_options_simulator)
+    is_succeed, = xcodebuild(
+      sandbox,
+      target_label,
+      configuration,
+      simulator,
+      deployment_target,
+      other_options + custom_build_options_simulator
+    )
     raise "Build simulator framework failed: #{target_label}" unless is_succeed
   else
     puts "Simulator framework already exist at: #{simulator_framework_path}"
@@ -54,7 +60,14 @@ def build_for_iosish_platform(sandbox,
   end
 
   if !Dir.exist?(device_framework_path)
-    is_succeed, _ = xcodebuild(sandbox, target_label, device, deployment_target, other_options + custom_build_options)
+    is_succeed, = xcodebuild(
+      sandbox,
+      target_label,
+      configuration,
+      device,
+      deployment_target,
+      other_options + custom_build_options
+    )
     raise "Build device framework failed: #{target_label}" unless is_succeed
   else
     puts "Device framework already exist at: #{device_framework_path}"
@@ -122,8 +135,8 @@ def build_for_iosish_platform(sandbox,
 
 end
 
-def xcodebuild(sandbox, target, sdk='macosx', deployment_target=nil, other_options=[])
-  args = %W(-project #{sandbox.project_path.realdirpath} -scheme #{target} -configuration #{CONFIGURATION} -sdk #{sdk} )
+def xcodebuild(sandbox, target, configuration, sdk='macosx', deployment_target=nil, other_options=[])
+  args = %W(-project #{sandbox.project_path.realdirpath} -scheme #{target} -configuration #{configuration} -sdk #{sdk} )
   platform = PLATFORMS[sdk]
   args += Fourflusher::SimControl.new.destination(:oldest, platform, deployment_target) unless platform.nil?
   args += other_options
@@ -164,60 +177,70 @@ module Pod
     #
     # @param  [String] sandbox_root_path
     #         The sandbox root path where the targets project place
-    #         
+    #
     #         [PodTarget] target
     #         The pod targets to build
     #
     #         [Pathname] output_path
     #         output path for generated frameworks
     #
-    def self.build(sandbox_root_path, target, output_path, bitcode_enabled = false, custom_build_options=[], custom_build_options_simulator=[])
-    
+    def self.build(sandbox_root_path, target, configuration, output_path, bitcode_enabled = false, custom_build_options=[], custom_build_options_simulator=[])
       return if target.nil?
-    
+
       sandbox_root = Pathname(sandbox_root_path)
       sandbox = Pod::Sandbox.new(sandbox_root)
       build_dir = self.build_dir(sandbox_root)
 
       # -- build the framework
       case target.platform.name
-      when :ios then build_for_iosish_platform(sandbox, build_dir, output_path, target, 'iphoneos', 'iphonesimulator', bitcode_enabled, custom_build_options, custom_build_options_simulator)
-      when :osx then xcodebuild(sandbox, target.label, 'macosx', nil, custom_build_options)
+      when :ios
+        build_for_iosish_platform(
+          sandbox,
+          build_dir,
+          output_path,
+          target,
+          configuration,
+          "iphoneos",
+          "iphonesimulator",
+          bitcode_enabled,
+          custom_build_options,
+          custom_build_options_simulator
+        )
+      when :osx
+        xcodebuild(
+          sandbox,
+          target.label,
+          configuration,
+          "macosx",
+          nil,
+          custom_build_options
+        )
       # when :tvos then build_for_iosish_platform(sandbox, build_dir, target, 'appletvos', 'appletvsimulator')
-      when :watchos then build_for_iosish_platform(sandbox, build_dir, output_path, target, 'watchos', 'watchsimulator', true, custom_build_options, custom_build_options_simulator)
+      when :watchos
+        build_for_iosish_platform(
+          sandbox,
+          build_dir,
+          output_path,
+          target,
+          configuration,
+          "watchos",
+          "watchsimulator",
+          true,
+          custom_build_options,
+          custom_build_options_simulator
+        )
       else raise "Unsupported platform for '#{target.name}': '#{target.platform.name}'" end
-    
-      raise Pod::Informative, 'The build directory was not found in the expected location.' unless build_dir.directory?
 
-      # # --- copy the vendored libraries and framework
-      # frameworks = build_dir.children.select{ |path| File.extname(path) == ".framework" }
-      # Pod::UI.puts "Built #{frameworks.count} #{'frameworks'.pluralize(frameworks.count)}"
-    
-      # pod_target = target
-      # consumer = pod_target.root_spec.consumer(pod_target.platform.name)
-      # file_accessor = Pod::Sandbox::FileAccessor.new(sandbox.pod_dir(pod_target.pod_name), consumer)
-      # frameworks += file_accessor.vendored_libraries
-      # frameworks += file_accessor.vendored_frameworks
-
-      # frameworks.uniq!
-    
-      # frameworks.each do |framework|
-      #   FileUtils.mkdir_p destination
-      #   FileUtils.cp_r framework, destination, :remove_destination => true
-      # end
-      # build_dir.rmtree if build_dir.directory?
+      raise Pod::Informative, "The build directory was not found in the expected location" unless build_dir.directory?
     end
-    
+
     def self.remove_build_dir(sandbox_root)
       path = build_dir(sandbox_root)
       path.rmtree if path.exist?
     end
 
-    private 
-    
     def self.build_dir(sandbox_root)
-      # don't know why xcode chose this folder
-      sandbox_root.parent + 'build' 
+      sandbox_root.parent + "build"
     end
 
   end

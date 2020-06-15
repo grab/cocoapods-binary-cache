@@ -1,5 +1,4 @@
 require_relative "tool/tool"
-require_relative "../prebuild_config"
 
 module Pod
   class Podfile
@@ -9,7 +8,7 @@ module Pod
           DSL.send("#{config}=", options[config]) unless options[config].nil?
         end
 
-        PrebuildConfig.CONFIGURATION = options[:prebuild_config] || "Debug"
+        apply_config.call(:prebuild_config)
         apply_config.call(:prebuild_job)
         apply_config.call(:prebuild_all) # TODO (thuyen): Revise this option
         apply_config.call(:prebuild_all_vendor_pods)
@@ -23,6 +22,7 @@ module Pod
         apply_config.call(:validate_prebuilt_settings)
       end
 
+      @prebuild_config = "Debug"
       @prebuild_job = false
       @prebuild_all = false
       @prebuild_all_vendor_pods = false
@@ -46,6 +46,7 @@ module Pod
       @validate_prebuilt_settings = nil
 
       class << self
+        attr_accessor :prebuild_config
         attr_accessor :prebuild_job
         attr_accessor :prebuild_all
         attr_accessor :prebuild_all_vendor_pods

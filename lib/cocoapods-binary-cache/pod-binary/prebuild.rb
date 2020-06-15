@@ -125,10 +125,11 @@ module Pod
         Pod::Prebuild.build(
           sandbox_path,
           target,
+          Pod::Podfile::DSL.prebuild_config,
           output_path,
           bitcode_enabled,
-          Podfile::DSL.custom_device_build_options,
-          Podfile::DSL.custom_simulator_build_options
+          Pod::Podfile::DSL.custom_device_build_options,
+          Pod::Podfile::DSL.custom_simulator_build_options
         )
         collect_metadata(target, output_path)
       end
@@ -216,7 +217,7 @@ module Pod
       metadata.build_settings = pods_project.targets
         .detect { |native_target| native_target.name == target.name }
         .build_configurations
-        .detect { |config| config.name == PrebuildConfig.CONFIGURATION }
+        .detect { |config| config.name == Pod::Podfile::DSL.prebuild_config }
         .build_settings
       metadata.save!
     end
