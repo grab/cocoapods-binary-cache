@@ -153,14 +153,10 @@ module Pod
 
     def should_integrate_prebuilt_pod?(name)
       if Pod::Podfile::DSL.prebuild_job?
-        # For prebuild job, at the integration stage, all prebuilt frameworks are ready to be integrated
-        # TODO (thuyen): Issue with `prebuild_pod_names`
-        # - `prebuild_pod_names` should not be related to whether a pod will be prebuilt (in prebuild job),
-        #   it should only represent what pods are declared as prebuilt pods (:binary => true)
-        # --> Define the responsibility clearly
-        prebuild_pod_names
-          .reject { |pod| PodPrebuild::StateStore.excluded_pods.include?(pod) }
-          .include?(name)
+        # In a prebuild job, at the integration stage, all prebuilt frameworks should be
+        # ready for integration regardless of whether there was any cache miss or not.
+        # Those that are missed were prebuilt in the prebuild stage.
+        PodPrebuild::StateStore.cache_validation.include?(name)
       else
         PodPrebuild::StateStore.cache_validation.hit?(name)
       end

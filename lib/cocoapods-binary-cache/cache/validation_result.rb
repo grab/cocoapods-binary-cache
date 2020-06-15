@@ -19,6 +19,10 @@ module PodPrebuild
       @hit.include?(name)
     end
 
+    def include?(name)
+      missed?(name) || hit?(name)
+    end
+
     def merge(other)
       PodPrebuild::CacheValidationResult.new(
         @missed_with_reasons.merge(other.missed_with_reasons),
