@@ -90,11 +90,6 @@ module Pod
       end
     end
 
-    # the root names who needs prebuild, including dependency pods.
-    def prebuild_pod_names
-      @prebuild_pod_names ||= prebuild_pod_targets.map(&:pod_name)
-    end
-
     def validate_every_pod_only_have_one_form
       multi_targets_pods = self.pod_targets.group_by do |t|
         t.pod_name

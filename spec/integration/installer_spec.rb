@@ -34,7 +34,6 @@ describe "Pod::Installer" do
       @installer = Pod::Installer.new(sandbox, podfile, pod_lockfile)
       @installer.instance_variable_set(:@installed_specs, [])
       allow(@installer).to receive(:create_pod_installer).and_return(@source_installer)
-      allow(@installer).to receive(:prebuild_pod_names).and_return(prebuilt_pod_names)
       allow(@source_installer).to receive_message_chain(:specs_by_platform, :values).and_return([])
     end
 
