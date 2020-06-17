@@ -4,7 +4,7 @@ module PodPrebuild
 
     def initialize(missed_with_reasons = {}, hit = Set.new)
       @missed_with_reasons = missed_with_reasons
-      @hit = hit - missed_with_reasons.keys
+      @hit = hit.to_set - missed_with_reasons.keys
     end
 
     def missed
@@ -38,19 +38,29 @@ module PodPrebuild
       json_file.save!
     end
 
-    def exclude_pods(names)
+    def keep(names)
       base_names = names.map { |name| name.split("/")[0] }.to_set
-      should_exclude_pod = lambda do |pod_name|
-        base_names.include?(pod_name.split("/")[0])
-      end
+      select { |name| base_names.include?(name.split("/")[0]) }
+    end
+
+    def discard(names)
+      base_names = names.map { |name| name.split("/")[0] }.to_set
+      reject { |name| base_names.include?(name.split("/")[0]) }
+    end
+
+    def select(&predicate)
       PodPrebuild::CacheValidationResult.new(
-        @missed_with_reasons.reject { |pod_name, _| should_exclude_pod.call(pod_name) },
-        @hit.reject { |pod_name| should_exclude_pod.call(pod_name) }.to_set
+        @missed_with_reasons.select { |name, _| predicate.call(name) },
+        @hit.select(&predicate)
       )
     end
 
+    def reject(&predicate)
+      select { |name| !predicate.call(name) }
+    end
+
     def print_summary
-      Pod::UI.puts "Cache validation: hit #{@hit.to_a}"
+      Pod::UI.puts "Cache validation: hit (#{@hit.count}) #{@hit.to_a}"
       @missed_with_reasons.each do |name, reason|
         Pod::UI.puts "Cache validation: missed #{name}. Reason: #{reason}".yellow
       end
