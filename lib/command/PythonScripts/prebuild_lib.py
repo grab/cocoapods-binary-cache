@@ -125,7 +125,7 @@ class PrebuildLib:
 
     def prebuild_if_needed(self, push=True, branch='master'):
         self.fetch_and_apply_cache(branch=branch)
-        self.pod_install_update_if_needed()
+        self.pod_install_update_if_needed(try_repo_update=True)
         # Sync with cache directory
 
         if not os.path.isfile(self.delta_path):

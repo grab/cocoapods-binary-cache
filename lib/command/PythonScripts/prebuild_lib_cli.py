@@ -25,7 +25,7 @@ def main():
     elif args.cmd == 'fetch_devpod':
       prebuild_lib.fetch_and_apply_devpod_cache()
     elif args.cmd == 'prebuild_devpod':
-      prebuild_lib.prebuild_devpod()
+      prebuild_lib.prebuild_devpod(try_repo_update=True)
     elif args.cmd == 'prebuild_devpod_and_push':
       prebuild_lib.prebuild_devpod(push=True, try_repo_update=True)
     else:
