@@ -47,12 +47,8 @@ module PodPrebuild
 
     def ensure_valid_podfile
       podfile.target_definition_list.each do |target_definition|
-        next if target_definition.prebuild_framework_pod_names.empty?
-
-        unless target_definition.uses_frameworks?
-          warn "[!] Cocoapods-binary requires `use_frameworks!`".red
-          exit
-        end
+        next if target_definition.explicit_prebuilt_pod_names.empty?
+        raise "cocoapods-binary-cache requires `use_frameworks!`" unless target_definition.uses_frameworks?
       end
     end
 
@@ -95,6 +91,7 @@ module PodPrebuild
         .group_by { |spec| spec.name.split("/")[0] }
         .select { |_, specs| specs.all?(&:empty_source_files?) }
         .keys
+
       PodPrebuild::StateStore.excluded_pods += pods_with_empty_source_files
       Pod::UI.puts "Exclude pods with empty source files: #{pods_with_empty_source_files.to_a}"
 
@@ -110,7 +107,8 @@ module PodPrebuild
         validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path,
         sandbox_root: prebuild_sandbox.root,
-        ignored_pods: PodPrebuild::StateStore.excluded_pods
+        ignored_pods: PodPrebuild::StateStore.excluded_pods,
+        prebuilt_pod_names: @original_installer.prebuilt_pod_names
       ).validate
       path_to_save_cache_validation = Pod::Podfile::DSL.save_cache_validation_to
       @cache_validation.update_to(path_to_save_cache_validation) unless path_to_save_cache_validation.nil?

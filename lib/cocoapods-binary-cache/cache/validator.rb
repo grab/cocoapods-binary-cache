@@ -8,13 +8,14 @@ module PodPrebuild
       ]
       @validators << PodPrebuild::DevPodsCacheValidator.new(options) if Pod::Podfile::DSL.dev_pods_enabled
       @validators << PodPrebuild::DependenciesGraphCacheValidator.new(options)
+      @validators << PodPrebuild::ExclusionCacheValidator.new(options)
     end
 
     def validate(*)
-      validation = @validators.reduce(PodPrebuild::CacheValidationResult.new) do |acc, validator|
-        acc.merge(validator.validate(acc))
+      @validators.reduce(PodPrebuild::CacheValidationResult.new) do |acc, validator|
+        validation = validator.validate(acc)
+        validator.is_a?(AccumulatedCacheValidator) ? validation : acc.merge(validation)
       end
-      validation.exclude_pods(@ignored_pods)
     end
   end
 end

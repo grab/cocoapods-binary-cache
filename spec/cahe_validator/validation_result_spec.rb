@@ -30,7 +30,7 @@ describe "PodPrebuild::CacheValidationResult" do
     end
     let(:excluded_pods) { Set.new }
     before do
-      @excluded = PodPrebuild::CacheValidationResult.new(*data).exclude_pods(excluded_pods)
+      @excluded = PodPrebuild::CacheValidationResult.new(*data).discard(excluded_pods)
     end
 
     context "excludes pods without subspec" do

@@ -22,7 +22,7 @@ describe "PodPrebuild::PodfileChangesCacheValidator" do
 
     before do
       allow(Pod::Podfile::DSL).to receive(:dev_pods_enabled).and_return(dev_pods_enabled)
-      validation_result = PodPrebuild::CacheValidator.new(
+      validation_result = PodPrebuild::PodfileChangesCacheValidator.new(
         podfile: podfile,
         prebuilt_lockfile: prebuilt_lockfile
       ).validate
@@ -33,14 +33,6 @@ describe "PodPrebuild::PodfileChangesCacheValidator" do
     it "returns changes as missed" do
       expect(@missed).to eq(Set["A", "D", "E"])
       expect(@hit).to eq(Set["B", "C"])
-    end
-
-    context "dev pods is disabled" do
-      let(:dev_pods_enabled) { false }
-      it "excludes changes for local pods" do
-        expect(@missed).to eq(Set["A", "D"])
-        expect(@hit).to eq(Set["B", "C"])
-      end
     end
   end
 end
