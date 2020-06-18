@@ -1,4 +1,4 @@
-require "cocoapods-binary-cache/pod-binary/integration/installer"
+require "cocoapods-binary-cache/pod-binary/integration/patch/source_installation"
 
 describe "Pod::Installer" do
   describe "#install_source_of_pod" do
