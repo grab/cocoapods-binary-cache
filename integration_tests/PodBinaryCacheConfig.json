@@ -4,7 +4,7 @@
   "cache_path": "~/Library/Caches/CocoaPods/PrebuiltPodIntegration-libs/",
   "prebuild_path": "Pods/_Prebuild/",
   "generated_dir_name": "GeneratedFrameworks/",
-  "delta_path": "Pods/_Prebuild_delta/changes.txt",
+  "delta_path": "Pods/_Prebuild_delta/changes.json",
   "manifest_file": "Manifest.lock",
   "devpod_cache_repo": "git@gitlab.myteksi.net:mobile/dax-ios/dax-ios-dev-pods-cache.git",
   "devpod_cache_path": "~/Library/Caches/CocoaPods/dax-ios-dev-pods-cache/",

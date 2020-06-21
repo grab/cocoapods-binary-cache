@@ -2,7 +2,7 @@
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
 import subprocess
-import re
+import json
 import os
 import glob
 from utils.fileutils import FileUtils
@@ -132,29 +132,14 @@ class PrebuildLib:
             logger.info('No change in prebuilt frameworks')
             return
         try:
+            FileUtils.create_dir(self.cache_path)
             with open(self.delta_path) as f:
-                FileUtils.create_dir(self.cache_path)
-                data = f.read()
-                data = re.sub('"', '', data)
-                updatedMatches = re.findall(r'Updated: \[(.*)\]', data)
-                if updatedMatches:
-                    updated = updatedMatches[0].strip()
-                    logger.info("Updated frameworks: {}".format(updated))
-                    if len(updated):
-                        libs = updated.split(',')
-                        for lib in libs:
-                            libName = lib.strip()
-                            self.clean_cache(libName)
-                            self.zip_to_cache(libName)
-
-                match = re.findall(r'Deleted: \[(.*)\]', data)
-                if match:
-                    deleted = match[0].strip()
-                    if len(deleted):
-                        logger.info('Deleted frameworks: {}'.format(deleted))
-                        libs = deleted.split(',')
-                        for lib in libs:
-                            self.clean_cache(lib.strip())
+                changes = json.load(f)
+                for pod in changes['deleted']:
+                    self.clean_cache(pod)
+                for pod in changes['updated']:
+                    self.clean_cache(pod)
+                    self.zip_to_cache(pod)
                 # Copy manifest file
                 FileUtils.copy_file_or_dir(self.prebuild_path + self.manifest_file, self.cache_path)
                 if push:

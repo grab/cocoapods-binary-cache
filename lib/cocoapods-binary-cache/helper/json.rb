@@ -10,6 +10,10 @@ module PodPrebuild
       @data = load_json
     end
 
+    def empty?
+      @data.empty?
+    end
+
     def [](key)
       @data[key]
     end
