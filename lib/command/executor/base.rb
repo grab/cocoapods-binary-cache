@@ -13,7 +13,7 @@ module PodPrebuild
       `#{comps.join(" ")}`
     end
 
-    def git_clone(cmd, options)
+    def git_clone(cmd, options = {})
       git("clone #{cmd}", options.merge(:cache_repo => false))
     end
   end
