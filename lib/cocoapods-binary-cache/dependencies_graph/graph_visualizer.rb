@@ -61,7 +61,12 @@ module RGL
       end
 
       unless system("dot -T#{fmt} #{src} -o #{dot}")
-        raise "Error executing dot. Did you install GraphViz?"
+        message = <<-HEREDOC # Use <<- to indent End of String terminator
+          Error executing dot. Did you install GraphViz?
+          Try installing it via Homebrew: `brew install graphviz`.
+          Visit https://graphviz.org/download/ for more installation instructions.
+        HEREDOC
+        raise message
       end
       dot
     end

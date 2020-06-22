@@ -23,7 +23,7 @@ check_pod_install_when_prebuilt_enabled() {
   log_section "Checking pod install when prebuilt frameworks are ENABLED..."
 
   rm -rf Pods
-  bundle exec pod binary-cache --cmd=fetch
+  bundle exec pod binary fetch --ansi
   bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 

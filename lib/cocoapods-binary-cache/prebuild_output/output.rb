@@ -8,15 +8,16 @@ module PodPrebuild
     end
 
     def delta_dir
-      "#{@sandbox.root}/../_Prebuild_delta"
+      @delta_dir ||= File.expand_path("#{@sandbox.root}/../_Prebuild_delta")
     end
 
     def delta_file_path
-      "#{delta_dir}/changes.txt"
+      # TODO (thuyen): Unify this path with PodPrebuild::Config#delta_file_path
+      "#{delta_dir}/changes.json"
     end
 
     def clean_delta_file
-      puts "clean_delta_file: #{delta_file_path}"
+      puts "Clean delta file: #{delta_file_path}"
       FileUtils.rm_rf(delta_file_path)
     end
 
@@ -26,17 +27,17 @@ module PodPrebuild
 
     # Input 2 arrays of library names
     def write_delta_file(updated, deleted)
-      if !updated.empty? || !deleted.empty?
-        create_dir_if_needed(delta_dir)
-        file_path = delta_file_path
-        File.open(file_path, "w+") do |line|
-          line.puts "Updated: #{updated}"
-          line.puts "Deleted: #{deleted}"
-        end
-        Pod::UI.puts "Pod prebuild changes were writen to file: #{file_path}"
-      else
+      if updated.empty? && deleted.empty?
         Pod::UI.puts "No changes in prebuild"
+        return
       end
+
+      Pod::UI.puts "Write prebuild changes to: #{delta_file_path}"
+      create_dir_if_needed(delta_dir)
+      changes = PodPrebuild::JSONFile.new(delta_file_path)
+      changes["updated"] = updated
+      changes["deleted"] = deleted
+      changes.save!
     end
 
     def process_prebuilt_dev_pods
