@@ -52,14 +52,6 @@ module Pod
       @prebuild_output ||= PodPrebuild::Output.new(sandbox)
     end
 
-    # The install method when have completed cache
-    def install_when_cache_hit!
-      # just print log
-      sandbox.exsited_framework_target_names.each do |name|
-        UI.puts "Using #{name}"
-      end
-    end
-
     # Build the needed framework files
     def prebuild_frameworks!
       UI.puts "Start prebuild_frameworks"

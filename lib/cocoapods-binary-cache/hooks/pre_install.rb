@@ -23,7 +23,7 @@ module PodPrebuild
       create_prebuild_sandbox
       Pod::UI.section("Detect implicit dependencies") { detect_implicit_dependencies }
       Pod::UI.section("Validate prebuilt cache") { validate_cache }
-      install!
+      prebuild! if Pod::Podfile::DSL.prebuild_job?
       reset_environment
       log_section "🤖  Resume pod installation"
       require_relative "../pod-binary/integration"
@@ -116,32 +116,19 @@ module PodPrebuild
       PodPrebuild::StateStore.cache_validation = cache_validation
     end
 
-    def install!
+    def prebuild!
       binary_installer = Pod::PrebuildInstaller.new(
         sandbox: prebuild_sandbox,
         podfile: podfile,
         lockfile: installer_context.lockfile,
         cache_validation: cache_validation
       )
+      binary_installer.update = @pod_install_options[:update]
+      binary_installer.repo_update = @pod_install_options[:repo_update]
 
-      binary_installer.clean_delta_file
-
-      installer_exec = lambda do
-        binary_installer.update = @pod_install_options[:update]
-        binary_installer.repo_update = @pod_install_options[:repo_update]
+      Pod::UI.title("Prebuilding...") do
+        binary_installer.clean_delta_file
         binary_installer.install!
-      end
-
-      if Pod::Podfile::DSL.prebuild_all_vendor_pods
-        Pod::UI.puts "Prebuild all vendor pods"
-        installer_exec.call
-      elsif !@pod_install_options[:update] && cache_validation.missed.empty?
-        # If not in prebuild job, we never rebuild and just use cache
-        Pod::UI.puts "Cache hit"
-        binary_installer.install_when_cache_hit!
-      else
-        Pod::UI.puts "Cache miss -> need to update: #{cache_validation.missed.to_a}"
-        installer_exec.call
       end
     end
 
