@@ -96,7 +96,7 @@ It will build frameworks and push to the cache repo and also install prebuilt fr
 - Other members in your team don't need to build again, they just need to fetch prebuilt frameworks from cache and use the project as normal:
 
 ```
-$ pod binary-cache --cmd=fetch
+$ bundle exec pod binary-cache --cmd=fetch
 $ bundle exec pod install
 ```
 
@@ -109,7 +109,7 @@ $ bundle exec pod install
 // In .gitlab-ci.yml file
 prebuild_pod:
   script:
-    - $ pod binary-cache --cmd=prebuild
+    - $ bundle exec pod binary-cache --cmd=prebuild
   only:
     variables:
       - $IS_PREBUILD_DEVPOD_JOB == "true"
