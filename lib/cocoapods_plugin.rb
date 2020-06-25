@@ -3,4 +3,3 @@
 
 require "cocoapods-binary-cache/main"
 require "command/binary"
-require "command/binary_cache_deprecated"
