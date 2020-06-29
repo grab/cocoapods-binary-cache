@@ -39,6 +39,7 @@ module PodPrebuild
     end
 
     def zip_to_cache(pods_to_update)
+      FileUtils.mkdir_p(@config.generated_frameworks_dir(in_cache: true))
       pods_to_update.each do |pod|
         Pod::UI.puts "- Update cache: #{pod}"
         ZipUtils.zip(

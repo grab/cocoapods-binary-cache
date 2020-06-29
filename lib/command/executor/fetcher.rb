@@ -35,7 +35,12 @@ module PodPrebuild
       FileUtils.rm_rf(@config.prebuild_path)
       FileUtils.mkdir_p(@config.prebuild_path)
 
-      FileUtils.cp(@config.manifest_path(in_cache: true), @config.manifest_path)
+      if File.exist?(@config.manifest_path(in_cache: true))
+        FileUtils.cp(
+          @config.manifest_path(in_cache: true),
+          @config.manifest_path
+        )
+      end
       Dir[@config.generated_frameworks_dir(in_cache: true) + "/*.zip"].each do |path|
         ZipUtils.unzip(path, to_dir: @config.generated_frameworks_dir)
       end
