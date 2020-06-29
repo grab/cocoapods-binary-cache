@@ -6,7 +6,7 @@ module PodPrebuild
 
     def initialize(path)
       @data = PodPrebuild::JSONFile.new(path)
-      @cache_repo = @data["prebuilt_cache_repo"]
+      @cache_repo = @data["cache_repo"] || @data["prebuilt_cache_repo"]
       @cache_path = File.expand_path(@data["cache_path"])
       @prebuild_path = @data["prebuild_path"] || "Pods/_Prebuild"
     end
