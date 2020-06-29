@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['bang.nguyen@grabtaxi.com']
   spec.description   = %q{Reduce build time by building pod frameworks and cache to remote storage, reuse on multiple machines}
   spec.summary       = %q{Reduce build time by building pod frameworks and cache to remote storage, reuse on multiple machines}
-  spec.homepage      = 'https://github.com/update_later'
+  spec.homepage      = 'https://github.com/grab/cocoapods-binary-cache'
   spec.license       = 'MIT'
 
   spec.files         = Dir['lib/**/*']

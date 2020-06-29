@@ -21,6 +21,12 @@ Then, run `bundle install` to install the added gem.
 
 In case you're not familiar with [`bundler`](https://bundler.io/), take a look at [Learn how to set it up here](https://www.mokacoding.com/blog/ruby-for-ios-developers-bundler/).
 
+### Via [RubyGems](https://rubygems.org/)
+
+```sh
+$ gem install cocoapods-binary-cache
+```
+
 ## How it works
 
 Check out the [documentation on how it works](/docs/how_it_works.md) for more information.
