@@ -3,9 +3,10 @@ module PodPrebuild
     def self.zip(path, to_dir: nil)
       basename = File.basename(path)
       out_path = to_dir.nil? ? "#{basename}.zip" : "#{to_dir}/#{basename}.zip"
+      in_path = File.directory?(path) ? "#{basename}/*" : basename
       cmd = []
       cmd << "cd" << File.dirname(path)
-      cmd << "&& zip --symlinks" << out_path << basename
+      cmd << "&& zip --symlinks" << out_path << in_path
       cmd << "&& cd -"
       `#{cmd.join(" ")}`
     end
