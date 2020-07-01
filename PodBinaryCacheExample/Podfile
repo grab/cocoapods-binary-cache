@@ -10,8 +10,12 @@ if is_pod_binary_cache_enabled
 
   # TODO: BUILD_LIBRARY_FOR_DISTRIBUTION is to build with library evolution, but it doesn't work in Xcode 10.2 now, need find another way
   # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", :device => "ARCHS=arm64 BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
-  set_is_prebuild_job(true)
-  enable_devpod_prebuild
+  
+  config_cocoapods_binary_cache(
+    prebuild_config: "Debug",
+    prebuild_job: true,
+    dev_pods_enabled: false
+  )
   # set_unbuilt_dev_pods(['ConfigSDK']) // To test ABI breaking (crash, call wrong function) when there're code change in ConfigSDK and don't rebuild it's clients (ConfigService)
 end
 
