@@ -13,7 +13,6 @@ if is_pod_binary_cache_enabled
   
   config_cocoapods_binary_cache(
     prebuild_config: "Debug",
-    prebuild_job: true,
     dev_pods_enabled: false
   )
   # set_unbuilt_dev_pods(['ConfigSDK']) // To test ABI breaking (crash, call wrong function) when there're code change in ConfigSDK and don't rebuild it's clients (ConfigService)

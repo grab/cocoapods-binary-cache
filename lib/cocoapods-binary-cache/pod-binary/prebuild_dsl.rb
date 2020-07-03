@@ -9,7 +9,6 @@ module Pod
         end
 
         apply_config.call(:prebuild_config)
-        apply_config.call(:prebuild_job)
         apply_config.call(:prebuild_all) # TODO (thuyen): Revise this option
         apply_config.call(:prebuild_all_vendor_pods)
         apply_config.call(:excluded_pods)

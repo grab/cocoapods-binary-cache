@@ -18,7 +18,6 @@ class PodCacheValidator
       FileUtils.mkdir_p(target_path)
     end
     missing_pods_dic = Hash[]
-    dev_pods_count = 0
     cachehit_pods_dic = Hash[]
     if !external_sources
       Pod::UI.puts 'No development pods!'
@@ -29,7 +28,6 @@ class PodCacheValidator
         path = attribs[:path]
         if path
           hash = FolderChecksum.checksum(path)
-          dev_pods_count += 1
           cached_path = "#{devpod_path}#{name}_#{hash}"
           if !Dir.exists?(cached_path)
             missing_pods_dic[name] = hash
