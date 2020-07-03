@@ -1,4 +1,5 @@
 require_relative "executor/prebuilder"
+require_relative "../cocoapods-binary-cache/pod-binary/prebuild_dsl"
 
 module Pod
   class Command
@@ -21,6 +22,7 @@ module Pod
         end
 
         def run
+          Pod::Podfile::DSL.prebuild_job = true
           @prebuilder.run
         end
       end

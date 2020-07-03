@@ -27,6 +27,12 @@ check_pod_install_when_prebuilt_enabled() {
   bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 
+check_pod_prebuild() {
+  log_section "Check pod prebuild"
+  rm -rf Pods
+  bundle exec pod binary prebuild
+}
+
 xcodebuild_test() {
   xcodebuild \
     -workspace PrebuiltPodIntegration.xcworkspace \
@@ -89,7 +95,6 @@ run_test_all() {
 }
 run_test_flag_off() {
   export ENABLE_PREBUILT_POD_LIBS=false
-  export PREBUILD_VENDOR_PODS_JOB=false
   export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
   check_pod_install_when_prebuilt_disabled
@@ -97,7 +102,6 @@ run_test_flag_off() {
 }
 run_test_flag_on() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export PREBUILD_VENDOR_PODS_JOB=false
   export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
   check_pod_install_when_prebuilt_enabled
@@ -105,19 +109,17 @@ run_test_flag_on() {
 }
 run_test_prebuild_all() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export PREBUILD_VENDOR_PODS_JOB=true
   export FORCE_PREBUILD_ALL_VENDOR_PODS=true
 
-  check_pod_install_when_prebuilt_enabled
+  check_pod_prebuild
   check_xcodebuild_test
   check_prebuilt_integration
 }
 run_test_prebuild_changes() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export PREBUILD_VENDOR_PODS_JOB=true
   export FORCE_PREBUILD_ALL_VENDOR_PODS=false
 
-  check_pod_install_when_prebuilt_enabled
+  check_pod_prebuild
   check_xcodebuild_test
   check_prebuilt_integration
 }

@@ -63,7 +63,7 @@ DEPENDENCIES:
   - SwiftyJSON
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - AFNetworking
     - Alamofire
     - CocoaLumberjack
@@ -105,6 +105,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 306aef82e0915c69d8860aed11b5061934a9848e
+PODFILE CHECKSUM: 3add93eef59760b6bab105ceca5e27f362c817f4
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.8.4

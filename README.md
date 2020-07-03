@@ -14,7 +14,7 @@ Requirements
 Add the gem `cocoapods-binary-cache` to the `Gemfile` of your project.
 
 ```rb
-gem "cocoapods-binary-cache", :git => "https://github.com/grab/cocoapods-binary-cache.git", :tag => "1.0.0"
+gem "cocoapods-binary-cache", :git => "https://github.com/grab/cocoapods-binary-cache.git", :tag => "0.1.2"
 ```
 
 Then, run `bundle install` to install the added gem.
@@ -89,7 +89,7 @@ $ bundle exec pod binary fetch
 ```
 - Prebuild binary pods
 ```sh
-$ bundle exec pod binary prebuild
+$ bundle exec pod binary prebuild [--push]
 ```
 - Push the prebuilt pods to the cache repo
 ```sh
