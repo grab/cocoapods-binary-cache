@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-binary-cache (0.1.2)
+    cocoapods-binary-cache (0.1.3)
       cocoapods (>= 1.5.0)
       fourflusher (~> 2.0)
       rgl (~> 0.5.6)
