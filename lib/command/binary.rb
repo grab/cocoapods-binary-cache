@@ -11,7 +11,7 @@ module Pod
       self.default_subcommand = "fetch"
 
       def prebuild_config
-        @prebuild_config ||= PodPrebuild::Config.new("PodBinaryCacheConfig.json")
+        @prebuild_config ||= PodPrebuild::Config.instance
       end
     end
   end

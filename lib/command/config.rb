@@ -11,6 +11,10 @@ module PodPrebuild
       @prebuild_path = @data["prebuild_path"] || "Pods/_Prebuild"
     end
 
+    def self.instance
+      @instance ||= new("PodBinaryCacheConfig.json")
+    end
+
     def manifest_path(in_cache: false)
       root_dir(in_cache) + "/Manifest.lock"
     end

@@ -1,4 +1,5 @@
 {
   "cache_repo": "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
-  "cache_path": "~/Library/Caches/CocoaPods/PrebuiltPodIntegration-libs/"
+  "cache_path": "~/Library/Caches/CocoaPods/PrebuiltPodIntegration-libs/",
+  "prebuild_path": "_Prebuild"
 }
