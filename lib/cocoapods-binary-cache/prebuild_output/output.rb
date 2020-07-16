@@ -7,18 +7,17 @@ module PodPrebuild
       @sandbox = prebuild_sandbox
     end
 
-    def delta_dir
-      @delta_dir ||= File.expand_path("#{@sandbox.root}/../_Prebuild_delta")
+    def prebuild_delta_path
+      @prebuild_delta_path ||= PodPrebuild::Config.instance.prebuild_delta_path
     end
 
-    def delta_file_path
-      # TODO (thuyen): Unify this path with PodPrebuild::Config#delta_file_path
-      "#{delta_dir}/changes.json"
+    def delta_dir
+      @delta_dir ||= File.dirname(prebuild_delta_path)
     end
 
     def clean_delta_file
-      puts "Clean delta file: #{delta_file_path}"
-      FileUtils.rm_rf(delta_file_path)
+      puts "Clean delta file: #{prebuild_delta_path}"
+      FileUtils.rm_rf(prebuild_delta_path)
     end
 
     def create_dir_if_needed(dir)
@@ -32,9 +31,9 @@ module PodPrebuild
         return
       end
 
-      Pod::UI.puts "Write prebuild changes to: #{delta_file_path}"
+      Pod::UI.puts "Write prebuild changes to: #{prebuild_delta_path}"
       create_dir_if_needed(delta_dir)
-      changes = PodPrebuild::JSONFile.new(delta_file_path)
+      changes = PodPrebuild::JSONFile.new(prebuild_delta_path)
       changes["updated"] = updated
       changes["deleted"] = deleted
       changes.save!
