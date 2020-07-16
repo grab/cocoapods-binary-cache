@@ -15,7 +15,7 @@ module PodPrebuild
     def run
       @fetcher.run
       prebuild
-      changes = PodPrebuild::JSONFile.new(@config.delta_file_path)
+      changes = PodPrebuild::JSONFile.new(@config.prebuild_delta_path)
       return if changes.empty?
 
       sync_cache(changes)
