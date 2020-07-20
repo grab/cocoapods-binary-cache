@@ -12,7 +12,7 @@ module PodPrebuild
         commit_message = "Update prebuilt cache".shellescape
         git("add .")
         git("commit -m '#{commit_message}'")
-        git("push origin head")
+        git("push origin #{@cache_branch}")
       end
     end
   end
