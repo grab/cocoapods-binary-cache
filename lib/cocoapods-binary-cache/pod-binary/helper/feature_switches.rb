@@ -2,10 +2,6 @@ require_relative "../tool/tool"
 require_relative "prebuild_sandbox"
 
 module Pod
-
-  # a flag that indicate stages
-  class_attr_accessor :is_prebuild_stage
-
   # a switch for the `pod` DSL to make it only valid for ':binary => true'
   class Podfile
     module DSL

@@ -13,8 +13,9 @@ module PodPrebuild
     end
 
     def run
+      return if @installer_context.sandbox.is_a?(Pod::PrebuildSandbox)
+
       require_relative "../pod-binary/helper/feature_switches"
-      return if Pod.is_prebuild_stage
 
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
@@ -25,6 +26,8 @@ module PodPrebuild
       Pod::UI.section("Validate prebuilt cache") { validate_cache }
       prebuild! if Pod::Podfile::DSL.prebuild_job?
       reset_environment
+
+      PodPrebuild::Env.next_stage!
       log_section "🤖  Resume pod installation"
       require_relative "../pod-binary/integration"
     end
@@ -54,7 +57,6 @@ module PodPrebuild
 
     def prepare_environment
       Pod::UI.puts "Prepare environment"
-      Pod.is_prebuild_stage = true
       Pod::Podfile::DSL.enable_prebuild_patch true  # enable sikpping for prebuild targets
       Pod::Installer.force_disable_integration true # don't integrate targets
       Pod::Config.force_disable_write_lockfile true # disbale write lock file for perbuild podfile
@@ -63,7 +65,6 @@ module PodPrebuild
 
     def reset_environment
       Pod::UI.puts "Reset environment"
-      Pod.is_prebuild_stage = false
       Pod::Installer.force_disable_integration false
       Pod::Podfile::DSL.enable_prebuild_patch false
       Pod::Config.force_disable_write_lockfile false
