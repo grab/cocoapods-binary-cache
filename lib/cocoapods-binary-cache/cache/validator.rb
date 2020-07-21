@@ -1,7 +1,6 @@
 module PodPrebuild
-  class CacheValidator < BaseCacheValidator
+  class CacheValidator
     def initialize(options)
-      super(options)
       @validators = [
         PodPrebuild::PodfileChangesCacheValidator.new(options),
         PodPrebuild::NonDevPodsCacheValidator.new(options)

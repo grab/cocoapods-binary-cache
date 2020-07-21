@@ -38,33 +38,5 @@ module PodPrebuild
       changes["deleted"] = deleted
       changes.save!
     end
-
-    def process_prebuilt_dev_pods
-      devpod_output_path = "#{delta_dir}/devpod_prebuild_output/"
-      create_dir_if_needed(devpod_output_path)
-      Pod::UI.puts "Copy prebuilt devpod frameworks to output dir: #{devpod_output_path}"
-
-      # Inject project path (where the framework is built) to support generating code coverage later
-      project_root = PathUtils.remove_last_path_component(@sandbox.standard_sanbox_path.to_s)
-      template_file_path = devpod_output_path + "prebuilt_map"
-      File.open(template_file_path, "w") do |file|
-        file.write(project_root)
-      end
-
-      # FIXME (thuyen): Revise usage of cache_miss_dev_pods_dic
-      # The behavior of processing outputs of dev pods and non-dev pods should be very SIMILAR
-      cache_miss_dev_pods_dic = {}
-
-      cache_miss_dev_pods_dic.each do |name, hash|
-        Pod::UI.puts "Output dev pod lib: #{name} hash: #{hash}"
-        built_lib_path = @sandbox.framework_folder_path_for_target_name(name)
-        next unless File.directory?(built_lib_path)
-
-        FileUtils.cp(template_file_path, "#{built_lib_path}/#{name}.framework")
-        target_dir = "#{devpod_output_path}#{name}_#{hash}"
-        Pod::UI.puts "From: #{built_lib_path} -> #{target_dir}"
-        FileUtils.cp_r(built_lib_path, target_dir)
-      end
-    end
   end
 end

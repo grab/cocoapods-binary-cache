@@ -70,13 +70,6 @@ module PodPrebuild
       PodPrebuild::CacheValidationResult.new(missed, hit)
     end
 
-    def read_prebuilt_build_settings(name)
-      return {} if generated_framework_path.nil?
-
-      metadata = PodPrebuild::Metadata.in_dir(generated_framework_path + name)
-      metadata.build_settings
-    end
-
     def incompatible_build_settings(name)
       settings_diff = {}
       prebuilt_build_settings = read_prebuilt_build_settings(name)
@@ -87,6 +80,38 @@ module PodPrebuild
         end
       end
       settings_diff
+    end
+
+    def incompatible_source(name)
+      diff = {}
+      prebuilt_hash = source_hash_info(name)
+      expected_hash = pod_lockfile.dev_pod_hash(name)
+      unless prebuilt_hash == expected_hash
+        diff[name] = { :prebuilt_hash => prebuilt_hash, :expected_hash => expected_hash}
+      end
+      diff
+    end
+
+    private
+
+    def load_metadata(name)
+      return nil if generated_framework_path.nil?
+
+      PodPrebuild::Metadata.in_dir(generated_framework_path + name)
+    end
+
+    def read_prebuilt_build_settings(name)
+      metadata = load_metadata(name)
+      return {} if metadata.nil?
+
+      metadata.build_settings
+    end
+
+    def source_hash_info(name)
+      metadata = load_metadata(name)
+      return {} if metadata.nil?
+
+      metadata.source_hash || {}
     end
   end
 end

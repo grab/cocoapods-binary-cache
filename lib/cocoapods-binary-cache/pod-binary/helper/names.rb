@@ -18,19 +18,10 @@
 module Pod
   def self.fast_get_targets_for_pod_name(pod_name, targets, cache)
     pod_name = pod_name.split("/")[0] # Look for parent spec instead of subspecs
-    pod_name_to_targets_hash = nil
     if cache.empty?
-      pod_name_to_targets_hash = targets.reduce({}) do |sum, target|
-        array = sum[target.pod_name] || []
-        array << target
-        sum[target.pod_name] = array
-        sum
-      end
-      cache << pod_name_to_targets_hash
+      targets.select { |target| target.name == pod_name }
     else
-      pod_name_to_targets_hash = cache.first
+      cache.first[pod_name] || []
     end
-
-    pod_name_to_targets_hash[pod_name] || []
   end
 end

@@ -14,6 +14,7 @@ module Pod
         return if !Podfile::DSL.dev_pods_enabled && standard_sanbox.local?(name)
 
         # make a symlink to target folder
+        # TODO (bang): Unify to 1 sandbox to optimize and avoid inconsistency
         prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sanbox)
         # if spec used in multiple platforms, it may return multiple paths
         target_names = prebuild_sandbox.existed_target_names_for_pod_name(self.name)

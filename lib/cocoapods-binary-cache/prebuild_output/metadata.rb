@@ -43,5 +43,21 @@ module PodPrebuild
     def build_settings=(value)
       @data["build_settings"] = value
     end
+
+    def source_hash
+      @data["source_hash"] || {}
+    end
+
+    def source_hash=(value)
+      @data["source_hash"] = value
+    end
+
+    def project_root
+      @data["project_root"]
+    end
+
+    def project_root=(value)
+      @data["project_root"] = value
+    end
   end
 end

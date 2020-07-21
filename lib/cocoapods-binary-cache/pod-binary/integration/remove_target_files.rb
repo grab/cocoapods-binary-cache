@@ -15,7 +15,7 @@ module Pod
 
       updated_names.each do |name|
         root_name = Specification.root_name(name)
-        next if !Pod::Podfile::DSL.dev_pods_enabled && sandbox.local?(root_name)
+        next if Pod::Podfile::DSL.dev_pods_enabled && sandbox.local?(root_name)
 
         UI.puts "Delete cached files: #{root_name}"
         target_path = sandbox.pod_dir(root_name)
