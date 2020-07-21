@@ -13,7 +13,7 @@ if is_pod_binary_cache_enabled
   
   config_cocoapods_binary_cache(
     prebuild_config: "Debug",
-    dev_pods_enabled: false
+    dev_pods_enabled: true
   )
   # set_unbuilt_dev_pods(['ConfigSDK']) // To test ABI breaking (crash, call wrong function) when there're code change in ConfigSDK and don't rebuild it's clients (ConfigService)
 end
@@ -44,7 +44,9 @@ target 'PodBinCacheExample' do
   binary_pod 'Realm'
   binary_pod 'SnapKit'
   binary_pod 'Kingfisher'
-  binary_pod 'RxSwift', '5.0.1'
+
+  # Example of Vendor pod with external source from git
+  pod 'RxSwift', :git => 'https://github.com/ReactiveX/RxSwift.git', :commit => 'a580d07ed002217fd91d8446c3a852486e9beefa', :binary => true
 
   # Development/Local Pods
   pod 'ConfigService', :path => 'DevPods/ConfigService', :binary => true
