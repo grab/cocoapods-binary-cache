@@ -24,6 +24,7 @@ describe "Lockfile" do
       expect(@lockfile.pods.keys).to eq(pods.keys)
       expect(@lockfile.external_sources).to eq(external_pods)
       expect(@lockfile.dev_pods.keys).to eq(dev_pods.keys)
+      expect(@lockfile.send(:dev_pod_hashes_map).keys).to eq(dev_pods.keys)
       expect(@lockfile.non_dev_pods.keys).to eq(non_dev_pods.keys)
     end
 

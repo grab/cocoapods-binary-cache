@@ -1,3 +1,5 @@
+require_relative "../source_installer"
+
 module Pod
   class Installer
     # Override the download step to skip download and prepare file in target folder

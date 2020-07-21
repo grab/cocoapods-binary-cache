@@ -1,3 +1,5 @@
+require_relative "checksum"
+
 module PodPrebuild
   class Lockfile
     attr_reader :lockfile, :data
@@ -15,6 +17,10 @@ module PodPrebuild
       @data["EXTERNAL SOURCES"] || {}
     end
 
+    def dev_pod_sources
+      @dev_pod_sources ||= external_sources.select { |_, attributes| attributes.key?(:path) } || {}
+    end
+
     def dev_pod_names
       # There are 2 types of external sources:
       # - Development pods: declared with `:path` option in Podfile, corresponding to `:path` in the Lockfile
@@ -27,7 +33,7 @@ module PodPrebuild
       #     :git: git@remote_url
       #     :commit: abc1234
       # --------------------
-      @dev_pod_names ||= external_sources.select { |_, attributes| attributes.key?(:path) }.keys.to_set
+      @dev_pod_names ||= dev_pod_sources.keys.to_set
     end
 
     def dev_pods
@@ -46,7 +52,19 @@ module PodPrebuild
         .group_by { |k| k.split("/")[0] }
     end
 
+    # Return content hash (Hash the directory at source path) of a dev_pod
+    # Return nil if it's not a dev_pod
+    def dev_pod_hash(pod_name)
+      dev_pod_hashes_map[pod_name]
+    end
+
     private
+
+    # Generate a map between a dev_pod and it source hash
+    def dev_pod_hashes_map
+      @dev_pod_hashes_map ||=
+        dev_pod_sources.map { |name, attribs| [name, FolderChecksum.checksum(attribs[:path])] }.to_h
+    end
 
     # Parse an item under `PODS` section of a Lockfile
     # @param hash_or_string: an item under `PODS` section, could be a Hash (if having dependencies) or a String

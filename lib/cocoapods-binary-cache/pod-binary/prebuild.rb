@@ -3,6 +3,7 @@ require_relative "../pod-rome/build_framework"
 require_relative "../prebuild_output/output"
 require_relative "helper/passer"
 require_relative "helper/target_checker"
+require_relative "../helper/lockfile"
 
 # patch prebuild ability
 module Pod
@@ -10,6 +11,7 @@ module Pod
     def initialize(options)
       super(options[:sandbox], options[:podfile], options[:lockfile])
       @cache_validation = options[:cache_validation]
+      @lockfile_wrapper = PodPrebuild::Lockfile.new(lockfile)
     end
 
     private
@@ -188,7 +190,6 @@ module Pod
       Pod::UI.puts "Targets to cleanup: #{deleted_target_names}"
 
       prebuild_output.write_delta_file(updated_target_names, deleted_target_names)
-      prebuild_output.process_prebuilt_dev_pods
     end
 
     def clean_delta_file
@@ -211,6 +212,13 @@ module Pod
         .build_configurations
         .detect { |config| config.name == Pod::Podfile::DSL.prebuild_config }
         .build_settings
+      hash = @lockfile_wrapper.dev_pod_hash(target.name)
+      metadata.source_hash = hash unless hash.nil?
+
+      # Store root path for code-coverage support later
+      # TODO: update driver code-coverage logic to use path stored here
+      project_root = PathUtils.remove_last_path_component(@sandbox.standard_sanbox_path.to_s)
+      metadata.project_root = project_root
       metadata.save!
     end
 

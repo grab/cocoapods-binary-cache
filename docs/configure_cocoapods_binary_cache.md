@@ -13,8 +13,6 @@ Following are the options available in `config_cocoapods_binary_cache`:
 
 - `prebuild_config` (default: `Debug`): The configuration to use (such as `Debug`) when prebuilding pods
 
-- `prebuild_job` (default: `false`): Whether or not this is a prebuild job
-
 - `prebuild_all_vendor_pods` (default: `false`): Whether to build all vendor pods in the prebuild job
 
 - `excluded_pods` (default: `[]`): A list of pods to exclude (ie. treat them as non-prebuilt pods)
