@@ -1,24 +1,30 @@
 module PodPrebuild
   class DevPodsCacheValidator < BaseCacheValidator
-    def initialize(options)
-      super(options)
-      @sandbox_root = options[:sandbox_root]
-    end
-
     def validate(*)
       return PodPrebuild::CacheValidationResult.new if @pod_lockfile.nil?
 
-      hits = Set.new
-      misses = {}
-      @pod_lockfile.dev_pod_names.each do |name|
-        diff = incompatible_source(name)
-        if diff.empty?
-          hits.add(name)
-        else
-          misses[name] = "Incompatible source: #{diff}"
-        end
+      validate_pods(
+        pods: @pod_lockfile.dev_pods,
+        subspec_pods: @pod_lockfile.subspec_pods,
+        prebuilt_pods: @prebuilt_lockfile.nil? ? {} : @prebuilt_lockfile.dev_pods
+      )
+    end
+
+    def incompatible_pod(name)
+      diff = super(name)
+      return diff unless diff.empty?
+
+      incompatible_source(name)
+    end
+
+    def incompatible_source(name)
+      diff = {}
+      prebuilt_hash = read_source_hash(name)
+      expected_hash = pod_lockfile.dev_pod_hash(name)
+      unless prebuilt_hash == expected_hash
+        diff[name] = { :prebuilt_hash => prebuilt_hash, :expected_hash => expected_hash}
       end
-      PodPrebuild::CacheValidationResult.new(misses, hits)
+      diff
     end
   end
 end
