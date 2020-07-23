@@ -34,7 +34,7 @@ PODS:
   - Realm (4.1.1):
     - Realm/Headers (= 4.1.1)
   - Realm/Headers (4.1.1)
-  - RxSwift (5.0.1)
+  - RxSwift (5.1.1)
   - SDWebImage (5.4.0):
     - SDWebImage/Core (= 5.4.0)
   - SDWebImage/Core (5.4.0)
@@ -56,7 +56,7 @@ DEPENDENCIES:
   - MBProgressHUD
   - MJRefresh
   - Realm
-  - RxSwift (= 5.0.1)
+  - RxSwift (from `https://github.com/ReactiveX/RxSwift.git`, commit `a580d07ed002217fd91d8446c3a852486e9beefa`)
   - SDWebImage
   - SnapKit
   - SVProgressHUD
@@ -73,7 +73,6 @@ SPEC REPOS:
     - MJRefresh
     - ProtocolBuffers-Swift
     - Realm
-    - RxSwift
     - SDWebImage
     - SnapKit
     - SQLite.swift
@@ -85,6 +84,14 @@ EXTERNAL SOURCES:
     :path: DevPods/ConfigSDK
   ConfigService:
     :path: DevPods/ConfigService
+  RxSwift:
+    :commit: a580d07ed002217fd91d8446c3a852486e9beefa
+    :git: https://github.com/ReactiveX/RxSwift.git
+
+CHECKOUT OPTIONS:
+  RxSwift:
+    :commit: a580d07ed002217fd91d8446c3a852486e9beefa
+    :git: https://github.com/ReactiveX/RxSwift.git
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
@@ -98,13 +105,13 @@ SPEC CHECKSUMS:
   MJRefresh: eeda70fbf0ad277f3178cef1cd0c3532591d6237
   ProtocolBuffers-Swift: 09b5cfcc641ab512d6aaa1d2cc3879a40432052c
   Realm: 25f0a8244cbb1c2271c922963ea8666fc2d8104d
-  RxSwift: e2dc62b366a3adf6a0be44ba9f405efd4c94e0c4
+  RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
   SDWebImage: 5bf6aec6481ae2a062bdc59f9d6c1d1e552090e0
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
   SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: 3add93eef59760b6bab105ceca5e27f362c817f4
+PODFILE CHECKSUM: 1cb7b7ae66561363f746423ff953196a642277a6
 
 COCOAPODS: 1.8.4
