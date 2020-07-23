@@ -22,7 +22,13 @@ describe "PodPrebuild::CacheValidator" do
     end
     let(:ignored_pods) { nil }
     before do
-      allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(metadata_hash)
+      allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json) do |metadata, _|
+        if metadata.path.fnmatch?("#{generated_framework_path}/*/metadata.json", File::FNM_PATHNAME)
+          metadata_hash
+        else
+          {}
+        end
+      end
 
       validation_result = PodPrebuild::CacheValidator.new(
         podfile: podfile,
