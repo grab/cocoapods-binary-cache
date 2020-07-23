@@ -44,13 +44,15 @@ module PodPrebuild
           missed[name] = "Not available (#{version})"
         elsif prebuilt_version != version
           missed[name] = "Outdated: (prebuilt: #{prebuilt_version}) vs (#{version})"
+        elsif load_metadata(name).blank?
+          missed[name] = "Metadata not available (probably #{name}.zip is not in GeneratedFrameworks)"
         else
-          settings_diff = incompatible_build_settings(name)
-          if settings_diff.empty?
+          diff = incompatible_pod(name)
+          if diff.empty?
             hit << name
             result = true
           else
-            missed[name] = "Incompatible build settings: #{settings_diff}"
+            missed[name] = "Incompatible: #{diff}"
           end
         end
         result
@@ -70,6 +72,12 @@ module PodPrebuild
       PodPrebuild::CacheValidationResult.new(missed, hit)
     end
 
+    def incompatible_pod(name)
+      # Pod incompatibility is a universal concept. Generally, it requires build settings compatibility.
+      # For more checks, do override this function to define what it means by `incompatible`.
+      incompatible_build_settings(name)
+    end
+
     def incompatible_build_settings(name)
       settings_diff = {}
       prebuilt_build_settings = read_prebuilt_build_settings(name)
@@ -82,36 +90,22 @@ module PodPrebuild
       settings_diff
     end
 
-    def incompatible_source(name)
-      diff = {}
-      prebuilt_hash = source_hash_info(name)
-      expected_hash = pod_lockfile.dev_pod_hash(name)
-      unless prebuilt_hash == expected_hash
-        diff[name] = { :prebuilt_hash => prebuilt_hash, :expected_hash => expected_hash}
-      end
-      diff
-    end
-
-    private
-
     def load_metadata(name)
-      return nil if generated_framework_path.nil?
+      @metadata_cache ||= {}
+      cache = @metadata_cache[name]
+      return cache unless cache.nil?
 
-      PodPrebuild::Metadata.in_dir(generated_framework_path + name)
+      metadata = PodPrebuild::Metadata.in_dir(generated_framework_path + name)
+      @metadata_cache[name] = metadata
+      metadata
     end
 
     def read_prebuilt_build_settings(name)
-      metadata = load_metadata(name)
-      return {} if metadata.nil?
-
-      metadata.build_settings
+      load_metadata(name).build_settings
     end
 
-    def source_hash_info(name)
-      metadata = load_metadata(name)
-      return {} if metadata.nil?
-
-      metadata.source_hash || {}
+    def read_source_hash(name)
+      load_metadata(name).source_hash
     end
   end
 end

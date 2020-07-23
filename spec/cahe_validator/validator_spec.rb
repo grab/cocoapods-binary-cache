@@ -11,8 +11,8 @@ describe "PodPrebuild::CacheValidator" do
     let(:pod_lockfile) { gen_lockfile(pods: pods) }
     let(:prebuilt_lockfile) { gen_lockfile(pods: pods) }
     let(:validate_prebuilt_settings) { nil }
-    let(:generated_framework_path) { nil }
-    let(:prebuilt_settings) do
+    let(:generated_framework_path) { Pathname("GeneratedFrameworks") }
+    let(:metadata_hash) do
       {
         "build_settings" => {
           "SWIFT_VERSION" => "5.0",
@@ -22,7 +22,7 @@ describe "PodPrebuild::CacheValidator" do
     end
     let(:ignored_pods) { nil }
     before do
-      allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(prebuilt_settings)
+      allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(metadata_hash)
 
       validation_result = PodPrebuild::CacheValidator.new(
         podfile: podfile,
@@ -76,7 +76,6 @@ describe "PodPrebuild::CacheValidator" do
           settings
         end
       end
-      let(:generated_framework_path) { Pathname("GeneratedFrameworks") }
       it "returns incompatible cache as missed" do
         expect(@missed).to eq(Set["A", "B"])
         expect(@hit).to eq(pods.keys.to_set - Set["A", "B"])
@@ -169,6 +168,14 @@ describe "PodPrebuild::CacheValidator" do
           expect(@missed).to include("S")
           expect(@hit).not_to include("S")
         end
+      end
+    end
+
+    context "has a pod in Manifest.lock, but not in GeneratedFrameworks" do
+      let(:metadata_hash) { {} }
+      it "returns this pod as missed" do
+        expect(@missed).to include("A")
+        expect(@hit).not_to include("A")
       end
     end
   end
