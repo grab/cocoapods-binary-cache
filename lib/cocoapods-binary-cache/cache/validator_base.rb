@@ -37,6 +37,7 @@ module PodPrebuild
       hit = Set.new
 
       check_pod = lambda do |name|
+        root_name = name.split("/")[0]
         version = pods[name]
         prebuilt_version = prebuilt_pods[name]
         result = false
@@ -44,10 +45,10 @@ module PodPrebuild
           missed[name] = "Not available (#{version})"
         elsif prebuilt_version != version
           missed[name] = "Outdated: (prebuilt: #{prebuilt_version}) vs (#{version})"
-        elsif load_metadata(name).blank?
-          missed[name] = "Metadata not available (probably #{name}.zip is not in GeneratedFrameworks)"
+        elsif load_metadata(root_name).blank?
+          missed[name] = "Metadata not available (probably #{root_name}.zip is not in GeneratedFrameworks)"
         else
-          diff = incompatible_pod(name)
+          diff = incompatible_pod(root_name)
           if diff.empty?
             hit << name
             result = true
