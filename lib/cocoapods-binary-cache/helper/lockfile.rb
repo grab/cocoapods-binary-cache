@@ -46,10 +46,9 @@ module PodPrebuild
       @non_dev_pods ||= pods.reject { |name, _| dev_pod_names_.include?(name) }
     end
 
-    def subspec_pods
-      pods.keys
-        .select { |k| k.include?("/") }
-        .group_by { |k| k.split("/")[0] }
+    def subspec_vendor_pods
+      dev_pod_names_ = dev_pod_names
+      @subspec_vendor_pods ||= subspec_pods.reject { |name, _| dev_pod_names_.include?(name) }
     end
 
     # Return content hash (Hash the directory at source path) of a dev_pod
@@ -59,6 +58,12 @@ module PodPrebuild
     end
 
     private
+
+    def subspec_pods
+      @subspec_pods ||= pods.keys
+        .select { |k| k.include?("/") }
+        .group_by { |k| k.split("/")[0] }
+    end
 
     # Generate a map between a dev_pod and it source hash
     def dev_pod_hashes_map

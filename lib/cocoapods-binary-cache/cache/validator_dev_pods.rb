@@ -5,7 +5,7 @@ module PodPrebuild
 
       validate_pods(
         pods: @pod_lockfile.dev_pods,
-        subspec_pods: @pod_lockfile.subspec_pods,
+        subspec_pods: [],
         prebuilt_pods: @prebuilt_lockfile.nil? ? {} : @prebuilt_lockfile.dev_pods
       )
     end

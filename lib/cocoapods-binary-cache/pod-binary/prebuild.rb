@@ -37,15 +37,13 @@ module Pod
       PodPrebuild::StateStore.excluded_pods.include?(name)
     end
 
-    def cache_hit?(name)
-      @cache_validation.hit?(name)
+    def cache_missed?(name)
+      @cache_validation.missed?(name)
     end
 
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
       return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
-
-      cache_hit?(name)
     end
 
     public
@@ -100,6 +98,9 @@ module Pod
         targets = pod_targets
       end
 
+      unless Pod::Podfile::DSL.prebuild_all_vendor_pods
+        targets = targets.select { |pod_target| cache_missed?(pod_target.name) }
+      end
       targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
       targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) } unless Podfile::DSL.dev_pods_enabled
 
