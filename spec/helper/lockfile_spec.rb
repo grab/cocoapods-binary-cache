@@ -34,7 +34,9 @@ describe "Lockfile" do
           "C_remote" => { :git => "remote_url", :tag => "0.0.1" },
           "S/A" => { :git => "remote_url", :tag => "0.0.1" },
           "S/B" => { :git => "remote_url", :tag => "0.0.1" },
-          "T/C" => { :git => "remote_url", :tag => "0.0.1" }
+          "T/C" => { :git => "remote_url", :tag => "0.0.1" },
+          "DevA" => { :path => "local" },
+          "DevA/Sub" => { :path => "local" }
         }
       end
       it "extracts subspec pods correctly" do
@@ -42,7 +44,7 @@ describe "Lockfile" do
           "S" => ["S/A", "S/B"],
           "T" => ["T/C"]
         }
-        expect(@lockfile.subspec_pods).to eq(subspec_pods)
+        expect(@lockfile.subspec_vendor_pods).to eq(subspec_pods)
       end
     end
   end
