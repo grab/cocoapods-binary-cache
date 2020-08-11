@@ -15,7 +15,8 @@ module PodPrebuild
       Pod::UI.section("Diagnosing cocoapods-binary-cache") do
         PodPrebuild::Diagnosis.new(
           cache_validation: PodPrebuild::StateStore.cache_validation,
-          standard_sandbox: @installer_context.sandbox
+          standard_sandbox: @installer_context.sandbox,
+          specs: @installer_context.umbrella_targets.map(&:specs).flatten
         ).run
       end
     end
