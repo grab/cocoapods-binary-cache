@@ -22,7 +22,7 @@ module PodPrebuild
       if Dir.exist?(dest_dir + "/.git")
         git("fetch origin #{branch}")
         git("checkout -f FETCH_HEAD", ignore_output: true)
-        git("branch -D #{branch} || true", ignore_output: true, can_fail: true)
+        git("branch -D #{branch}", ignore_output: true, can_fail: true)
         git("checkout -b #{branch}")
       else
         FileUtils.rm_rf(dest_dir)
