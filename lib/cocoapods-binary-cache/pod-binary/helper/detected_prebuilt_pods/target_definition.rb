@@ -3,7 +3,7 @@ module Pod
     class TargetDefinition
       def detect_prebuilt_pod(name, requirements)
         @explicit_prebuilt_pod_names ||= []
-        options = requirements.last
+        options = requirements.last || {}
         if Pod::Podfile::DSL.prebuild_all?
           @explicit_prebuilt_pod_names << Specification.root_name(name)
         elsif options.is_a?(Hash) && options[:binary]
