@@ -20,12 +20,12 @@ module PodPrebuild
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
       save_installation_states
-      prepare_environment
+      Pod::UI.section("Prepare environment") { prepare_environment }
       create_prebuild_sandbox
       Pod::UI.section("Detect implicit dependencies") { detect_implicit_dependencies }
       Pod::UI.section("Validate prebuilt cache") { validate_cache }
       prebuild! if Pod::Podfile::DSL.prebuild_job?
-      reset_environment
+      Pod::UI.section("Reset environment") { reset_environment }
 
       PodPrebuild::Env.next_stage!
       log_section "🤖  Resume pod installation"
@@ -56,14 +56,12 @@ module PodPrebuild
     end
 
     def prepare_environment
-      Pod::UI.puts "Prepare environment"
       Pod::Installer.force_disable_integration true # don't integrate targets
       Pod::Config.force_disable_write_lockfile true # disbale write lock file for perbuild podfile
       Pod::Installer.disable_install_complete_message true # disable install complete message
     end
 
     def reset_environment
-      Pod::UI.puts "Reset environment"
       Pod::Installer.force_disable_integration false
       Pod::Config.force_disable_write_lockfile false
       Pod::Installer.disable_install_complete_message false
@@ -80,7 +78,7 @@ module PodPrebuild
     def create_prebuild_sandbox
       standard_sandbox = installer_context.sandbox
       @prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sandbox)
-      Pod::UI.puts "Create prebuild sandbox at #{@prebuild_sandbox.root}"
+      Pod::UI.message "Create prebuild sandbox at #{@prebuild_sandbox.root}"
     end
 
     def detect_implicit_dependencies
