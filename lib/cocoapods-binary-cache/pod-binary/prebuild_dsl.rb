@@ -14,6 +14,7 @@ module Pod
         apply_config.call(:excluded_pods)
         apply_config.call(:dev_pods_enabled)
         apply_config.call(:bitcode_enabled)
+        apply_config.call(:device_build_enabled)
         apply_config.call(:dont_remove_source_code)
         apply_config.call(:custom_device_build_options)
         apply_config.call(:custom_simulator_build_options)
@@ -28,6 +29,7 @@ module Pod
       @excluded_pods = Set.new
       @dev_pods_enabled = false
       @bitcode_enabled = false
+      @device_build_enabled = false
       @dont_remove_source_code = false
       @custom_device_build_options = []
       @custom_simulator_build_options = []
@@ -52,6 +54,7 @@ module Pod
         attr_accessor :excluded_pods
         attr_accessor :dev_pods_enabled
         attr_accessor :bitcode_enabled
+        attr_accessor :device_build_enabled
         attr_accessor :dont_remove_source_code
         attr_accessor :custom_device_build_options
         attr_accessor :custom_simulator_build_options

@@ -1,6 +1,13 @@
 require 'fourflusher'
 require 'xcpretty' # TODO (thuyen): Revise this dependency
 
+module FileUtils
+  def self.mvpath(src, dst, **options)
+    FileUtils.rm_rf(File.join(dst, File.basename(src)))
+    FileUtils.mv(src, dst, **options)
+  end
+end
+
 PLATFORMS = { 'iphonesimulator' => 'iOS',
               'appletvsimulator' => 'tvOS',
               'watchsimulator' => 'watchOS' }
@@ -76,14 +83,14 @@ def build_for_iosish_platform(sandbox,
   device_binary = device_framework_path + "/#{module_name}"
   simulator_binary = simulator_framework_path + "/#{module_name}"
   return unless File.file?(device_binary) && File.file?(simulator_binary)
-  
+
   # the device_lib path is the final output file path
   # combine the binaries
   tmp_lipoed_binary_path = "#{build_dir}/#{target_name}"
   lipo_log = `lipo -create -output #{tmp_lipoed_binary_path} #{device_binary} #{simulator_binary}`
   puts lipo_log unless File.exist?(tmp_lipoed_binary_path)
-  FileUtils.mv tmp_lipoed_binary_path, device_binary, :force => true
-  
+  FileUtils.mvpath tmp_lipoed_binary_path, device_binary
+
   # collect the swiftmodule file for various archs.
   device_swiftmodule_path = device_framework_path + "/Modules/#{module_name}.swiftmodule"
   simulator_swiftmodule_path = simulator_framework_path + "/Modules/#{module_name}.swiftmodule"
@@ -123,16 +130,14 @@ def build_for_iosish_platform(sandbox,
       tmp_lipoed_binary_path = "#{output_path}/#{module_name}.draft"
       lipo_log = `lipo -create -output #{tmp_lipoed_binary_path} #{device_dsym}/Contents/Resources/DWARF/#{module_name} #{simulator_dsym}/Contents/Resources/DWARF/#{module_name}`
       puts lipo_log unless File.exist?(tmp_lipoed_binary_path)
-      FileUtils.mv tmp_lipoed_binary_path, "#{device_framework_path}.dSYM/Contents/Resources/DWARF/#{module_name}", :force => true
+      FileUtils.mvpath tmp_lipoed_binary_path, "#{device_framework_path}.dSYM/Contents/Resources/DWARF/#{module_name}"
     end
-    # move
-    FileUtils.mv device_dsym, output_path, :force => true
+    FileUtils.mvpath device_dsym, output_path
   end
 
   # output
   output_path.mkpath unless output_path.exist?
-  FileUtils.mv device_framework_path, output_path, :force => true
-
+  FileUtils.mvpath device_framework_path, output_path
 end
 
 def xcodebuild(sandbox, target, configuration, sdk='macosx', deployment_target=nil, other_options=[])
@@ -168,23 +173,18 @@ def xcodebuild(sandbox, target, configuration, sdk='macosx', deployment_target=n
   [is_succeed, log]
 end
 
-
-
 module Pod
   class Prebuild
+    def self.build(options)
+      sandbox_root_path = options[:sandbox_root_path]
+      target = options[:target]
+      configuration = options[:configuration]
+      output_path = options[:output_path]
+      bitcode_enabled = options[:bitcode_enabled] || false
+      device_build_enabled = options[:device_build_enabled] || false
+      custom_build_options = options[:custom_build_options] || []
+      custom_build_options_simulator = options[:custom_build_options_simulator] || []
 
-    # Build the frameworks with sandbox and targets
-    #
-    # @param  [String] sandbox_root_path
-    #         The sandbox root path where the targets project place
-    #
-    #         [PodTarget] target
-    #         The pod targets to build
-    #
-    #         [Pathname] output_path
-    #         output path for generated frameworks
-    #
-    def self.build(sandbox_root_path, target, configuration, output_path, bitcode_enabled = false, custom_build_options=[], custom_build_options_simulator=[])
       return if target.nil?
 
       sandbox_root = Pathname(sandbox_root_path)
@@ -204,7 +204,8 @@ module Pod
           "iphonesimulator",
           bitcode_enabled,
           custom_build_options,
-          custom_build_options_simulator
+          custom_build_options_simulator,
+          device_build_enabled
         )
       when :osx
         xcodebuild(
@@ -227,7 +228,8 @@ module Pod
           "watchsimulator",
           true,
           custom_build_options,
-          custom_build_options_simulator
+          custom_build_options_simulator,
+          device_build_enabled
         )
       else raise "Unsupported platform for '#{target.name}': '#{target.platform.name}'" end
 
@@ -242,6 +244,5 @@ module Pod
     def self.build_dir(sandbox_root)
       sandbox_root.parent + "build"
     end
-
   end
 end

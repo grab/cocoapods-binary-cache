@@ -118,13 +118,14 @@ module Pod
         output_path = sandbox.framework_folder_path_for_target_name(target.name)
         output_path.mkpath unless output_path.exist?
         Pod::Prebuild.build(
-          sandbox_path,
-          target,
-          Pod::Podfile::DSL.prebuild_config,
-          output_path,
-          bitcode_enabled,
-          Pod::Podfile::DSL.custom_device_build_options,
-          Pod::Podfile::DSL.custom_simulator_build_options
+          sandbox_root_path: sandbox_path,
+          target: target,
+          configuration: Pod::Podfile::DSL.prebuild_config,
+          output_path: output_path,
+          bitcode_enabled: bitcode_enabled,
+          device_build_enabled: Pod::Podfile::DSL.device_build_enabled,
+          custom_build_options: Pod::Podfile::DSL.custom_device_build_options,
+          custom_build_options_simulator: Pod::Podfile::DSL.custom_simulator_build_options
         )
         collect_metadata(target, output_path)
       end
