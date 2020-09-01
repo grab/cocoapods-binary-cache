@@ -46,20 +46,16 @@ module Pod
       return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
     end
 
-    public
+    def run_code_gen!
+      return if Pod::Podfile::DSL.prebuild_code_gen.nil?
 
-    def prebuild_output
-      @prebuild_output ||= PodPrebuild::Output.new(sandbox)
+      Pod::UI.title("Running code generation...") do
+        Pod::Podfile::DSL.prebuild_code_gen.call(self)
+      end
     end
 
-    # Build the needed framework files
-    def prebuild_frameworks!
-      UI.puts "Start prebuild_frameworks"
-
-      # build options
-      sandbox_path = sandbox.root
+    def targets_to_prebuild
       existed_framework_folder = sandbox.generate_framework_path
-      bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled
       targets = []
 
       if Pod::Podfile::DSL.prebuild_all_vendor_pods
@@ -103,18 +99,27 @@ module Pod
       end
       targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
       targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) } unless Podfile::DSL.dev_pods_enabled
+      targets
+    end
 
-      # build!
-      Pod::UI.puts "Prebuild frameworks (total #{targets.count})"
-      Pod::UI.puts targets.map(&:name)
+    public
 
+    def prebuild_output
+      @prebuild_output ||= PodPrebuild::Output.new(sandbox)
+    end
+
+    # Build the needed framework files
+    def prebuild_frameworks!
+      UI.puts "Start prebuild_frameworks"
+      existed_framework_folder = sandbox.generate_framework_path
+      sandbox_path = sandbox.root
+      bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled
+      targets = targets_to_prebuild
+
+      run_code_gen!
+      Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}"
       Pod::Prebuild.remove_build_dir(sandbox_path)
       targets.each do |target|
-        unless target.should_build?
-          Pod::UI.puts "Skip prebuilding #{target.label} because of no source files".yellow
-          next
-        end
-
         output_path = sandbox.framework_folder_path_for_target_name(target.name)
         output_path.mkpath unless output_path.exist?
         Pod::Prebuild.build(
