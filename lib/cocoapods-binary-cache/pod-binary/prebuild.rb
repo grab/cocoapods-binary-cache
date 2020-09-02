@@ -1,11 +1,11 @@
 require "fileutils"
 require_relative "../pod-rome/build_framework"
 require_relative "../prebuild_output/output"
+require_relative "../helper/lockfile"
 require_relative "helper/passer"
 require_relative "helper/target_checker"
-require_relative "../helper/lockfile"
+require_relative "helper/build"
 
-# patch prebuild ability
 module Pod
   class PrebuildInstaller < Installer
     def initialize(options)
@@ -123,7 +123,7 @@ module Pod
         output_path = sandbox.framework_folder_path_for_target_name(target.name)
         output_path.mkpath unless output_path.exist?
         Pod::Prebuild.build(
-          sandbox_root_path: sandbox_path,
+          sandbox: sandbox_path,
           target: target,
           configuration: Pod::Podfile::DSL.prebuild_config,
           output_path: output_path,
