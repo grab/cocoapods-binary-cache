@@ -22,7 +22,7 @@ module PodPrebuild
     end
 
     def edit_scheme_for_code_coverage
-      return unless Pod::Podfile::DSL.dev_pods_enabled && @installer_context.sandbox.instance_of?(Pod::PrebuildSandbox)
+      return unless Pod::Podfile::DSL.dev_pods_enabled? && @installer_context.sandbox.instance_of?(Pod::PrebuildSandbox)
 
       # Modify pods scheme to support code coverage
       # If we don't prebuild dev pod -> no need to care about this in Pod project

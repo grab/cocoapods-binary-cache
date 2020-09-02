@@ -8,12 +8,14 @@ module Pod
         self.arguments = [CLAide::Argument.new("CACHE-BRANCH", false)]
         def self.options
           [
-            ["--push", "Push cache to repo upon completion"]
+            ["--push", "Push cache to repo upon completion"],
+            ["--all", "Prebuild all binary pods regardless of cache validation"]
           ]
         end
 
         def initialize(argv)
           super
+          @prebuild_all_pods = argv.flag?("all")
           @prebuilder = PodPrebuild::CachePrebuilder.new(
             config: prebuild_config,
             cache_branch: argv.shift_argument || "master",
@@ -22,7 +24,8 @@ module Pod
         end
 
         def run
-          Pod::Podfile::DSL.prebuild_job = true
+          Pod::Podfile::DSL.binary_cache_config[:prebuild_job] = true
+          Pod::Podfile::DSL.binary_cache_config[:prebuild_all_pods] = @prebuild_all_pods
           @prebuilder.run
         end
       end

@@ -43,7 +43,7 @@ module Pod
 
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
-      return false if Pod::Podfile::DSL.prebuild_all_vendor_pods
+      return false if Pod::Podfile::DSL.prebuild_all_pods?
     end
 
     def run_code_gen!
@@ -58,11 +58,9 @@ module Pod
       existed_framework_folder = sandbox.generate_framework_path
       targets = []
 
-      if Pod::Podfile::DSL.prebuild_all_vendor_pods
-        UI.puts "Rebuild all vendor frameworks"
+      if Pod::Podfile::DSL.prebuild_all_pods?
         targets = pod_targets
       elsif !local_manifest.nil?
-        UI.puts "Update some frameworks"
         changes = prebuild_pods_changes
         added = changes.added
         changed = changes.changed
@@ -90,15 +88,16 @@ module Pod
         dependency_targets = targets.map(&:recursive_dependent_targets).flatten.uniq || []
         targets = (targets + dependency_targets).uniq
       else
-        UI.puts "Rebuild all frameworks"
         targets = pod_targets
       end
 
-      unless Pod::Podfile::DSL.prebuild_all_vendor_pods
+      unless Pod::Podfile::DSL.prebuild_all_pods?
         targets = targets.select { |pod_target| cache_missed?(pod_target.name) }
       end
       targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
-      targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) } unless Podfile::DSL.dev_pods_enabled
+      unless Podfile::DSL.dev_pods_enabled?
+        targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
+      end
       targets
     end
 
@@ -113,7 +112,7 @@ module Pod
       UI.puts "Start prebuild_frameworks"
       existed_framework_folder = sandbox.generate_framework_path
       sandbox_path = sandbox.root
-      bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled
+      bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled?
       targets = targets_to_prebuild
 
       run_code_gen!
@@ -128,7 +127,7 @@ module Pod
           configuration: Pod::Podfile::DSL.prebuild_config,
           output_path: output_path,
           bitcode_enabled: bitcode_enabled,
-          device_build_enabled: Pod::Podfile::DSL.device_build_enabled,
+          device_build_enabled: Pod::Podfile::DSL.device_build_enabled?,
           custom_build_options: Pod::Podfile::DSL.custom_device_build_options,
           custom_build_options_simulator: Pod::Podfile::DSL.custom_simulator_build_options
         )
@@ -180,7 +179,7 @@ module Pod
         path.rmtree if path.exist?
       end
 
-      if Podfile::DSL.dont_remove_source_code
+      if Podfile::DSL.dont_remove_source_code?
         # just remove the tmp files
         path = sandbox.root + "Manifest.lock.tmp"
         path.rmtree if path.exist?

@@ -30,7 +30,11 @@ check_pod_install_when_prebuilt_enabled() {
 check_pod_prebuild() {
   log_section "Check pod prebuild"
   rm -rf Pods
-  bundle exec pod binary prebuild
+  local prebuild_args=()
+  if [[ ${FORCE_PREBUILD_ALL_PODS} == "true" ]]; then
+    prebuild_args+="--all"
+  fi
+  bundle exec pod binary prebuild ${prebuild_args}
 }
 
 xcodebuild_test() {
@@ -95,21 +99,21 @@ run_test_all() {
 }
 run_test_flag_off() {
   export ENABLE_PREBUILT_POD_LIBS=false
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
+  export FORCE_PREBUILD_ALL_PODS=false
 
   check_pod_install_when_prebuilt_disabled
   check_xcodebuild_test
 }
 run_test_flag_on() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
+  export FORCE_PREBUILD_ALL_PODS=false
 
   check_pod_install_when_prebuilt_enabled
   check_xcodebuild_test
 }
 run_test_prebuild_all() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=true
+  export FORCE_PREBUILD_ALL_PODS=true
 
   check_pod_prebuild
   check_xcodebuild_test
@@ -117,7 +121,7 @@ run_test_prebuild_all() {
 }
 run_test_prebuild_changes() {
   export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_VENDOR_PODS=false
+  export FORCE_PREBUILD_ALL_PODS=false
 
   check_pod_prebuild
   check_xcodebuild_test

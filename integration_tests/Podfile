@@ -25,7 +25,6 @@ pods_originally_distributed_as_vendor = [
 if enabled_prebuilt_pods
   plugin "cocoapods-binary-cache"
   config_cocoapods_binary_cache(
-    prebuild_all_vendor_pods: ENV["FORCE_PREBUILD_ALL_VENDOR_PODS"] == "true",
     excluded_pods: [],
     save_cache_validation_to: ".stats/cocoapods_binary_cache.json"
   )
