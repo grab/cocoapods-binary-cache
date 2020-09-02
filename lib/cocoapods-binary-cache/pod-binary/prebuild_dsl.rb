@@ -20,6 +20,7 @@ module Pod
         apply_config.call(:custom_simulator_build_options)
         apply_config.call(:save_cache_validation_to)
         apply_config.call(:validate_prebuilt_settings)
+        apply_config.call(:prebuild_code_gen)
       end
 
       @prebuild_config = "Debug"
@@ -45,6 +46,7 @@ module Pod
       #   end
       # -----------------------------------------------
       @validate_prebuilt_settings = nil
+      @prebuild_code_gen = nil
 
       class << self
         attr_accessor :prebuild_config
@@ -60,6 +62,7 @@ module Pod
         attr_accessor :custom_simulator_build_options
         attr_accessor :save_cache_validation_to
         attr_accessor :validate_prebuilt_settings
+        attr_accessor :prebuild_code_gen
 
         alias prebuild_job? prebuild_job
         alias prebuild_all? prebuild_all
