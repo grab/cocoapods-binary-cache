@@ -9,6 +9,7 @@ describe "Pod::Command::Binary::Prebuild" do
     end
     after do
       Pod::Podfile::DSL.binary_cache_config = {}
+      Pod::Podfile::DSL.binary_cache_cli_config = {}
     end
 
     context "no arguments & options are specified" do

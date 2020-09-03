@@ -4,23 +4,25 @@ module Pod
   class Podfile
     module DSL
       @binary_cache_config = {}
+      @binary_cache_cli_config = {}
       def config_cocoapods_binary_cache(options)
         Pod::Podfile::DSL.binary_cache_config = options
       end
 
       class << self
         attr_accessor :binary_cache_config
+        attr_accessor :binary_cache_cli_config
 
         def prebuild_config
           @binary_cache_config[:prebuild_config] || "Debug"
         end
 
         def prebuild_job?
-          @binary_cache_config[:prebuild_job]
+          @binary_cache_cli_config[:prebuild_job] || @binary_cache_config[:prebuild_job]
         end
 
         def prebuild_all_pods?
-          @binary_cache_config[:prebuild_all_pods]
+          @binary_cache_cli_config[:prebuild_all_pods] || @binary_cache_config[:prebuild_all_pods]
         end
 
         def excluded_pods

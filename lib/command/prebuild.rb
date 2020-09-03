@@ -24,8 +24,8 @@ module Pod
         end
 
         def run
-          Pod::Podfile::DSL.binary_cache_config[:prebuild_job] = true
-          Pod::Podfile::DSL.binary_cache_config[:prebuild_all_pods] = @prebuild_all_pods
+          Pod::Podfile::DSL.binary_cache_cli_config[:prebuild_job] = true
+          Pod::Podfile::DSL.binary_cache_cli_config[:prebuild_all_pods] = @prebuild_all_pods
           @prebuilder.run
         end
       end
