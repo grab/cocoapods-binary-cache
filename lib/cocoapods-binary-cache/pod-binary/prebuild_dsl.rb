@@ -5,7 +5,7 @@ module Pod
     module DSL
       @binary_cache_config = {}
       def config_cocoapods_binary_cache(options)
-        @binary_cache_config = options
+        Pod::Podfile::DSL.binary_cache_config = options
       end
 
       class << self
