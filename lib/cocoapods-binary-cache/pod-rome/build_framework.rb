@@ -24,7 +24,7 @@ def build_for_apple_platform(options)
   bitcode_enabled = options[:bitcode_enabled]
   custom_build_options = options[:custom_build_options] || []
   custom_build_options_simulator = options[:custom_build_options_simulator] || []
-  enable_device_build = options[:enable_device_build]
+  device_build_enabled = options[:device_build_enabled]
 
   deployment_target = target.platform.deployment_target.to_s
 
@@ -58,7 +58,7 @@ def build_for_apple_platform(options)
     puts "Simulator framework already exist at: #{simulator_framework_path}"
   end
 
-  unless enable_device_build
+  unless device_build_enabled
     FileUtils.cp_r Dir["#{simulator_target_products_path}/*"], output_path
     return
   end
