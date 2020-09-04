@@ -68,7 +68,7 @@ module PodPrebuild
     # Generate a map between a dev_pod and it source hash
     def dev_pod_hashes_map
       @dev_pod_hashes_map ||=
-        dev_pod_sources.map { |name, attribs| [name, FolderChecksum.checksum(attribs[:path])] }.to_h
+        dev_pod_sources.map { |name, attribs| [name, FolderChecksum.git_checksum(attribs[:path])] }.to_h
     end
 
     # Parse an item under `PODS` section of a Lockfile

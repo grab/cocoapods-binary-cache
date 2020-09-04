@@ -16,8 +16,8 @@ describe "PodPrebuild::DevPodsCacheValidator" do
 
     before do
       allow_any_instance_of(PodPrebuild::Metadata).to receive(:load_json).and_return(metadata_hash)
-      allow(FolderChecksum).to receive(:checksum).with(anything).and_return(source_hash)
-      allow(FolderChecksum).to receive(:checksum).with("local/A").and_return("not" + source_hash)
+      allow(FolderChecksum).to receive(:git_checksum).with(anything).and_return(source_hash)
+      allow(FolderChecksum).to receive(:git_checksum).with("local/A").and_return("not" + source_hash)
 
       validation_result = PodPrebuild::DevPodsCacheValidator.new(
         pod_lockfile: pod_lockfile,

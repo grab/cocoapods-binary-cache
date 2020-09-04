@@ -4,9 +4,15 @@
 require "digest/md5"
 
 class FolderChecksum
-  def self.checksum(dir)
-    files = Dir["#{dir}/**/*"].reject { |f| File.directory?(f) }
-    content = files.map { |f| File.read(f) }.join
-    Digest::MD5.hexdigest(content).to_s
+  def self.git_checksum(dir)
+    checksum_of_files(`git ls-files #{dir}`.split("\n"))
+  rescue => e
+    Pod::UI.warn "Cannot get checksum of tracked files under #{dir}: #{e}"
+    checksum_of_files(Dir["#{dir}/**/*"].reject { |f| File.directory?(f) })
+  end
+
+  def self.checksum_of_files(files)
+    checksums = files.sort.map { |f| Digest::MD5.hexdigest(File.read(f)) }
+    Digest::MD5.hexdigest(checksums.join)
   end
 end
