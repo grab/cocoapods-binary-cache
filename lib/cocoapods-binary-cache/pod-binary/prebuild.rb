@@ -1,5 +1,4 @@
 require "fileutils"
-require_relative "../pod-rome/build_framework"
 require_relative "../prebuild_output/output"
 require_relative "../helper/lockfile"
 require_relative "helper/passer"
@@ -114,7 +113,6 @@ module Pod
       UI.puts "Start prebuild_frameworks"
       existed_framework_folder = sandbox.generate_framework_path
       sandbox_path = sandbox.root
-      bitcode_enabled = Pod::Podfile::DSL.bitcode_enabled?
       targets = targets_to_prebuild
 
       run_code_gen!
@@ -128,10 +126,10 @@ module Pod
           target: target,
           configuration: Pod::Podfile::DSL.prebuild_config,
           output_path: output_path,
-          bitcode_enabled: bitcode_enabled,
+          bitcode_enabled: Pod::Podfile::DSL.bitcode_enabled?,
           device_build_enabled: Pod::Podfile::DSL.device_build_enabled?,
-          custom_build_options: Pod::Podfile::DSL.custom_device_build_options,
-          custom_build_options_simulator: Pod::Podfile::DSL.custom_simulator_build_options
+          disable_dsym: Pod::Podfile::DSL.disable_dsym?,
+          args: Pod::Podfile::DSL.build_args
         )
         collect_metadata(target, output_path)
       end

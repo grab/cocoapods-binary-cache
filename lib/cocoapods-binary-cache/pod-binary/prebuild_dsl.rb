@@ -41,16 +41,16 @@ module Pod
           @binary_cache_config[:device_build_enabled]
         end
 
+        def disable_dsym?
+          @binary_cache_config[:disable_dsym]
+        end
+
         def dont_remove_source_code?
           @binary_cache_config[:dont_remove_source_code]
         end
 
-        def custom_device_build_options
-          @binary_cache_config[:custom_device_build_options] || []
-        end
-
-        def custom_simulator_build_options
-          @binary_cache_config[:custom_simulator_build_options] || []
+        def build_args
+          @binary_cache_config[:build_args]
         end
 
         def save_cache_validation_to

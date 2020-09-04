@@ -21,6 +21,8 @@ Following are the options available in `config_cocoapods_binary_cache`:
 
 - `device_build_enabled` (default: `false`): Enable prebuilt frameworks to be used with devices.
 
+- `disable_dsym` (default: `false`): Disable dSYM generation when prebuilding frameworks.
+
 - `save_cache_validation_to` (default: `nil`): The path to save cache validation (missed/hit). Do nothing if not specified
 
 - `validate_prebuilt_settings` (default: `nil`): Validate build settings of the prebuilt frameworks. A framework that has incompatible build settings will be treated as a cache miss. If this option is not specified, only versions of the prebuilt pods are used to check for cache hit/miss. Below is a sample build settings validation:

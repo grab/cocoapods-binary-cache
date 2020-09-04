@@ -1,5 +1,5 @@
-require_relative "../../pod-rome/xcodebuild"
-require_relative "../../pod-rome/build_framework"
+require_relative "../../pod-rome/xcodebuild_raw"
+require_relative "../../pod-rome/xcodebuild_command"
 
 module Pod
   class Prebuild
@@ -11,25 +11,15 @@ module Pod
       options[:build_dir] = build_dir(options[:sandbox].root)
 
       case target.platform.name
-      when :ios
-        build_for_apple_platform(
-          options.merge(:device => "iphoneos", :simulator => "iphonesimulator")
-        )
-      when :tvos
-        build_for_apple_platform(
-          options.merge(:device => "appletvos", :simulator => "appletvsimulator")
-        )
-      when :watchos
-        build_for_apple_platform(
-          options.merge(:device => "watchos", :simulator => "watchsimulator")
-        )
+      when :ios, :tvos, :watchos
+        XcodebuildCommand.new(options).run
       when :osx
         xcodebuild(
           sandbox: options[:sandbox],
           target: target.label,
           configuration: options[:configuration],
           sdk: "macosx",
-          other_options: options[:custom_build_options]
+          args: options[:args]
         )
       else
         raise "Unsupported platform for '#{target.name}': '#{target.platform.name}'"

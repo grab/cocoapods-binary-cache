@@ -1,8 +1,14 @@
 require "fourflusher"
 
+PLATFORM_OF_SDK = {
+  "iphonesimulator" => "iOS",
+  "appletvsimulator" => "tvOS",
+  "watchsimulator" => "watchOS"
+}.freeze
+
 def xcodebuild(options)
   sdk = options[:sdk] || "iphonesimulator"
-  platform = PLATFORMS[sdk]
+  platform = PLATFORM_OF_SDK[sdk]
 
   cmd = ["xcodebuild"]
   cmd << "-project" << options[:sandbox].project_path.realdirpath
@@ -10,7 +16,7 @@ def xcodebuild(options)
   cmd << "-configuration" << options[:configuration]
   cmd << "-sdk" << sdk
   cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
-  cmd += options[:other_options] if options[:other_options]
+  cmd += options[:args] if options[:args]
   cmd << "2>&1"
   cmd = cmd.join(" ")
 
