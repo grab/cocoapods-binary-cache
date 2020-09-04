@@ -1,10 +1,15 @@
 module PodPrebuild
   class DependenciesGraphCacheValidator < AccumulatedCacheValidator
+    def initialize(options)
+      super(options)
+      @ignored_pods = options[:ignored_pods] || Set.new
+    end
+
     def validate(accumulated)
       return accumulated if library_evolution_supported? || @pod_lockfile.nil?
 
       dependencies_graph = DependenciesGraph.new(@pod_lockfile.lockfile)
-      clients = dependencies_graph.get_clients(accumulated.missed.to_a)
+      clients = dependencies_graph.get_clients(accumulated.discard(@ignored_pods).missed.to_a)
       unless Pod::Podfile::DSL.dev_pods_enabled?
         clients = clients.reject { |client| @pod_lockfile.dev_pods.keys.include?(client) }
       end
