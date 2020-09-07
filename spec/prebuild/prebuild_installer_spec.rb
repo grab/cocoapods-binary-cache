@@ -33,18 +33,19 @@ describe "Pod::PrebuildInstaller" do
   end
 
   describe "#prebuild_frameworks!" do
-    let(:prebuild_code_gen) { ->(installer) {} }
+    let(:prebuild_code_gen) { ->(_, _) {} }
+    let(:targets_to_prebuild) { [] }
 
     before do
       allow(@installer).to receive(:pod_targets).and_return([])
-      allow(@installer).to receive(:targets_to_prebuild).and_return([])
+      allow(@installer).to receive(:targets_to_prebuild).and_return(targets_to_prebuild)
       allow(sandbox).to receive(:exsited_framework_target_names).and_return([])
       allow(sandbox).to receive(:generate_framework_path).and_return(tmp_dir + "/Generated")
       allow(Pod::Podfile::DSL).to receive(:prebuild_code_gen).and_return(prebuild_code_gen)
     end
 
     it "runs code generation before building" do
-      expect(prebuild_code_gen).to receive(:call).with(@installer)
+      expect(prebuild_code_gen).to receive(:call).with(@installer, targets_to_prebuild)
       @installer.prebuild_frameworks!
     end
   end

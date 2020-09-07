@@ -47,11 +47,11 @@ module Pod
       return false if Pod::Podfile::DSL.prebuild_all_pods?
     end
 
-    def run_code_gen!
+    def run_code_gen!(targets)
       return if Pod::Podfile::DSL.prebuild_code_gen.nil?
 
       Pod::UI.title("Running code generation...") do
-        Pod::Podfile::DSL.prebuild_code_gen.call(self)
+        Pod::Podfile::DSL.prebuild_code_gen.call(self, targets)
       end
     end
 
@@ -115,9 +115,9 @@ module Pod
       sandbox_path = sandbox.root
       targets = targets_to_prebuild
 
-      run_code_gen!
       Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}"
       Pod::Prebuild.remove_build_dir(sandbox_path)
+      run_code_gen!(targets)
       targets.each do |target|
         output_path = sandbox.framework_folder_path_for_target_name(target.name)
         output_path.mkpath unless output_path.exist?

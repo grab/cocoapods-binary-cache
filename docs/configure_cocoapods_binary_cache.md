@@ -43,7 +43,7 @@ config_cocoapods_binary_cache(
   Do take note that if the code generation requires the `Pods.xcodeproj`, the project should correspond to the prebuilt sandbox (for ex. `_Prebuild/`, accessed via `installer.sandbox.root`), not the standard sandbox (`Pods`)
 ```rb
 config_cocoapods_binary_cache(
-  prebuild_code_gen: lambda { |installer|
+  prebuild_code_gen: lambda { |installer, targets_to_prebuild|
     `sh scripts/codegen_for_prebuild.sh`
   }
 )
