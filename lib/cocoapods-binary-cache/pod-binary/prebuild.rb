@@ -8,10 +8,12 @@ require_relative "helper/build"
 
 module Pod
   class PrebuildInstaller < Installer
+    attr_reader :lockfile_wrapper
+
     def initialize(options)
       super(options[:sandbox], options[:podfile], options[:lockfile])
       @cache_validation = options[:cache_validation]
-      @lockfile_wrapper = PodPrebuild::Lockfile.new(lockfile)
+      @lockfile_wrapper = lockfile && PodPrebuild::Lockfile.new(lockfile)
     end
 
     private
@@ -218,8 +220,7 @@ module Pod
         .build_configurations
         .detect { |config| config.name == Pod::Podfile::DSL.prebuild_config }
         .build_settings
-      hash = @lockfile_wrapper.dev_pod_hash(target.name)
-      metadata.source_hash = hash unless hash.nil?
+      metadata.source_hash = @lockfile_wrapper && @lockfile_wrapper.dev_pod_hash(target.name)
 
       # Store root path for code-coverage support later
       # TODO: update driver code-coverage logic to use path stored here
