@@ -64,6 +64,10 @@ module Pod
         def prebuild_code_gen
           @binary_cache_config[:prebuild_code_gen]
         end
+
+        def targets_to_prebuild_from_cli
+          @binary_cache_cli_config[:prebuild_targets] || []
+        end
       end
     end
   end

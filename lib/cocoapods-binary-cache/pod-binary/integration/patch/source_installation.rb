@@ -17,13 +17,14 @@ module Pod
     end
 
     def should_integrate_prebuilt_pod?(name)
-      if Pod::Podfile::DSL.prebuild_job?
+      if Pod::Podfile::DSL.prebuild_job? && Pod::Podfile::DSL.targets_to_prebuild_from_cli.empty?
         # In a prebuild job, at the integration stage, all prebuilt frameworks should be
         # ready for integration regardless of whether there was any cache miss or not.
         # Those that are missed were prebuilt in the prebuild stage.
         PodPrebuild::StateStore.cache_validation.include?(name)
       else
-        PodPrebuild::StateStore.cache_validation.hit?(name)
+        prebuilt = PodPrebuild::StateStore.cache_validation.hit + Pod::Podfile::DSL.targets_to_prebuild_from_cli
+        prebuilt.include?(name)
       end
     end
   end

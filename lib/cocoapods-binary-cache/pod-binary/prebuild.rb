@@ -57,11 +57,12 @@ module Pod
 
     def targets_to_prebuild
       existed_framework_folder = sandbox.generate_framework_path
-      targets = []
+      targets = pod_targets
 
-      if Pod::Podfile::DSL.prebuild_all_pods?
-        targets = pod_targets
-      elsif !local_manifest.nil?
+      targets_from_cli = Pod::Podfile::DSL.targets_to_prebuild_from_cli
+      if !targets_from_cli.empty?
+        targets = targets.select { |target| targets_from_cli.include?(target.name) }
+      elsif !Pod::Podfile::DSL.prebuild_all_pods? && !local_manifest.nil?
         changes = prebuild_pods_changes
         added = changes.added
         changed = changes.changed
@@ -88,8 +89,6 @@ module Pod
         # add the dendencies
         dependency_targets = targets.map(&:recursive_dependent_targets).flatten.uniq || []
         targets = (targets + dependency_targets).uniq
-      else
-        targets = pod_targets
       end
 
       unless Pod::Podfile::DSL.prebuild_all_pods?

@@ -66,13 +66,28 @@ describe "Pod::Installer" do
     end
 
     context "is prebuild job" do
-      it "install source of all prebuilt pods differently" do
+      before do
         allow(Pod::Podfile::DSL).to receive(:prebuild_job?).and_return(true)
-
+      end
+      it "installs source of all prebuilt pods differently" do
         prebuilt_pod_names.each do |name|
           expect(@source_installer).to receive(:install_for_prebuild!)
           expect(@source_installer).not_to receive(:install!)
           @installer.send(:install_source_of_pod, name)
+        end
+      end
+
+      context "targets were specified in CLI" do
+        let(:targets_to_prebuild_from_cli) { ["Y"] }
+        before do
+          allow(Pod::Podfile::DSL).to receive(:targets_to_prebuild_from_cli).and_return(targets_to_prebuild_from_cli)
+        end
+        it "installs specified targets & cache hit as prebuilt" do
+          (prebuilt_pod_names_cache_hit + targets_to_prebuild_from_cli).each do |name|
+            expect(@source_installer).to receive(:install_for_prebuild!)
+            expect(@source_installer).not_to receive(:install!)
+            @installer.send(:install_source_of_pod, name)
+          end
         end
       end
     end
