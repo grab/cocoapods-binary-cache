@@ -19,15 +19,15 @@ When reporting the issue, kindly describe:
 
 ## Contribute to the codebase
 
-Do note that the Github repo [cococoapods-binary-cache](https://github.com/grab/cocoapods-binary-cache) is a mirror of an internal repo. A change to the codebase must be merged in the internal repo.
+Do note that the Github repo [cococoapods-binary-cache](https://github.com/grab/cocoapods-binary-cache) is a mirror of an internal repo.
 
 If you are a Grabber or you have access to the internal repo, kindly submit your change to this internal repo.
 
 In case you do not have access to this repo, please check out the following steps:
 
 1. Submit your change to the Github repo [cococoapods-binary-cache](https://github.com/grab/cocoapods-binary-cache).
-2. The code is reviewed by our team. Once the code is approved, we submit a merge request to the internal repo to include your change.
-3. Once the change is merged, we notify you of the merge (in your original pull request). Then, please help close your pull request.
+2. The change is reviewed by our team.
+3. Once the change is approved, we'll proceed to merge your change.
 
 ...
 
