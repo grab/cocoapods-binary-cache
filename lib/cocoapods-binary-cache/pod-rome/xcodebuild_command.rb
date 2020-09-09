@@ -23,8 +23,8 @@ class XcodebuildCommand
       build_for_sdk(device)
       create_universal_framework
       merge_dsym unless disable_dsym?
-      merge_headers
-      merge_swiftmodules
+      merge_swift_headers
+      merge_swift_modules
     end
     collect_output(Dir[target_products_dir_of(simulator) + "/*"])
   end
@@ -88,9 +88,11 @@ class XcodebuildCommand
     Pod::UI.puts `#{cmd.join(" ")}`
   end
 
-  def merge_headers
+  def merge_swift_headers
     simulator_header_path = framework_path_of(simulator) + "/Headers/#{module_name}-Swift.h"
     device_header_path = framework_path_of(device) + "/Headers/#{module_name}-Swift.h"
+    return unless File.exist?(simulator_header_path) && File.exist?(device_header_path)
+
     merged_header = <<~HEREDOC
       #if TARGET_OS_SIMULATOR // merged by cocoapods-binary
       #{File.read(simulator_header_path)}
@@ -101,10 +103,14 @@ class XcodebuildCommand
     File.write(simulator_header_path, merged_header.strip)
   end
 
-  def merge_swiftmodules
+  def merge_swift_modules
+    simulator_swift_module_path = framework_path_of(simulator) + "/Modules/#{module_name}.swiftmodule"
+    device_swift_module_path = framework_path_of(device) + "/Modules/#{module_name}.swiftmodule"
+    return unless File.exist?(simulator_swift_module_path) && File.exist?(device_swift_module_path)
+
     FileUtils.cp_r(
-      framework_path_of(device) + "/Modules/#{module_name}.swiftmodule/.",
-      framework_path_of(simulator) + "/Modules/#{module_name}.swiftmodule"
+      device_swift_module_path + "/.",
+      simulator_swift_module_path
     )
   end
 
