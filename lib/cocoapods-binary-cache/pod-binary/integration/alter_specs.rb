@@ -15,6 +15,7 @@ module Pod
         # as to compitable with older version and be less wordy.
         framework_file_path = target.framework_name
         framework_file_path = target.name + "/" + framework_file_path if targets.count > 1
+        framework_file_path = PodPrebuild::Config.instance.prebuilt_path(path: framework_file_path)
         add_vendered_framework(spec, target.platform.name.to_s, framework_file_path)
       end
 
