@@ -13,7 +13,7 @@ module PodPrebuild
       end
 
       def stages
-        @stages ||= Pod::Podfile::DSL.prebuild_job? ? [:prebuild, :integration] : [:integration]
+        @stages ||= PodPrebuild.config.prebuild_job? ? [:prebuild, :integration] : [:integration]
       end
 
       def current_stage

@@ -44,14 +44,14 @@ module Pod
 
     def should_not_prebuild_vendor_pod(name)
       return true if blacklisted?(name)
-      return false if Pod::Podfile::DSL.prebuild_all_pods?
+      return false if PodPrebuild.config.prebuild_all_pods?
     end
 
     def run_code_gen!(targets)
-      return if Pod::Podfile::DSL.prebuild_code_gen.nil?
+      return if PodPrebuild.config.prebuild_code_gen.nil?
 
       Pod::UI.title("Running code generation...") do
-        Pod::Podfile::DSL.prebuild_code_gen.call(self, targets)
+        PodPrebuild.config.prebuild_code_gen.call(self, targets)
       end
     end
 
@@ -59,10 +59,10 @@ module Pod
       existed_framework_folder = sandbox.generate_framework_path
       targets = pod_targets
 
-      targets_from_cli = Pod::Podfile::DSL.targets_to_prebuild_from_cli
+      targets_from_cli = PodPrebuild.config.targets_to_prebuild_from_cli
       if !targets_from_cli.empty?
         targets = targets.select { |target| targets_from_cli.include?(target.name) }
-      elsif !Pod::Podfile::DSL.prebuild_all_pods? && !local_manifest.nil?
+      elsif !PodPrebuild.config.prebuild_all_pods? && !local_manifest.nil?
         changes = prebuild_pods_changes
         added = changes.added
         changed = changes.changed
@@ -91,11 +91,11 @@ module Pod
         targets = (targets + dependency_targets).uniq
       end
 
-      unless Pod::Podfile::DSL.prebuild_all_pods?
+      unless PodPrebuild.config.prebuild_all_pods?
         targets = targets.select { |pod_target| cache_missed?(pod_target.name) }
       end
       targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
-      unless Podfile::DSL.dev_pods_enabled?
+      unless PodPrebuild.config.dev_pods_enabled?
         targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
       end
       targets
@@ -123,12 +123,12 @@ module Pod
         Pod::Prebuild.build(
           sandbox: sandbox_path,
           target: target,
-          configuration: Pod::Podfile::DSL.prebuild_config,
+          configuration: PodPrebuild.config.prebuild_config,
           output_path: output_path,
-          bitcode_enabled: Pod::Podfile::DSL.bitcode_enabled?,
-          device_build_enabled: Pod::Podfile::DSL.device_build_enabled?,
-          disable_dsym: Pod::Podfile::DSL.disable_dsym?,
-          args: Pod::Podfile::DSL.build_args
+          bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
+          device_build_enabled: PodPrebuild.config.device_build_enabled?,
+          disable_dsym: PodPrebuild.config.disable_dsym?,
+          args: PodPrebuild.config.build_args
         )
         collect_metadata(target, output_path)
       end
@@ -178,7 +178,7 @@ module Pod
         path.rmtree if path.exist?
       end
 
-      if Podfile::DSL.dont_remove_source_code?
+      if PodPrebuild.config.dont_remove_source_code?
         # just remove the tmp files
         path = sandbox.root + "Manifest.lock.tmp"
         path.rmtree if path.exist?
@@ -215,7 +215,7 @@ module Pod
       metadata.build_settings = pods_project.targets
         .detect { |native_target| native_target.name == target.name }
         .build_configurations
-        .detect { |config| config.name == Pod::Podfile::DSL.prebuild_config }
+        .detect { |config| config.name == PodPrebuild.config.prebuild_config }
         .build_settings
       metadata.source_hash = @lockfile_wrapper && @lockfile_wrapper.dev_pod_hash(target.name)
 

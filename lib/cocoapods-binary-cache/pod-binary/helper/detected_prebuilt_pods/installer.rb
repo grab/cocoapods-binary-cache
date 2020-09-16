@@ -17,7 +17,7 @@ module Pod
         targets = pod_targets.select { |target| explicit_prebuilt_pod_names.include?(target.pod_name) }
         dependencies = targets.flat_map(&:recursive_dependent_targets) # Treat dependencies as prebuilt pods
         all = (targets + dependencies).uniq
-        all = all.reject { |target| sandbox.local?(target.pod_name) } unless Podfile::DSL.dev_pods_enabled?
+        all = all.reject { |target| sandbox.local?(target.pod_name) } unless PodPrebuild.config.dev_pods_enabled?
         all
       end
     end

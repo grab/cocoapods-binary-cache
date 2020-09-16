@@ -12,7 +12,7 @@ class SchemeEditor
       scheme_name = File.basename(file_path, '.*')
       next unless sandbox.local?(scheme_name)
 
-      puts "Modify scheme to enable coverage symbol when prebuild: #{scheme_name}"
+      Pod::UI.message "Modify scheme to enable coverage symbol when prebuild: #{scheme_name}"
 
       doc = File.open(file_path, 'r') { |f| REXML::Document.new(f) }
       scheme = doc.elements['Scheme']

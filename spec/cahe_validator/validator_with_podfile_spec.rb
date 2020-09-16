@@ -21,7 +21,7 @@ describe "PodPrebuild::PodfileChangesCacheValidator" do
     end
 
     before do
-      allow(Pod::Podfile::DSL).to receive(:dev_pods_enabled).and_return(dev_pods_enabled)
+      allow(PodPrebuild.config).to receive(:dev_pods_enabled).and_return(dev_pods_enabled)
       validation_result = PodPrebuild::PodfileChangesCacheValidator.new(
         podfile: podfile,
         prebuilt_lockfile: prebuilt_lockfile

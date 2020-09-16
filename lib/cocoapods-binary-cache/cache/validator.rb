@@ -5,7 +5,7 @@ module PodPrebuild
         PodPrebuild::PodfileChangesCacheValidator.new(options),
         PodPrebuild::NonDevPodsCacheValidator.new(options)
       ]
-      @validators << PodPrebuild::DevPodsCacheValidator.new(options) if Pod::Podfile::DSL.dev_pods_enabled?
+      @validators << PodPrebuild::DevPodsCacheValidator.new(options) if PodPrebuild.config.dev_pods_enabled?
       @validators << PodPrebuild::DependenciesGraphCacheValidator.new(options)
       @validators << PodPrebuild::ExclusionCacheValidator.new(options)
     end

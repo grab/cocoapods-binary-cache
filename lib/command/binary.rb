@@ -11,7 +11,7 @@ module Pod
       self.abstract_command = true
 
       def prebuild_config
-        @prebuild_config ||= PodPrebuild::Config.instance
+        @prebuild_config ||= PodPrebuild.config
       end
     end
   end

@@ -11,7 +11,7 @@ module Pod
   class Installer
     class PodSourceInstaller
       def install_for_prebuild!(standard_sanbox)
-        return if !Podfile::DSL.dev_pods_enabled? && standard_sanbox.local?(name)
+        return if !PodPrebuild.config.dev_pods_enabled? && standard_sanbox.local?(name)
 
         # make a symlink to target folder
         # TODO (bang): Unify to 1 sandbox to optimize and avoid inconsistency
@@ -26,7 +26,7 @@ module Pod
           # platform frameworks. e.g. AFNetworking/AFNetworking-iOS/AFNetworking.framework
           target_folder = standard_sanbox.pod_dir(self.name)
           target_folder += real_file_folder.basename if target_names.count > 1
-          target_folder += PodPrebuild::Config.instance.prebuilt_path
+          target_folder += PodPrebuild.config.prebuilt_path
           target_folder.rmtree if target_folder.exist?
           target_folder.mkpath
 

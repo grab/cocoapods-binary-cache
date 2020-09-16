@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.7
+### Enhancements
+- Change the prebuilt path from `Pods/A/A.framework` to `Pods/A/_Prebuilt/A.framework`. No config change is required.
+- Show warnings if there exists an inapplicable option in `config_cocoapods_binary_cache`.
+
+### Bug fixes
+None
+
+---
 ## 0.1.6
 ### Enhancements
 - Remove the `prebuild_all_vendor_pods` option. Specify this in the CLI instead: `pod binary prebuild --all`

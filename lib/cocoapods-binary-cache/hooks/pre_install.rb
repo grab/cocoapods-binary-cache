@@ -24,7 +24,7 @@ module PodPrebuild
       create_prebuild_sandbox
       Pod::UI.section("Detect implicit dependencies") { detect_implicit_dependencies }
       Pod::UI.section("Validate prebuilt cache") { validate_cache }
-      prebuild! if Pod::Podfile::DSL.prebuild_job?
+      prebuild! if PodPrebuild.config.prebuild_job?
       Pod::UI.section("Reset environment") { reset_environment }
 
       PodPrebuild::Env.next_stage!
@@ -72,7 +72,7 @@ module PodPrebuild
       # Note: DSL is reloaded when creating an installer (Pod::Installer.new).
       # Any mutation to DSL is highly discouraged
       # --> Rather, perform mutation on PodPrebuild::StateStore instead
-      PodPrebuild::StateStore.excluded_pods += Pod::Podfile::DSL.excluded_pods
+      PodPrebuild::StateStore.excluded_pods += PodPrebuild.config.excluded_pods
     end
 
     def create_prebuild_sandbox
@@ -101,13 +101,13 @@ module PodPrebuild
         podfile: podfile,
         pod_lockfile: installer_context.lockfile,
         prebuilt_lockfile: prebuilt_lockfile,
-        validate_prebuilt_settings: Pod::Podfile::DSL.validate_prebuilt_settings,
+        validate_prebuilt_settings: PodPrebuild.config.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path,
         sandbox_root: prebuild_sandbox.root,
         ignored_pods: PodPrebuild::StateStore.excluded_pods,
         prebuilt_pod_names: @original_installer.prebuilt_pod_names
       ).validate
-      path_to_save_cache_validation = Pod::Podfile::DSL.save_cache_validation_to
+      path_to_save_cache_validation = PodPrebuild.config.save_cache_validation_to
       @cache_validation.update_to(path_to_save_cache_validation) unless path_to_save_cache_validation.nil?
       cache_validation.print_summary
       PodPrebuild::StateStore.cache_validation = cache_validation

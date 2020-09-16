@@ -3,7 +3,7 @@ describe "PodPrebuild::Env" do
     let(:prebuild_job) { false }
     before do
       PodPrebuild::Env.reset!
-      allow(Pod::Podfile::DSL).to receive(:prebuild_job?).and_return(prebuild_job)
+      allow(PodPrebuild.config).to receive(:prebuild_job?).and_return(prebuild_job)
     end
 
     def expect_current_stage_as(stage)

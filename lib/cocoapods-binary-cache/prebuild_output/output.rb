@@ -8,7 +8,7 @@ module PodPrebuild
     end
 
     def prebuild_delta_path
-      @prebuild_delta_path ||= PodPrebuild::Config.instance.prebuild_delta_path
+      @prebuild_delta_path ||= PodPrebuild.config.prebuild_delta_path
     end
 
     def delta_dir

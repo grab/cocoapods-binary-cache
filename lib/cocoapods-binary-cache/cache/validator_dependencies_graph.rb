@@ -10,7 +10,7 @@ module PodPrebuild
 
       dependencies_graph = DependenciesGraph.new(@pod_lockfile.lockfile)
       clients = dependencies_graph.get_clients(accumulated.discard(@ignored_pods).missed.to_a)
-      unless Pod::Podfile::DSL.dev_pods_enabled?
+      unless PodPrebuild.config.dev_pods_enabled?
         clients = clients.reject { |client| @pod_lockfile.dev_pods.keys.include?(client) }
       end
 
