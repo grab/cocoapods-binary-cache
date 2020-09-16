@@ -6,15 +6,10 @@ module PodPrebuild
   end
 
   class Config
-    attr_reader :cache_repo, :cache_path, :prebuild_sandbox_path, :prebuild_delta_path
     attr_accessor :dsl_config, :cli_config
 
     def initialize(path)
-      @data = File.exist?(path) ? PodPrebuild::JSONFile.new(path) : {}
-      @cache_repo = @data["cache_repo"] || @data["prebuilt_cache_repo"]
-      @cache_path = @data.empty? ? nil : File.expand_path(@data["cache_path"])
-      @prebuild_sandbox_path = @data["prebuild_path"] || "_Prebuild"
-      @prebuild_delta_path = @data["prebuild_delta_path"] || "_Prebuild_delta/changes.json"
+      @deprecated_config = File.exist?(path) ? PodPrebuild::JSONFile.new(path).data : {}
       @dsl_config = {}
       @cli_config = {}
     end
@@ -23,12 +18,34 @@ module PodPrebuild
       @instance ||= new("PodBinaryCacheConfig.json")
     end
 
+    def reset!
+      @deprecated_config = {}
+      @dsl_config = {}
+      @cli_config = {}
+    end
+
+    def cache_repo
+      @cache_repo ||= cache_repo_config["remote"]
+    end
+
+    def cache_path
+      @cache_path ||= File.expand_path(cache_repo_config["local"])
+    end
+
+    def prebuild_sandbox_path
+      @dsl_config[:prebuild_sandbox_path] || @deprecated_config["prebuild_path"] || "_Prebuild"
+    end
+
+    def prebuild_delta_path
+      @dsl_config[:prebuild_delta_path] || @deprecated_config["prebuild_delta_path"] || "_Prebuild_delta/changes.json"
+    end
+
     def manifest_path(in_cache: false)
       root_dir(in_cache) + "/Manifest.lock"
     end
 
     def root_dir(in_cache)
-      in_cache ? @cache_path : @prebuild_sandbox_path
+      in_cache ? cache_path : prebuild_sandbox_path
     end
 
     def generated_frameworks_dir(in_cache: false)
@@ -54,7 +71,7 @@ module PodPrebuild
     end
 
     def prebuild_config
-      @dsl_config[:prebuild_config] || "Debug"
+      @cli_config[:prebuild_config] || @dsl_config[:prebuild_config] || "Debug"
     end
 
     def prebuild_job?
@@ -113,6 +130,9 @@ module PodPrebuild
 
     def applicable_dsl_config
       [
+        :cache_repo,
+        :prebuild_sandbox_path,
+        :prebuild_delta_path,
         :prebuild_config,
         :prebuild_job,
         :prebuild_all_pods,
@@ -127,6 +147,26 @@ module PodPrebuild
         :validate_prebuilt_settings,
         :prebuild_code_gen
       ]
+    end
+
+    def cache_repo_config
+      @cache_repo_config ||= begin
+        repo = @cli_config[:repo] || "default"
+        config_ = @dsl_config[:cache_repo] || {}
+        if config_[repo].nil?
+          message = <<~HEREDOC
+            [Deprecated] Configs in `PodBinaryCacheConfig.json` are deprecated.
+            Declare option `cache_repo` in `config_cocoapods_binary_cache` instead.
+            Check out the following doc for more details
+              https://github.com/grab/cocoapods-binary-cache/blob/master/docs/configure_cocoapods_binary_cache.md
+          HEREDOC
+          Pod::UI.puts message.yellow
+        end
+        config_[repo] || {
+          "remote" => @deprecated_config["cache_repo"] || @deprecated_config["prebuilt_cache_repo"],
+          "local" => @deprecated_config["cache_path"] || "~/.cocoapods-binary-cache/prebuilt-frameworks"
+        }
+      end
     end
   end
 end

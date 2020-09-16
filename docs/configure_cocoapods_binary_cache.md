@@ -2,16 +2,37 @@
 
 This document guides you through how to config `cocoapods-binary-cache` via the `config_cocoapods_binary_cache` method in Podfile.
 
+Following are the options available in `config_cocoapods_binary_cache`:
+
+- `cache_repo`: Configure cache repo
 ```rb
 config_cocoapods_binary_cache(
-  prebuild_config: "Debug",
-  ...
+  cache_repo: {
+    "default" => {
+      "remote" => "git@cache_repo.git",
+      "local" => "~/.cocoapods-binary-cache/prebuilt-frameworks-debug-config"
+    }
+    "test" => {
+      "remote" => "git@another_cache_repo.git",
+      "local" => "~/.cocoapods-binary-cache/prebuilt-frameworks-test-config"
+    }
+  }
 )
 ```
 
-Following are the options available in `config_cocoapods_binary_cache`:
+Note: The cache repo can be specified in the CLI of `fetch`/`prebuild`/`push` command with the `--repo` option (`default` is used if not specified):
+```sh
+bundle exec pod binary fetch --repo=test
+```
 
-- `prebuild_config` (default: `Debug`): The configuration to use (such as `Debug`) when prebuilding pods
+- `prebuild_sandbox_path` (default: `_Prebuild`): The path to the prebuild sandbox.
+
+- `prebuild_config` (default: `Debug`): The configuration to use (such as `Debug`) when prebuilding pods.
+
+Note: This config can be overriden by the option `--config` in the `prebuild` CLI:
+```sh
+bundle exec pod binary prebuild --config=Test
+```
 
 - `excluded_pods` (default: `[]`): A list of pods to exclude (ie. treat them as non-prebuilt pods)
 

@@ -4,6 +4,8 @@
 ### Enhancements
 - Change the prebuilt path from `Pods/A/A.framework` to `Pods/A/_Prebuilt/A.framework`. No config change is required.
 - Show warnings if there exists an inapplicable option in `config_cocoapods_binary_cache`.
+- Deprecate configs (`cache_repo`, `cache_path`, `prebuild_path`...) in `PodBinaryCacheConfig.json`. Rather, declare them in `config_cocoapods_binary_cache`. Refer to [Configure cocoapods-binary-cache](/docs/configure_cocoapods_binary_cache.md) for more details.
+- Multi-cache-repo support https://github.com/grab/cocoapods-binary-cache/issues/18.
 
 ### Bug fixes
 None

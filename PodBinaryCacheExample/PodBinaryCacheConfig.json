@@ -1,7 +1,0 @@
-{
-  "cache_repo": "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
-  "cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-libs/",
-  "devpod_cache_repo": "https://github.com/bigbangvn/demo-pod-binary-cache-devpod.git",
-  "devpod_cache_path": "~/Library/Caches/CocoaPods/PodBinaryCacheExample-devpods/",
-  "devpod_prebuild_output": "Pods/_Prebuild_delta/devpod_prebuild_output/"
-}

@@ -6,12 +6,13 @@ end
 
 if is_pod_binary_cache_enabled
   plugin 'cocoapods-binary-cache'
-  # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "DEBUG_INFORMATION_FORMAT=dwarf", :device => "ARCHS=arm64 DEBUG_INFORMATION_FORMAT=dwarf"
-
-  # TODO: BUILD_LIBRARY_FOR_DISTRIBUTION is to build with library evolution, but it doesn't work in Xcode 10.2 now, need find another way
-  # set_custom_xcodebuild_options_for_prebuilt_frameworks :simulator => "BUILD_LIBRARY_FOR_DISTRIBUTION=YES", :device => "ARCHS=arm64 BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
-  
   config_cocoapods_binary_cache(
+    cache_repo: {
+      "default" => {
+        "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
+        "local" => "~/.cocoapods-binary-cache/PodBinaryCacheExample-libs"
+      }
+    },
     prebuild_config: "Debug",
     dev_pods_enabled: true
   )

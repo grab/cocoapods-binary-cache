@@ -5,7 +5,6 @@ module Pod
     class Binary < Command
       class Push < Binary
         self.arguments = [CLAide::Argument.new("CACHE-BRANCH", false)]
-
         def initialize(argv)
           super
           @pusher = PodPrebuild::CachePusher.new(

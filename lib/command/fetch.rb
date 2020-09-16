@@ -5,7 +5,6 @@ module Pod
     class Binary < Command
       class Fetch < Binary
         self.arguments = [CLAide::Argument.new("CACHE-BRANCH", false)]
-
         def initialize(argv)
           super
           @fetcher = PodPrebuild::CacheFetcher.new(

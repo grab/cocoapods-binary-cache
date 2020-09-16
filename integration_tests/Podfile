@@ -25,6 +25,12 @@ pods_originally_distributed_as_vendor = [
 if enabled_prebuilt_pods
   plugin "cocoapods-binary-cache"
   config_cocoapods_binary_cache(
+    cache_repo: {
+      "default" => {
+        "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
+        "local" => "~/.cocoapods-binary-cache/PrebuiltPodIntegration-libs"
+      }
+    },
     excluded_pods: [],
     save_cache_validation_to: ".stats/cocoapods_binary_cache.json"
   )
