@@ -211,7 +211,7 @@ module Pod
         .file_accessors
         .map { |f| f.resource_bundles.keys }
         .flatten
-        .map { |name| PodPrebuild::Config.instance.prebuilt_path(path: "#{name}.bundle") }
+        .map { |name| "#{name}.bundle" }
       metadata.build_settings = pods_project.targets
         .detect { |native_target| native_target.name == target.name }
         .build_configurations

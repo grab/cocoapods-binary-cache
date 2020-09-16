@@ -89,6 +89,7 @@ module Pod
       def make_link(source, target)
         source = Pathname.new(source)
         target = Pathname.new(target)
+        target.rmtree if target.exist?
         target.parent.mkpath unless target.parent.exist?
         relative_source = source.relative_path_from(target.parent)
         FileUtils.ln_sf(relative_source, target)

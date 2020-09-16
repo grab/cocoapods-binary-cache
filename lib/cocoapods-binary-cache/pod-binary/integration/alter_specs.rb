@@ -62,7 +62,9 @@ module Pod
         attributes["resource_bundles"] = nil
         attributes["resources"] ||= []
         attributes["resources"] = [attributes["resources"]] if attributes["resources"].is_a?(String)
-        attributes["resources"] += resource_bundle_names.map { |n| n + ".bundle" }
+        attributes["resources"] += resource_bundle_names.map do |name|
+          PodPrebuild::Config.instance.prebuilt_path(path: "#{name}.bundle")
+        end
       end
 
       add_resource_bundles_to_resources.call(spec.attributes_hash)
