@@ -1,0 +1,29 @@
+name: test
+on: [push, pull_request]
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+      - name: Set up Ruby 2.7
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+      - name: Testing with RSpec
+        run: |
+          gem install bundler:2.1.2
+          bundle install --with development test
+          bundle exec rspec
+
+  integration_test:
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        mode: [flag-off, flag-on, prebuild-changes, prebuild-all]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+      - name: Running integration tests
+        run: |
+          sh scripts/integration_test.sh ${{ matrix.mode }}
