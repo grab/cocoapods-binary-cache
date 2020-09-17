@@ -26,4 +26,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Running integration tests
         run: |
+          gem install bundler:2.1.2
+          bundle install
           sh scripts/integration_test.sh ${{ matrix.mode }}
