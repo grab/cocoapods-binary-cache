@@ -10,16 +10,18 @@ jobs:
   rspec:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
+      - name: Checkout
         uses: actions/checkout@v2
-      - name: Set up Ruby 2.7
+      - name: Ruby setup
         uses: actions/setup-ruby@v1
         with:
           ruby-version: 2.7
-      - name: Testing with RSpec
+      - name: Bundle installation
         run: |
           gem install bundler:2.1.2
-          bundle install --with development test
+          bundle install
+      - name: RSpec
+        run: |
           bundle exec rspec
 
   integration_test:
@@ -28,10 +30,12 @@ jobs:
       matrix:
         mode: [flag-off, flag-on, prebuild-changes, prebuild-all]
     steps:
-      - name: Check out
+      - name: Checkout
         uses: actions/checkout@v2
-      - name: Running integration tests
+      - name: Bundle installation
         run: |
           gem install bundler:2.1.2
           bundle install
+      - name: Integration tests
+        run: |
           sh scripts/integration_test.sh ${{ matrix.mode }}

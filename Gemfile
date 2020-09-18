@@ -13,14 +13,13 @@ end
 
 group :test do
   gem "rspec"
-end
-
-group :integration_test do
   gem "xcpretty"
 end
 
 group :lint do
-  gem "rubocop"
+  gem "danger"
+  gem "danger-rubocop"
+  gem "rubocop", "0.84.0"
 end
 
 group :debug do

@@ -93,3 +93,8 @@ Metrics/CyclomaticComplexity:
 
 Metrics/BlockLength:
   Enabled: false
+
+Naming/FileName:
+  Exclude:
+    - Gemfile
+    - Dangerfile
