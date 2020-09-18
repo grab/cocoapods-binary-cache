@@ -23,5 +23,5 @@ jobs:
           bundle install
       - name: Rubocop
         run: |
-          bundle exec danger || true
+          bundle exec danger || echo "Errors occurred (probably due to fork-based MRs), but are tolerated"
         # TODO (thuyen): Comments (with GITHUB_TOKEN) are not working with fork-based MRs
