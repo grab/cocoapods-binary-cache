@@ -28,7 +28,9 @@ module Pod
         def run
           PodPrebuild.config.cli_config[:prebuild_job] = true
           PodPrebuild.config.cli_config[:prebuild_all_pods] = @prebuild_all_pods
-          PodPrebuild.config.cli_config[:prebuild_targets] = @prebuild_targets unless @prebuild_all_pods
+          unless @prebuild_all_pods # expect a lint warning here
+            PodPrebuild.config.cli_config[:prebuild_targets] = @prebuild_targets
+          end
           @prebuilder.run
         end
       end
