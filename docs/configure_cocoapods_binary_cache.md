@@ -11,7 +11,7 @@ config_cocoapods_binary_cache(
     "default" => {
       "remote" => "git@cache_repo.git",
       "local" => "~/.cocoapods-binary-cache/prebuilt-frameworks-debug-config"
-    }
+    },
     "test" => {
       "remote" => "git@another_cache_repo.git",
       "local" => "~/.cocoapods-binary-cache/prebuilt-frameworks-test-config"
