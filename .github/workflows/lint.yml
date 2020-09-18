@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Ruby setup
         uses: actions/setup-ruby@v1
         with:
@@ -21,4 +23,4 @@ jobs:
           bundle install
       - name: Rubocop
         run: |
-          bundle exec danger --fail-on-errors=true
+          bundle exec danger
