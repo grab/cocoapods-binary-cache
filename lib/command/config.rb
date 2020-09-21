@@ -12,6 +12,7 @@ module PodPrebuild
       @deprecated_config = File.exist?(path) ? PodPrebuild::JSONFile.new(path).data : {}
       @dsl_config = {}
       @cli_config = {}
+      @detected_config = {}
     end
 
     def self.instance
@@ -83,7 +84,7 @@ module PodPrebuild
     end
 
     def excluded_pods
-      @dsl_config[:excluded_pods] || Set.new
+      ((@dsl_config[:excluded_pods] || Set.new) + (@detected_config[:excluded_pods] || Set.new)).to_set
     end
 
     def dev_pods_enabled?
@@ -124,6 +125,22 @@ module PodPrebuild
 
     def targets_to_prebuild_from_cli
       @cli_config[:prebuild_targets] || []
+    end
+
+    def update_detected_prebuilt_pod_names!(value)
+      @detected_config[:prebuilt_pod_names] = value
+    end
+
+    def update_detected_excluded_pods!(value)
+      @detected_config[:excluded_pods] = value
+    end
+
+    def prebuilt_pod_names
+      @detected_config[:prebuilt_pod_names] || Set.new
+    end
+
+    def tracked_prebuilt_pod_names
+      prebuilt_pod_names - excluded_pods
     end
 
     private

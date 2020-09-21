@@ -29,7 +29,7 @@ describe "Pod::Installer" do
         prebuilt_pod_names_cache_missed.map { |name| [name, "missing"] }.to_h,
         prebuilt_pod_names_cache_hit.to_set
       )
-      allow(PodPrebuild::StateStore).to receive(:cache_validation).and_return(cache_validation)
+      allow(PodPrebuild.state).to receive(:cache_validation).and_return(cache_validation)
       @source_installer = Object.new
       @installer = Pod::Installer.new(sandbox, podfile, pod_lockfile)
       @installer.instance_variable_set(:@installed_specs, [])

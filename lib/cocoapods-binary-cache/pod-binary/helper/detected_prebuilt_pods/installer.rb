@@ -3,7 +3,7 @@ module Pod
     # Returns the names of pod targets detected as prebuilt, including
     # those declared in Podfile and their dependencies
     def prebuilt_pod_names
-      prebuilt_pod_targets.map(&:name)
+      prebuilt_pod_targets.map(&:name).to_set
     end
 
     # Returns the pod targets detected as prebuilt, including

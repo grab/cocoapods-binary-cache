@@ -35,7 +35,7 @@ module Pod
     end
 
     def blacklisted?(name)
-      PodPrebuild::StateStore.excluded_pods.include?(name)
+      PodPrebuild.config.excluded_pods.include?(name)
     end
 
     def cache_missed?(name)
@@ -75,7 +75,7 @@ module Pod
         missing = unchanged.reject { |pod_name| exsited_framework_pod_names.include?(pod_name) }
 
         root_names_to_update = (added + changed + missing)
-        root_names_to_update += PodPrebuild::StateStore.cache_validation.missed
+        root_names_to_update += PodPrebuild.state.cache_validation.missed
 
         # transform names to targets
         cache = []

@@ -21,9 +21,9 @@ module Pod
         # In a prebuild job, at the integration stage, all prebuilt frameworks should be
         # ready for integration regardless of whether there was any cache miss or not.
         # Those that are missed were prebuilt in the prebuild stage.
-        PodPrebuild::StateStore.cache_validation.include?(name)
+        PodPrebuild.state.cache_validation.include?(name)
       else
-        prebuilt = PodPrebuild::StateStore.cache_validation.hit + PodPrebuild.config.targets_to_prebuild_from_cli
+        prebuilt = PodPrebuild.state.cache_validation.hit + PodPrebuild.config.targets_to_prebuild_from_cli
         prebuilt.include?(name)
       end
     end

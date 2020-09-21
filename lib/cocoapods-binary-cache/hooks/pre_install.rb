@@ -36,7 +36,6 @@ module PodPrebuild
 
     def save_installation_states
       save_pod_install_options
-      save_states_from_dsl
     end
 
     def save_pod_install_options
@@ -68,13 +67,6 @@ module PodPrebuild
       Pod::UserInterface.warnings = [] # clean the warning in the prebuild step, it's duplicated.
     end
 
-    def save_states_from_dsl
-      # Note: DSL is reloaded when creating an installer (Pod::Installer.new).
-      # Any mutation to DSL is highly discouraged
-      # --> Rather, perform mutation on PodPrebuild::StateStore instead
-      PodPrebuild::StateStore.excluded_pods += PodPrebuild.config.excluded_pods
-    end
-
     def create_prebuild_sandbox
       standard_sandbox = installer_context.sandbox
       @prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sandbox)
@@ -88,11 +80,9 @@ module PodPrebuild
         .group_by { |spec| spec.name.split("/")[0] }
         .select { |_, specs| specs.all?(&:empty_source_files?) }
         .keys
-
-      PodPrebuild::StateStore.excluded_pods += pods_with_empty_source_files
+      PodPrebuild.config.update_detected_excluded_pods!(pods_with_empty_source_files)
+      PodPrebuild.config.update_detected_prebuilt_pod_names!(@original_installer.prebuilt_pod_names)
       Pod::UI.puts "Exclude pods with empty source files: #{pods_with_empty_source_files.to_a}"
-
-      # TODO (thuyen): Detect dependencies of a prebuilt pod and treat them as prebuilt pods as well
     end
 
     def validate_cache
@@ -104,13 +94,13 @@ module PodPrebuild
         validate_prebuilt_settings: PodPrebuild.config.validate_prebuilt_settings,
         generated_framework_path: prebuild_sandbox.generate_framework_path,
         sandbox_root: prebuild_sandbox.root,
-        ignored_pods: PodPrebuild::StateStore.excluded_pods,
-        prebuilt_pod_names: @original_installer.prebuilt_pod_names
+        ignored_pods: PodPrebuild.config.excluded_pods,
+        prebuilt_pod_names: PodPrebuild.config.prebuilt_pod_names
       ).validate
       path_to_save_cache_validation = PodPrebuild.config.save_cache_validation_to
       @cache_validation.update_to(path_to_save_cache_validation) unless path_to_save_cache_validation.nil?
       cache_validation.print_summary
-      PodPrebuild::StateStore.cache_validation = cache_validation
+      PodPrebuild.state.update(:cache_validation => cache_validation)
     end
 
     def prebuild!

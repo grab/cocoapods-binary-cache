@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.8
+### Enhancements
+None
+
+### Bug fixes
+- Abnormal integration when some prebuilt pods are detected as unchanged in the integration step https://github.com/grab/cocoapods-binary-cache/issues/21.
+
+---
 ## 0.1.7
 ### Enhancements
 - Change the prebuilt path from `Pods/A/A.framework` to `Pods/A/_Prebuilt/A.framework`. No config change is required.

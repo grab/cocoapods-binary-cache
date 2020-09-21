@@ -7,9 +7,6 @@ module Pod
     # Modify specification to use only the prebuild framework after analyzing
     original_resolve_dependencies = instance_method(:resolve_dependencies)
     define_method(:resolve_dependencies) do
-      # Remove the old target files. Otherwise, it will not notice file changes.
-      # This call is to make sure subsequent pod installations function properly
-      remove_target_files_if_needed
       original_resolve_dependencies.bind(self).call
 
       # check the pods
