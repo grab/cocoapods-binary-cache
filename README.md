@@ -35,17 +35,7 @@ Check out the [documentation on how it works](/docs/how_it_works.md) for more in
 
 ### 1. Configure cache repo
 
-First of all, create a git repo that will be used as a storage of your prebuilt frameworks. Make sure this git repo is accessible via `git clone` and `git fetch`.
-
-Create a json file `PodBinaryCacheConfig.json` under the root of the project. Specify 2 fields `cache_repo` and `cache_path`:
-```json
-{
-  "cache_repo": "<your_git_url_goes_here>",
-  "cache_path": "<path_to_local_git_repo>"
-}
-```
-- `cache_repo`: the git URL to the cache repo, for example https://github.com/username/prebuilt-frameworks.git.
-- `cache_path`: the path to your local directory in which the cache repo is fetched to, for example `~/.cocoapods-binary-cache/prebuilt-frameworks`.
+First of all, create a git repo that will be used as a storage of your prebuilt frameworks. Make sure this git repo is accessible via `git clone` and `git fetch`. Specify this cache repo in the following section.
 
 ### 2. Configure Podfile
 
