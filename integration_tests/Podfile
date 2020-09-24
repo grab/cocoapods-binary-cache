@@ -54,12 +54,22 @@ end
 pre_install do |installer|
   must_be_dynamic_frameworks = []
 
+  def build_type_cls
+    Gem::Version.new(Pod::VERSION) >= Gem::Version.new("1.9.0") ? Pod::BuildType : Pod::Target::BuildType
+  end
+
   def make_static(pod)
-    pod.instance_variable_set(:@build_type, ::Pod::Target::BuildType.new(linkage: :static, packaging: :framework))
+    pod.instance_variable_set(
+      :@build_type,
+      build_type_cls.new(:linkage => :static, :packaging => :framework)
+    )
   end
 
   def make_dynamic(pod)
-    pod.instance_variable_set(:@build_type, ::Pod::Target::BuildType.new(linkage: :dynamic, packaging: :framework))
+    pod.instance_variable_set(
+      :@build_type,
+      build_type_cls.new(:linkage => :dynamic, :packaging => :framework)
+    )
   end
 
   installer.pod_targets.each do |pod|
@@ -71,7 +81,14 @@ pre_install do |installer|
   end
 end
 
-post_install do |_|
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings["SWIFT_SUPPRESS_WARNINGS"] = "YES"
+      config.build_settings["GCC_WARN_INHIBIT_ALL_WARNINGS"] = "YES"
+    end
+  end
+
   FileUtils.mkdir_p(".stats")
   pods_to_integrate = ($binary_pods - pods_originally_distributed_as_vendor).to_a
   File.open(".stats/pods_to_integrate.txt", "w") { |f| f.puts(pods_to_integrate) }
