@@ -10,9 +10,11 @@ def gen_lockfile(options = {})
   pods = pods_options.values
   hash["PODS"] = pods.map { |pod| gen_pod_item(pod) }
   hash["DEPENDENCIES"] = pods.map { |pod| gen_dependencies_item(pod) }
-  hash["EXTERNAL SOURCES"] = pods_options[:external_sources] \
-    || pods_options.select { |_, pod| pod.key?(:path) || pod.key?(:git) } \
-                   .map { |name, pod| [name, gen_external_sources_item(pod)] }.to_h
+  hash["EXTERNAL SOURCES"] = \
+    pods_options[:external_sources] || \
+    pods_options \
+      .select { |_, pod| pod.key?(:path) || pod.key?(:git) }
+      .map { |name, pod| [name, gen_external_sources_item(pod)] }.to_h
   hash["SPEC CHECKSUMS"] = pods_options[:spec_checksums] || {}
   hash["COCOAPODS"] = pods_options[:cocoapods] || "1.7.5"
   Pod::Lockfile.new(hash)

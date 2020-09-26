@@ -1,6 +1,6 @@
 require_relative "xcodebuild_raw"
 
-class XcodebuildCommand
+class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   def initialize(options)
     @options = options
     case options[:target].platform.name

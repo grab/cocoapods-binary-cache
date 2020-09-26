@@ -98,3 +98,4 @@ Naming/FileName:
   Exclude:
     - Gemfile
     - Dangerfile
+    - lib/cocoapods-binary-cache.rb

@@ -5,7 +5,7 @@ module PodPrebuild
     PodPrebuild::Config.instance
   end
 
-  class Config
+  class Config # rubocop:disable Metrics/ClassLength
     attr_accessor :dsl_config, :cli_config
 
     def initialize(path)

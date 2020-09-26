@@ -5,13 +5,15 @@ require "rgl/adjacency"
 require "rgl/dot"
 require_relative "graph_visualizer"
 
-# Using RGL graph because GraphViz doesn't store adjacent of a node/vertex but we need to traverse a substree from any node
+# Using RGL graph because GraphViz doesn't store adjacent of a node/vertex
+# but we need to traverse a substree from any node
 # https://github.com/monora/rgl/blob/master/lib/rgl/adjacency.rb
 
 class DependenciesGraph
   def initialize(lockfile)
     @lockfile = lockfile
-    @invert_edge = true # A normal edge is an edge (one direction) from library A to library B which is a dependency of A.
+    # A normal edge is an edge (one direction) from library A to library B which is a dependency of A.
+    @invert_edge = true
   end
 
   # Input : a list of library names.
@@ -28,12 +30,8 @@ class DependenciesGraph
     result
   end
 
-  def write_graphic_file(output_graphic_fmt, filename = "graph", highlight_nodes = Set[])
-    unless output_graphic_fmt
-      Pod::UI.puts "Error: Need graphic format."
-      return
-    end
-    graph.write_to_graphic_file(output_graphic_fmt, dotfile = filename, options = {}, highlight_nodes)
+  def write_graphic_file(options)
+    graph.write_to_graphic_file(options)
   end
 
   private
@@ -44,7 +42,9 @@ class DependenciesGraph
 
   # Convert array of dictionaries -> a dictionary with format {A: [A's dependencies]}
   def pod_to_dependencies
-    dependencies.map { |d| d.is_a?(Hash) ? d : { d => [] } }.reduce({}) { |combined, individual| combined.merge!(individual) }
+    dependencies
+      .map { |d| d.is_a?(Hash) ? d : { d => [] } }
+      .reduce({}) { |combined, individual| combined.merge!(individual) }
   end
 
   def add_vertex(graph, pod)
@@ -59,8 +59,7 @@ class DependenciesGraph
 
   def graph
     @graph ||= begin
-      graph = RGL::DirectedAdjacencyGraph.new()
-
+      graph = RGL::DirectedAdjacencyGraph.new
       pod_to_dependencies.each do |pod, dependencies|
         pod_node = add_vertex(graph, pod)
         next if pod_node.nil?

@@ -9,7 +9,7 @@ module Pod
     class EmbedFrameworksScript
       old_method = instance_method(:script)
       define_method(:script) do
-        script = old_method.bind(self).()
+        script = old_method.bind(self).call
         patch = <<-SH.strip_heredoc
           #!/bin/sh
           # ---- this is added by cocoapods-binary ---

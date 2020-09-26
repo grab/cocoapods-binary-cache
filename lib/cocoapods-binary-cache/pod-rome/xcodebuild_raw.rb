@@ -23,7 +23,7 @@ def xcodebuild(options)
   Pod::UI.puts "$ #{cmd}".magenta
   log = `#{cmd}`
 
-  succeeded = $?.exitstatus.zero?
+  succeeded = $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
   unless succeeded
     begin
       raise "Unexpected error" unless log.include?("** BUILD FAILED **")

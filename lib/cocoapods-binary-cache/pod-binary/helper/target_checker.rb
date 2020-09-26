@@ -1,16 +1,15 @@
 module Pod
   class Prebuild
-
     # Check the targets, for the current limitation of the plugin
     #
     # @param [Array<PodTarget>] prebuilt_targets
     def self.check_one_pod_should_have_only_one_target(prebuilt_targets)
-      targets_have_different_platforms = prebuilt_targets.select { |t| t.pod_name != t.name }
+      targets_have_different_platforms = prebuilt_targets.reject { |t| t.pod_name == t.name }
+      return unless targets_have_different_platforms.empty?
 
-      if targets_have_different_platforms.count > 0
-        names = targets_have_different_platforms.map(&:pod_name)
-        raw_names = targets_have_different_platforms.map(&:name)
-        message = "Oops, you came across a limitation of cocoapods-binary.
+      names = targets_have_different_platforms.map(&:pod_name)
+      raw_names = targets_have_different_platforms.map(&:name)
+      message = "Oops, you came across a limitation of cocoapods-binary.
 
 The plugin requires that one pod should have ONLY ONE target in the 'Pod.xcodeproj'. There are mainly 2 situations \
 causing this problem:
@@ -36,10 +35,8 @@ causing this problem:
     end
     ```
 
-Related pods: #{names}, target names: #{raw_names}
-        "
-        raise Informative, message
-      end
+Related pods: #{names}, target names: #{raw_names}"
+      raise Informative, message
     end
   end
 end

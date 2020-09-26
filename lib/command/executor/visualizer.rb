@@ -13,8 +13,9 @@ module PodPrebuild
     def run
       FileUtils.mkdir_p(@output_dir)
       graph = DependenciesGraph.new(@lockfile)
-      graph.write_graphic_file("png", "#{@output_dir}/graph", Set.new)
-      `open #{@output_dir}/graph.png` if @open
+      output_path = "#{@output_dir}/graph.png"
+      graph.write_graphic_file(output_path: output_path)
+      system("open #{@output_path}") if @open
     end
   end
 end

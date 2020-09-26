@@ -1,5 +1,5 @@
 module PodPrebuild
-  class PreInstallHook
+  class PreInstallHook # rubocop:disable Metrics/ClassLength
     include ObjectSpace
 
     attr_reader :installer_context, :podfile, :prebuild_sandbox, :cache_validation

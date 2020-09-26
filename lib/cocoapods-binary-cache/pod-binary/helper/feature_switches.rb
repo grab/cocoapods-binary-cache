@@ -10,10 +10,9 @@ module Pod
 
     old_method = instance_method(:integrate_user_project)
     define_method(:integrate_user_project) do
-      if @@force_disable_integration
-        return
-      end
-      old_method.bind(self).()
+      return if @@force_disable_integration
+
+      old_method.bind(self).call
     end
   end
 
@@ -25,10 +24,9 @@ module Pod
 
     old_method = instance_method(:print_post_install_message)
     define_method(:print_post_install_message) do
-      if @@disable_install_complete_message
-        return
-      end
-      old_method.bind(self).()
+      return if @@disable_install_complete_message
+
+      old_method.bind(self).call
     end
   end
 
@@ -44,9 +42,9 @@ module Pod
       if @@force_disable_write_lockfile
         # As config is a singleton, sandbox_root refer to the standard sandbox.
         return PrebuildSandbox.from_standard_sanbox_path(sandbox_root).root + "Manifest.lock.tmp"
-      else
-        return old_method.bind(self).()
       end
+
+      return old_method.bind(self).call
     end
   end
 end

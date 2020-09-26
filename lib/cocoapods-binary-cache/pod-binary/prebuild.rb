@@ -6,7 +6,7 @@ require_relative "helper/target_checker"
 require_relative "helper/build"
 
 module Pod
-  class PrebuildInstaller < Installer
+  class PrebuildInstaller < Installer # rubocop:disable Metrics/ClassLength
     attr_reader :lockfile_wrapper
 
     def initialize(options)
