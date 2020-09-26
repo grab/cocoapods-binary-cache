@@ -20,7 +20,7 @@ def xcodebuild(options)
   cmd << "2>&1"
   cmd = cmd.join(" ")
 
-  puts "xcodebuild command: #{cmd}"
+  Pod::UI.puts "$ #{cmd}".magenta
   log = `#{cmd}`
 
   succeeded = $?.exitstatus.zero?
