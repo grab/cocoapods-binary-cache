@@ -12,33 +12,22 @@ log_section() {
   echo "-------------------------------------------"
 }
 
-check_pod_install_when_prebuilt_disabled() {
-  log_section "Checking pod install when prebuilt frameworks are DISABLED..."
-
-  rm -rf Pods
+pod_install() {
   bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 
-check_pod_install_when_prebuilt_enabled() {
-  log_section "Checking pod install when prebuilt frameworks are ENABLED..."
-
-  rm -rf Pods
+pod_bin_fetch() {
   bundle exec pod binary fetch --ansi
-  bundle exec pod install --ansi || bundle exec pod install --ansi --repo-update
 }
 
-check_pod_prebuild() {
-  log_section "Check pod prebuild"
-  rm -rf Pods
-  local prebuild_args=()
-  if [[ ${FORCE_PREBUILD_ALL_PODS} == "true" ]]; then
-    prebuild_args+="--all"
-  fi
-  bundle exec pod binary prebuild ${prebuild_args}
+pod_bin_prebuild() {
+  bundle exec pod binary prebuild --ansi $1
 }
 
 xcodebuild_test() {
-  xcodebuild \
+  log_section "Running xcodebuild test..."
+
+  set -o pipefail && env NSUnbufferedIO=YES xcodebuild \
     -workspace PrebuiltPodIntegration.xcworkspace \
     -scheme PrebuiltPodIntegration \
     -configuration Debug \
@@ -46,89 +35,39 @@ xcodebuild_test() {
     -destination "platform=iOS Simulator,name=${TEST_DEVICE}" \
     -derivedDataPath "${DERIVED_DATA_PATH}" \
     clean \
-    test
+    test | bundle exec xcpretty --color
 }
 
-check_xcodebuild_test() {
-  log_section "Checking xcodebuild test..."
-
-  if bundle exec xcpretty --version &> /dev/null; then
-    set -o pipefail && xcodebuild_test | bundle exec xcpretty
-  elif which xcpretty &> /dev/null; then
-    set -o pipefail && xcodebuild_test | xcpretty
-  else
-    xcodebuild_test
-  fi
-}
-
-check_prebuilt_integration() {
-  log_section "Checking prebuilt integration..."
-
-  local should_fail=false
-  for pod in $(cat ".stats/pods_to_integrate.txt"); do
-    local framework_dir="Pods/${pod}/_Prebuilt/${pod}.framework"
-    if [[ ! -f "${framework_dir}/${pod}" ]]; then
-      should_fail=true
-      echo "🚩 Prebuilt framework ${pod} was not integrated. Expect to have: ${framework_dir}"
-    fi
-  done
-  if [[ ${should_fail} == "true" ]]; then
-    exit 1
-  fi
-}
-
-run_test() {
-  local test_mode="${1:-all}"
-  cd "${INTEGRATION_TESTS_DIR}"
-  echo "Running test with mode: ${test_mode}..."
-  case ${test_mode} in
-    flag-off ) run_test_flag_off ;;
-    flag-on ) run_test_flag_on ;;
-    prebuild-changes ) run_test_prebuild_changes ;;
-    prebuild-all ) run_test_prebuild_all ;;
-    all ) run_test_all ;;
-    * ) break ;;
-  esac
-}
-
-run_test_all() {
-  run_test_flag_off
-  run_test_flag_on
-  run_test_prebuild_all
-  run_test_prebuild_changes
-}
-run_test_flag_off() {
-  export ENABLE_PREBUILT_POD_LIBS=false
-  export FORCE_PREBUILD_ALL_PODS=false
-
-  check_pod_install_when_prebuilt_disabled
-  check_xcodebuild_test
-}
-run_test_flag_on() {
-  export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_PODS=false
-
-  check_pod_install_when_prebuilt_enabled
-  check_xcodebuild_test
-}
-run_test_prebuild_all() {
-  export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_PODS=true
-
-  check_pod_prebuild
-  check_xcodebuild_test
-  check_prebuilt_integration
-}
-run_test_prebuild_changes() {
-  export ENABLE_PREBUILT_POD_LIBS=true
-  export FORCE_PREBUILD_ALL_PODS=false
-
-  check_pod_prebuild
-  check_xcodebuild_test
-  check_prebuilt_integration
-}
 # -------------------------
 
 echo "Working dir: ${WORKING_DIR}"
 echo "Integeration tests dir: ${INTEGRATION_TESTS_DIR}"
-run_test "$1"
+
+export ENABLE_PREBUILT_POD_LIBS=true
+
+TEST_MODE="${1:-prebuild-all}"
+cd "${INTEGRATION_TESTS_DIR}"
+echo "Running test with mode: ${TEST_MODE}..."
+
+rm -rf Pods _Prebuild DerivedData
+case ${TEST_MODE} in
+  flag-off )
+    export ENABLE_PREBUILT_POD_LIBS=false
+    pod_install
+    xcodebuild_test
+    ;;
+  flag-on )
+    pod_bin_fetch
+    pod_install
+    xcodebuild_test
+    ;;
+  prebuild-changes )
+    pod_bin_prebuild
+    xcodebuild_test
+    ;;
+  prebuild-all )
+    pod_bin_prebuild --all
+    xcodebuild_test
+    ;;
+  * ) break ;;
+esac

@@ -123,6 +123,10 @@ module PodPrebuild
       @dsl_config[:prebuild_code_gen]
     end
 
+    def strict_diagnosis?
+      @dsl_config[:strict_diagnosis]
+    end
+
     def targets_to_prebuild_from_cli
       @cli_config[:prebuild_targets] || []
     end
@@ -162,7 +166,8 @@ module PodPrebuild
         :build_args,
         :save_cache_validation_to,
         :validate_prebuilt_settings,
-        :prebuild_code_gen
+        :prebuild_code_gen,
+        :strict_diagnosis
       ]
     end
 

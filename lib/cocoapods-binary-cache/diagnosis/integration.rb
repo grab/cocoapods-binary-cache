@@ -15,7 +15,9 @@ module PodPrebuild
           PodPrebuild.config.prebuilt_path(path: "#{module_name}.framework")
         framework_path.exist?
       end
-      Pod::UI.puts "🚩 Unintegrated frameworks: #{unintegrated}".yellow unless unintegrated.empty?
+      return [] if unintegrated.empty?
+
+      [[:error, "Unintegrated frameworks: #{unintegrated}"]]
     end
   end
 end

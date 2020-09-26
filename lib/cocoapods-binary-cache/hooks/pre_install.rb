@@ -20,12 +20,12 @@ module PodPrebuild
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
       save_installation_states
-      Pod::UI.section("Prepare environment") { prepare_environment }
+      prepare_environment
       create_prebuild_sandbox
-      Pod::UI.section("Detect implicit dependencies") { detect_implicit_dependencies }
-      Pod::UI.section("Validate prebuilt cache") { validate_cache }
+      Pod::UI.title("Detect implicit dependencies") { detect_implicit_dependencies }
+      Pod::UI.title("Validate prebuilt cache") { validate_cache }
       prebuild! if PodPrebuild.config.prebuild_job?
-      Pod::UI.section("Reset environment") { reset_environment }
+      reset_environment
 
       PodPrebuild::Env.next_stage!
       log_section "🤖  Resume pod installation"

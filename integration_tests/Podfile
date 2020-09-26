@@ -32,7 +32,8 @@ if enabled_prebuilt_pods
       }
     },
     excluded_pods: [],
-    save_cache_validation_to: ".stats/cocoapods_binary_cache.json"
+    save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
+    strict_diagnosis: true # Fail if any abnormal integration is spotted
   )
 end
 

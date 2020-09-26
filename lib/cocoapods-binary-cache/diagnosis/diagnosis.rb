@@ -10,7 +10,15 @@ module PodPrebuild
     end
 
     def run
-      @diagnosers.each(&:run)
+      diagnosis = @diagnosers.map(&:run)
+      errors = diagnosis.select { |d| d[0] == :error }.map { |d| d[1] }
+      warnings = diagnosis.select { |d| d[0] == :error }.map { |d| d[1] }
+
+      warnings.each { |d| Pod::UI.puts "⚠️  #{d[1]}" }
+      errors.each { |d| Pod::UI.puts "🚩  #{d[1]}" }
+      return if errors.empty? || !PodPrebuild.config.strict_diagnosis?
+
+      raise "There are #{errors.count} error(s) spotted after the diagnosis"
     end
   end
 end

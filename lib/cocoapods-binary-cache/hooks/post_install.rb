@@ -12,7 +12,7 @@ module PodPrebuild
     private
 
     def diagnose
-      Pod::UI.section("Diagnosing cocoapods-binary-cache") do
+      Pod::UI.title("Diagnosing cocoapods-binary-cache") do
         PodPrebuild::Diagnosis.new(
           cache_validation: PodPrebuild.state.cache_validation,
           standard_sandbox: @installer_context.sandbox,
