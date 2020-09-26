@@ -173,7 +173,7 @@ module Pod
         all_needed_names.include? name
       end
       useless_target_names.each do |name|
-        UI.puts "Remove: #{name}"
+        Pod::UI.message "Remove: #{name}"
         path = sandbox.framework_folder_path_for_target_name(name)
         path.rmtree if path.exist?
       end
@@ -189,12 +189,10 @@ module Pod
         to_delete_files.each { |file| file.rmtree if file.exist? }
       end
 
-      updated_target_names = targets.map { |target| target.label.to_s }
-      deleted_target_names = useless_target_names
-      Pod::UI.puts "Targets to prebuild: #{updated_target_names}"
-      Pod::UI.puts "Targets to cleanup: #{deleted_target_names}"
-
-      prebuild_output.write_delta_file(updated_target_names, deleted_target_names)
+      prebuild_output.write_delta_file(
+        updated: targets.map { |target| target.label.to_s },
+        deleted: useless_target_names
+      )
     end
 
     def clean_delta_file

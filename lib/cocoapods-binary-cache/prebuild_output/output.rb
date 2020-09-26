@@ -24,8 +24,10 @@ module PodPrebuild
       FileUtils.mkdir_p dir unless File.directory?(dir)
     end
 
-    # Input 2 arrays of library names
-    def write_delta_file(updated, deleted)
+    def write_delta_file(options)
+      updated = options[:updated]
+      deleted = options[:deleted]
+
       if updated.empty? && deleted.empty?
         Pod::UI.puts "No changes in prebuild"
         return
