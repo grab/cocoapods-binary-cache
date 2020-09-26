@@ -1,9 +1,9 @@
 # Copyright 2019 Grabtaxi Holdings PTE LTE (GRAB), All rights reserved.
 # Use of this source code is governed by an MIT-style license that can be found in the LICENSE file
 
-require 'rgl/adjacency'
-require 'rgl/dot'
-require_relative 'graph_visualizer'
+require "rgl/adjacency"
+require "rgl/dot"
+require_relative "graph_visualizer"
 
 # Using RGL graph because GraphViz doesn't store adjacent of a node/vertex but we need to traverse a substree from any node
 # https://github.com/monora/rgl/blob/master/lib/rgl/adjacency.rb
@@ -17,35 +17,29 @@ class DependenciesGraph
   # Input : a list of library names.
   # Output: a set of library names which are clients (directly and indirectly) of those input libraries.
   def get_clients(libnames)
-    result = Set.new()
+    result = Set.new
     libnames.each do |lib|
       if graph.has_vertex?(lib)
         result.merge(traverse_sub_tree(graph, lib))
       else
-        puts "Warning: cannot find lib: #{lib}"
+        Pod::UI.puts "Warning: cannot find lib: #{lib}"
       end
     end
     result
   end
 
-  def write_graphic_file(output_graphic_fmt, filename='graph', highlight_nodes=Set[])
-    if !output_graphic_fmt
-      puts 'Error: Need graphic format.'
+  def write_graphic_file(output_graphic_fmt, filename = "graph", highlight_nodes = Set[])
+    unless output_graphic_fmt
+      Pod::UI.puts "Error: Need graphic format."
       return
     end
-    graph.write_to_graphic_file(output_graphic_fmt, dotfile=filename, options={}, highlight_nodes)
+    graph.write_to_graphic_file(output_graphic_fmt, dotfile = filename, options = {}, highlight_nodes)
   end
 
   private
 
   def dependencies
-    @dependencies ||= begin
-      if @lockfile
-        @lockfile.to_hash['PODS']
-      else
-        nil
-      end
-    end
+    @dependencies ||= (@lockfile && @lockfile.to_hash["PODS"])
   end
 
   # Convert array of dictionaries -> a dictionary with format {A: [A's dependencies]}
@@ -70,9 +64,11 @@ class DependenciesGraph
       pod_to_dependencies.each do |pod, dependencies|
         pod_node = add_vertex(graph, pod)
         next if pod_node.nil?
+
         dependencies.each do |dependency|
           dep_node = add_vertex(graph, dependency)
           next if dep_node.nil?
+
           if @invert_edge
             graph.add_edge(dep_node, pod_node)
           else
@@ -85,7 +81,7 @@ class DependenciesGraph
   end
 
   def traverse_sub_tree(graph, vertex)
-    visited_nodes = Set.new()
+    visited_nodes = Set.new
     graph.each_adjacent(vertex) do |v|
       visited_nodes.add(v)
       visited_nodes.merge(traverse_sub_tree(graph, v))

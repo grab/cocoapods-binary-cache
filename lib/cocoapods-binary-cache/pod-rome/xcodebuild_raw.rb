@@ -36,7 +36,7 @@ def xcodebuild(options)
         printer.pretty_print(line)
       end
     rescue
-      puts log.red
+      Pod::UI.puts log.red
     end
   end
   [succeeded, log]

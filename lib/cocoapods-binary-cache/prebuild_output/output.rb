@@ -16,7 +16,7 @@ module PodPrebuild
     end
 
     def clean_delta_file
-      puts "Clean delta file: #{prebuild_delta_path}"
+      Pod::UI.puts "Clean delta file: #{prebuild_delta_path}"
       FileUtils.rm_rf(prebuild_delta_path)
     end
 
