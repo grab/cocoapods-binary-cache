@@ -1,7 +1,6 @@
 require "fileutils"
 require_relative "../prebuild_output/output"
 require_relative "../helper/lockfile"
-require_relative "helper/passer"
 require_relative "helper/target_checker"
 require_relative "helper/build"
 
@@ -15,38 +14,6 @@ module Pod
       @lockfile_wrapper = lockfile && PodPrebuild::Lockfile.new(lockfile)
     end
 
-    private
-
-    def local_manifest
-      @local_manifest ||= sandbox.manifest
-    end
-
-    # @return [Analyzer::SpecsState]
-    def prebuild_pods_changes
-      return nil if local_manifest.nil?
-
-      if @prebuild_pods_changes.nil?
-        changes = local_manifest.detect_changes_with_podfile(podfile)
-        @prebuild_pods_changes = Analyzer::SpecsState.new(changes)
-        # save the chagnes info for later stage
-        Pod::Prebuild::Passer.prebuild_pods_changes = @prebuild_pods_changes
-      end
-      @prebuild_pods_changes
-    end
-
-    def blacklisted?(name)
-      PodPrebuild.config.excluded_pods.include?(name)
-    end
-
-    def cache_missed?(name)
-      @cache_validation.missed?(name)
-    end
-
-    def should_not_prebuild_vendor_pod(name)
-      return true if blacklisted?(name)
-      return false if PodPrebuild.config.prebuild_all_pods?
-    end
-
     def run_code_gen!(targets)
       return if PodPrebuild.config.prebuild_code_gen.nil?
 
@@ -55,56 +22,16 @@ module Pod
       end
     end
 
-    def targets_to_prebuild
-      existed_framework_folder = sandbox.generate_framework_path
-      targets = pod_targets
-
-      targets_from_cli = PodPrebuild.config.targets_to_prebuild_from_cli
-      if !targets_from_cli.empty?
-        targets = targets.select { |target| targets_from_cli.include?(target.name) }
-      elsif !PodPrebuild.config.prebuild_all_pods? && !local_manifest.nil?
-        changes = prebuild_pods_changes
-        added = changes.added
-        changed = changes.changed
-        unchanged = changes.unchanged
-
-        existed_framework_folder.mkdir unless existed_framework_folder.exist?
-        exsited_framework_pod_names = sandbox.exsited_framework_pod_names
-
-        # additions
-        missing = unchanged.reject { |pod_name| exsited_framework_pod_names.include?(pod_name) }
-
-        root_names_to_update = (added + changed + missing)
-        root_names_to_update += PodPrebuild.state.cache_validation.missed
-
-        # transform names to targets
-        cache = []
-        targets = root_names_to_update.map do |pod_name|
-          tars = Pod.fast_get_targets_for_pod_name(pod_name, pod_targets, cache) || []
-          raise "There's no target named (#{pod_name}) in Pod.xcodeproj" if tars.empty?
-
-          tars
-        end.flatten
-
-        # add the dendencies
-        dependency_targets = targets.map(&:recursive_dependent_targets).flatten.uniq || []
-        targets = (targets + dependency_targets).uniq
-      end
-
-      unless PodPrebuild.config.prebuild_all_pods?
-        targets = targets.select { |pod_target| cache_missed?(pod_target.name) }
-      end
-      targets = targets.reject { |pod_target| should_not_prebuild_vendor_pod(pod_target.name) }
-      unless PodPrebuild.config.dev_pods_enabled?
-        targets = targets.reject { |pod_target| sandbox.local?(pod_target.pod_name) }
-      end
-      targets
-    end
-
-    public
-
     def prebuild_output
       @prebuild_output ||= PodPrebuild::Output.new(sandbox)
+    end
+
+    def targets_to_prebuild
+      to_build = PodPrebuild.config.targets_to_prebuild_from_cli
+      if to_build.empty?
+        to_build = PodPrebuild.config.prebuild_all_pods? ? @cache_validation.all : @cache_validation.missed
+      end
+      pod_targets.select { |target| to_build.include?(target.name) }
     end
 
     def prebuild_frameworks!
@@ -140,7 +67,6 @@ module Pod
         # If target shouldn't build, we copy all the original files
         # This is for target with only .a and .h files
         unless target.should_build?
-          Prebuild::Passer.target_names_to_skip_integration_framework << target.name
           FileUtils.cp_r(root_path, target_folder, :remove_destination => true)
           next
         end

@@ -1,5 +1,3 @@
-require_relative "tool/tool"
-
 module Pod
   class Podfile
     module DSL

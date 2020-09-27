@@ -7,6 +7,10 @@ module PodPrebuild
       @hit = hit.to_set - missed_with_reasons.keys
     end
 
+    def all
+      (hit + missed).to_set
+    end
+
     def missed
       @missed_with_reasons.keys.to_set
     end
