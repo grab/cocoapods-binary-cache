@@ -6,7 +6,7 @@ require "rexml/document"
 class SchemeEditor
   def self.edit_to_support_code_coverage(sandbox)
     pod_proj_path = sandbox.project_path
-    Pod::UI.puts "Modify schemes of pod project to support code coverage of prebuilt local pod: #{pod_proj_path}"
+    Pod::UI.message "Modify schemes of pod project to support code coverage of prebuilt local pod: #{pod_proj_path}"
     scheme_files = Dir["#{pod_proj_path}/**/*.xcscheme"]
     scheme_files.each do |file_path|
       scheme_name = File.basename(file_path, ".*")

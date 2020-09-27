@@ -7,6 +7,7 @@ module Pod
       target = options[:target]
       return if target.nil?
 
+      Pod::UI.puts "Building target: #{target}...".magenta
       options[:sandbox] = Pod::Sandbox.new(Pathname(options[:sandbox])) unless options[:sandbox].is_a?(Pod::Sandbox)
       options[:build_dir] = build_dir(options[:sandbox].root)
 

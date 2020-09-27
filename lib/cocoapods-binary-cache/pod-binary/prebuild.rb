@@ -107,9 +107,7 @@ module Pod
       @prebuild_output ||= PodPrebuild::Output.new(sandbox)
     end
 
-    # Build the needed framework files
     def prebuild_frameworks!
-      UI.puts "Start prebuild_frameworks"
       existed_framework_folder = sandbox.generate_framework_path
       sandbox_path = sandbox.root
       targets = targets_to_prebuild

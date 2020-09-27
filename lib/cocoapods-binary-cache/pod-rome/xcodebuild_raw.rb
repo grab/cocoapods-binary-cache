@@ -20,7 +20,7 @@ def xcodebuild(options)
   cmd << "2>&1"
   cmd = cmd.join(" ")
 
-  Pod::UI.puts "$ #{cmd}".magenta
+  Pod::UI.puts_indented "$ #{cmd}"
   log = `#{cmd}`
 
   succeeded = $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars

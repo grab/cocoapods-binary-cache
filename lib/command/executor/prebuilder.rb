@@ -26,9 +26,7 @@ module PodPrebuild
 
     def prebuild
       Pod::UI.step("Installation") do
-        args = []
-        args << "--ansi" if Pod::Command.ansi_output?
-        Pod::Command::Install.new(CLAide::ARGV.new(args)).run
+        installer.install!
       end
     end
 

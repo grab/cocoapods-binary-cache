@@ -47,7 +47,7 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   def build_for_sdk(sdk)
     framework_path = framework_path_of(sdk)
     if Dir.exist?(framework_path)
-      Pod::UI.puts "Framework already exists at: #{framework_path}"
+      Pod::UI.puts_indented "--> Framework already exists at: #{framework_path}"
       return
     end
 

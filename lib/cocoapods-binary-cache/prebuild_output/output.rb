@@ -16,7 +16,7 @@ module PodPrebuild
     end
 
     def clean_delta_file
-      Pod::UI.puts "Clean delta file: #{prebuild_delta_path}"
+      Pod::UI.message "Clean delta file: #{prebuild_delta_path}"
       FileUtils.rm_rf(prebuild_delta_path)
     end
 
@@ -33,7 +33,7 @@ module PodPrebuild
         return
       end
 
-      Pod::UI.puts "Write prebuild changes to: #{prebuild_delta_path}"
+      Pod::UI.message "Write prebuild changes to: #{prebuild_delta_path}"
       create_dir_if_needed(delta_dir)
       changes = PodPrebuild::JSONFile.new(prebuild_delta_path)
       changes["updated"] = updated

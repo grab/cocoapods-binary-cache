@@ -15,7 +15,7 @@ module Pod
           return state if PodPrebuild.config.tracked_prebuilt_pod_names.empty?
 
           prebuilt = PodPrebuild.config.tracked_prebuilt_pod_names
-          Pod::UI.message("Alter sandbox state: treat prebuilt frameworks as added: #{prebuilt.to_a}")
+          Pod::UI.message "Alter sandbox state: treat prebuilt frameworks as added: #{prebuilt.to_a}"
           SpecsState.new(
             :added => (state.added + prebuilt).uniq,
             :changed => state.changed - prebuilt,
