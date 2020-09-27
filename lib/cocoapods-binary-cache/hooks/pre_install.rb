@@ -1,5 +1,5 @@
 module PodPrebuild
-  class PreInstallHook # rubocop:disable Metrics/ClassLength
+  class PreInstallHook
     include ObjectSpace
 
     attr_reader :installer_context, :podfile, :prebuild_sandbox, :cache_validation
@@ -15,17 +15,13 @@ module PodPrebuild
     def run
       return if @installer_context.sandbox.is_a?(Pod::PrebuildSandbox)
 
-      require_relative "../pod-binary/helper/feature_switches"
-
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
       save_installation_states
-      prepare_environment
       create_prebuild_sandbox
       Pod::UI.title("Detect implicit dependencies") { detect_implicit_dependencies }
       Pod::UI.title("Validate prebuilt cache") { validate_cache }
       prebuild! if PodPrebuild.config.prebuild_job?
-      reset_environment
 
       PodPrebuild::Env.next_stage!
       log_section "🤖  Resume pod installation"
@@ -52,19 +48,6 @@ module PodPrebuild
         next if target_definition.explicit_prebuilt_pod_names.empty?
         raise "cocoapods-binary-cache requires `use_frameworks!`" unless target_definition.uses_frameworks?
       end
-    end
-
-    def prepare_environment
-      Pod::Installer.force_disable_integration true # don't integrate targets
-      Pod::Config.force_disable_write_lockfile true # disbale write lock file for perbuild podfile
-      Pod::Installer.disable_install_complete_message true # disable install complete message
-    end
-
-    def reset_environment
-      Pod::Installer.force_disable_integration false
-      Pod::Config.force_disable_write_lockfile false
-      Pod::Installer.disable_install_complete_message false
-      Pod::UserInterface.warnings = [] # clean the warning in the prebuild step, it's duplicated.
     end
 
     def create_prebuild_sandbox
