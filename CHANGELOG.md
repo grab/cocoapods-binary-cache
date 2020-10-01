@@ -2,7 +2,7 @@
 
 ## 0.1.8
 ### Enhancements
-None
+- Prebuild targets with more dependencies first to ultilize build parallelism.
 
 ### Bug fixes
 - Abnormal integration when some prebuilt pods are detected as unchanged in the integration step https://github.com/grab/cocoapods-binary-cache/issues/21.

@@ -1,6 +1,7 @@
 require "fileutils"
 require_relative "../prebuild_output/output"
 require_relative "../helper/lockfile"
+require_relative "../helper/prebuild_order"
 require_relative "helper/target_checker"
 require_relative "helper/build"
 
@@ -36,8 +37,8 @@ module Pod
 
     def prebuild_frameworks!
       sandbox_path = sandbox.root
-      targets = targets_to_prebuild
 
+      targets = PodPrebuild::BuildOrder.order_targets(targets_to_prebuild)
       Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}"
       Pod::Prebuild.remove_build_dir(sandbox_path)
       run_code_gen!(targets)
