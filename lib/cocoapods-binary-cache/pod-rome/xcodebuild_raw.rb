@@ -12,7 +12,7 @@ def xcodebuild(options)
 
   cmd = ["xcodebuild"]
   cmd << "-project" << options[:sandbox].project_path.realdirpath
-  cmd << "-scheme" << options[:target]
+  cmd << "-target" << options[:target]
   cmd << "-configuration" << options[:configuration]
   cmd << "-sdk" << sdk
   cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?

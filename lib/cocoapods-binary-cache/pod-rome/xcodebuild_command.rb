@@ -118,7 +118,7 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
     paths = [paths] unless paths.is_a?(Array)
     paths.each do |path|
       FileUtils.rm_rf(File.join(output_path, File.basename(path)))
-      FileUtils.mv(path, output_path)
+      FileUtils.cp_r(path, output_path)
     end
   end
 
