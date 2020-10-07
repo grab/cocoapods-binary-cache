@@ -1,8 +1,16 @@
 module Pod
   class Specification
-    # TODO: this detect objc lib as empty source, eg. Realm
     def empty_source_files?
-      return subspecs.all?(&:empty_source_files?) unless subspecs.empty?
+
+      if !subspecs.empty?
+        subspecs_empty = subspecs.all?(&:empty_source_files?)
+
+        # return early if there are some files in subpec(s)
+        # but process the spec itself
+        if !subspecs_empty
+          return false
+        end
+      end
 
       check = lambda do |patterns|
         patterns = [patterns] if patterns.is_a?(String)
