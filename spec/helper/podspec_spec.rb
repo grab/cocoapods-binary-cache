@@ -64,11 +64,20 @@ describe "Specification" do
         expect(spec.empty_source_files?).to be false
       end
 
-      it "returns false if all subspec have empty source files, but the parent spec has" do
+      it "returns false if all subspecs have empty source files, but the parent spec has" do
         spec = Pod::Specification.new do |s|
           s.source_files = ["path/to/*.cpp"]
           s.subspec("A") { |ss| ss.source_files = [] }
           s.subspec("B") { |ss| ss.source_files = [] }
+        end
+        expect(spec.empty_source_files?).to be false
+      end
+
+      it "returns false if a subspec and the spec itself have source files" do
+        spec = Pod::Specification.new do |s|
+          s.source_files = ["path/to/*.cpp"]
+          s.subspec("A") { |ss| ss.source_files = [] }
+          s.subspec("B") { |ss| ss.source_files = ["path/to/*.swift"] }
         end
         expect(spec.empty_source_files?).to be false
       end

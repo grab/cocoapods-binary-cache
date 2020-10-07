@@ -2,14 +2,9 @@ module Pod
   class Specification
     def empty_source_files?
 
-      if !subspecs.empty?
-        subspecs_empty = subspecs.all?(&:empty_source_files?)
-
-        # return early if there are some files in subpec(s)
-        # but process the spec itself
-        if !subspecs_empty
-          return false
-        end
+      unless subspecs.empty?
+        # return early if there are some files in subpec(s) but process the spec itself
+        return false unless subspecs.all?(&:empty_source_files?)
       end
 
       check = lambda do |patterns|
