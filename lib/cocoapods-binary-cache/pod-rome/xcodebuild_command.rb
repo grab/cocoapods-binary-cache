@@ -18,18 +18,32 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   end
 
   def run
-    build_for_sdk(simulator)
-    if device_build_enabled?
-      build_for_sdk(device)
+    build_for_sdk(simulator) if build_types.include?(:simulator)
+    build_for_sdk(device) if build_types.include?(:device)
+
+    case build_types
+    when [:simulator]
+      collect_output(Dir[target_products_dir_of(simulator) + "/*"])
+    when [:device]
+      collect_output(Dir[target_products_dir_of(device) + "/*"])
+    else
+      # When merging contents of `simulator` & `device`, prefer contents of `device` over `simulator`
+      # https://github.com/grab/cocoapods-binary-cache/issues/25
+      collect_output(Dir[target_products_dir_of(device) + "/*"])
       create_universal_framework
-      merge_dsym unless disable_dsym?
-      merge_swift_headers
-      merge_swift_modules
     end
-    collect_output(Dir[target_products_dir_of(simulator) + "/*"])
   end
 
   private
+
+  def build_types
+    @build_types ||= begin
+      # TODO (thuyen): Add DSL options `build_for_types` to specify build types
+      types = [:simulator]
+      types << :device if device_build_enabled?
+      types
+    end
+  end
 
   def make_up_build_args(args)
     args_ = args.clone
@@ -63,55 +77,57 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   end
 
   def create_universal_framework
-    create_fat_binary(
-      simulator: "#{framework_path_of(simulator)}/#{module_name}",
-      device: "#{framework_path_of(device)}/#{module_name}"
-    )
+    merge_framework_binary
+    merge_framework_dsym
+    merge_swift_headers
+    merge_swift_modules
   end
 
-  def merge_dsym
-    simulator_dsym = framework_path_of(simulator) + ".dSYM"
-    device_dsym = framework_path_of(device) + ".dSYM"
-    return unless File.exist?(simulator_dsym) && File.exist?(device_dsym)
+  def merge_framework_binary
+    merge_contents("/#{module_name}", &method(:create_fat_binary))
+  end
 
-    create_fat_binary(
-      simulator: "#{simulator_dsym}/Contents/Resources/DWARF/#{module_name}",
-      device: "#{device_dsym}/Contents/Resources/DWARF/#{module_name}"
-    )
-    collect_output(simulator_dsym)
+  def merge_framework_dsym
+    merge_contents(".dSYM/Contents/Resources/DWARF/#{module_name}", &method(:create_fat_binary))
+  end
+
+  def merge_swift_headers
+    merge_contents("/Headers/#{module_name}-Swift.h") do |options|
+      merged_header = <<~HEREDOC
+        #if TARGET_OS_SIMULATOR // merged by cocoapods-binary
+        #{File.read(options[:simulator])}
+        #else // merged by cocoapods-binary
+        #{File.read(options[:device])}
+        #endif // merged by cocoapods-binary
+      HEREDOC
+      File.write(options[:output], merged_header.strip)
+    end
+  end
+
+  def merge_swift_modules
+    merge_contents("/Modules/#{module_name}.swiftmodule") do |options|
+      # Note: swiftmodules of `device` were copied beforehand,
+      # here, we only need to copy swiftmodules of `simulator`
+      FileUtils.cp_r(options[:simulator] + "/.", options[:output])
+    end
+  end
+
+  def merge_contents(path_suffix, &merger)
+    simulator_, device_, output_ = [
+      framework_path_of(simulator),
+      framework_path_of(device),
+      "#{output_path}/#{module_name}.framework"
+    ].map { |p| p + path_suffix }
+    return unless File.exist?(simulator_) && File.exist?(device_)
+
+    merger.call(simulator: simulator_, device: device_, output: output_)
   end
 
   def create_fat_binary(options)
     cmd = ["lipo", " -create"]
-    cmd << "-output" << options[:simulator]
+    cmd << "-output" << options[:output]
     cmd << options[:simulator] << options[:device]
     Pod::UI.puts `#{cmd.join(" ")}`
-  end
-
-  def merge_swift_headers
-    simulator_header_path = framework_path_of(simulator) + "/Headers/#{module_name}-Swift.h"
-    device_header_path = framework_path_of(device) + "/Headers/#{module_name}-Swift.h"
-    return unless File.exist?(simulator_header_path) && File.exist?(device_header_path)
-
-    merged_header = <<~HEREDOC
-      #if TARGET_OS_SIMULATOR // merged by cocoapods-binary
-      #{File.read(simulator_header_path)}
-      #else // merged by cocoapods-binary
-      #{File.read(device_header_path)}
-      #endif // merged by cocoapods-binary
-    HEREDOC
-    File.write(simulator_header_path, merged_header.strip)
-  end
-
-  def merge_swift_modules
-    simulator_swift_module_path = framework_path_of(simulator) + "/Modules/#{module_name}.swiftmodule"
-    device_swift_module_path = framework_path_of(device) + "/Modules/#{module_name}.swiftmodule"
-    return unless File.exist?(simulator_swift_module_path) && File.exist?(device_swift_module_path)
-
-    FileUtils.cp_r(
-      device_swift_module_path + "/.",
-      simulator_swift_module_path
-    )
   end
 
   def collect_output(paths)
