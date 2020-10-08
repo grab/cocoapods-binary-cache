@@ -39,7 +39,8 @@ module Pod
       "_Prebuild"
     end
 
-    def create_prebuild_scheme(names)
+    def create_prebuild_scheme(targets)
+      names = targets.map(&:name)
       Pod::UI.puts "Create a scheme '#{prebuild_scheme_name}' to prebuild #{names.count} given targets"
 
       scheme = Xcodeproj::XCScheme.new
@@ -54,9 +55,8 @@ module Pod
       sandbox_path = sandbox.root
       targets = targets_to_prebuild
       Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}".magenta
-      return if targets.empty?
 
-      create_prebuild_scheme(targets.map(&:name))
+      create_prebuild_scheme(targets)
       run_code_gen!(targets)
 
       Pod::Prebuild.remove_build_dir(sandbox_path)
