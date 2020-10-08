@@ -35,47 +35,29 @@ module Pod
       pod_targets.select { |target| to_build.include?(target.name) }
     end
 
-    def prebuild_scheme_name
-      "_Prebuild"
-    end
-
-    def create_prebuild_scheme(targets)
-      names = targets.map(&:name)
-      Pod::UI.puts "Create a scheme '#{prebuild_scheme_name}' to prebuild #{names.count} given targets"
-
-      scheme = Xcodeproj::XCScheme.new
-      pods_project.targets
-        .select { |t| names.include?(t.name) }
-        .each { |t| scheme.add_build_target(t) }
-      scheme.test_action.code_coverage_enabled = "YES"
-      scheme.save_as(pods_project.path, prebuild_scheme_name, false)
-    end
-
     def prebuild_frameworks!
       sandbox_path = sandbox.root
-      targets = targets_to_prebuild
-      Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}".magenta
 
-      create_prebuild_scheme(targets)
+      targets = PodPrebuild::BuildOrder.order_targets(targets_to_prebuild)
+      Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}"
+      Pod::Prebuild.remove_build_dir(sandbox_path)
       run_code_gen!(targets)
-
-      Pod::Prebuild.remove_build_dir(sandbox_path)
-      Pod::Prebuild.build(
-        sandbox: sandbox_path,
-        scheme: prebuild_scheme_name,
-        targets: targets,
-        configuration: PodPrebuild.config.prebuild_config,
-        output_path: sandbox.generate_framework_path,
-        bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
-        device_build_enabled: PodPrebuild.config.device_build_enabled?,
-        disable_dsym: PodPrebuild.config.disable_dsym?,
-        args: PodPrebuild.config.build_args
-      )
-      Pod::Prebuild.remove_build_dir(sandbox_path)
-
       targets.each do |target|
-        collect_metadata(target, sandbox.framework_folder_path_for_target_name(target.name))
+        output_path = sandbox.framework_folder_path_for_target_name(target.name)
+        output_path.mkpath unless output_path.exist?
+        Pod::Prebuild.build(
+          sandbox: sandbox_path,
+          target: target,
+          configuration: PodPrebuild.config.prebuild_config,
+          output_path: output_path,
+          bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
+          device_build_enabled: PodPrebuild.config.device_build_enabled?,
+          disable_dsym: PodPrebuild.config.disable_dsym?,
+          args: PodPrebuild.config.build_args
+        )
+        collect_metadata(target, output_path)
       end
+      Pod::Prebuild.remove_build_dir(sandbox_path)
 
       # copy vendored libraries and frameworks
       targets.each do |target|

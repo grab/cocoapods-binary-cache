@@ -3,7 +3,7 @@ require_relative "xcodebuild_raw"
 class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   def initialize(options)
     @options = options
-    case options[:targets][0].platform.name
+    case options[:target].platform.name
     when :ios
       @options[:device] = "iphoneos"
       @options[:simulator] = "iphonesimulator"
@@ -21,18 +21,16 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
     build_for_sdk(simulator) if build_types.include?(:simulator)
     build_for_sdk(device) if build_types.include?(:device)
 
-    targets.each do |target|
-      case build_types
-      when [:simulator]
-        collect_output(target, Dir[target_products_dir_of(target, simulator) + "/*"])
-      when [:device]
-        collect_output(target, Dir[target_products_dir_of(target, device) + "/*"])
-      else
-        # When merging contents of `simulator` & `device`, prefer contents of `device` over `simulator`
-        # https://github.com/grab/cocoapods-binary-cache/issues/25
-        collect_output(target, Dir[target_products_dir_of(target, device) + "/*"])
-        create_universal_framework(target)
-      end
+    case build_types
+    when [:simulator]
+      collect_output(Dir[target_products_dir_of(simulator) + "/*"])
+    when [:device]
+      collect_output(Dir[target_products_dir_of(device) + "/*"])
+    else
+      # When merging contents of `simulator` & `device`, prefer contents of `device` over `simulator`
+      # https://github.com/grab/cocoapods-binary-cache/issues/25
+      collect_output(Dir[target_products_dir_of(device) + "/*"])
+      create_universal_framework
     end
   end
 
@@ -61,34 +59,40 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   end
 
   def build_for_sdk(sdk)
-    xcodebuild(
+    framework_path = framework_path_of(sdk)
+    if Dir.exist?(framework_path)
+      Pod::UI.puts_indented "--> Framework already exists at: #{framework_path}"
+      return
+    end
+
+    succeeded, = xcodebuild(
       sandbox: sandbox,
-      scheme: scheme,
-      targets: targets.map(&:label),
+      target: target.label,
       configuration: configuration,
       sdk: sdk,
-      deployment_target: targets.map { |t| t.platform.deployment_target }.max.to_s,
+      deployment_target: target.platform.deployment_target.to_s,
       args: sdk == simulator ? @build_args[:simulator] : @build_args[:device]
     )
+    raise "Build framework failed: #{target.label}" unless succeeded
   end
 
-  def create_universal_framework(target)
-    merge_framework_binary(target)
-    merge_framework_dsym(target)
-    merge_swift_headers(target)
-    merge_swift_modules(target)
+  def create_universal_framework
+    merge_framework_binary
+    merge_framework_dsym
+    merge_swift_headers
+    merge_swift_modules
   end
 
-  def merge_framework_binary(target)
-    merge_contents(target, "/#{target.product_module_name}", &method(:create_fat_binary))
+  def merge_framework_binary
+    merge_contents("/#{module_name}", &method(:create_fat_binary))
   end
 
-  def merge_framework_dsym(target)
-    merge_contents(target, ".dSYM/Contents/Resources/DWARF/#{target.product_module_name}", &method(:create_fat_binary))
+  def merge_framework_dsym
+    merge_contents(".dSYM/Contents/Resources/DWARF/#{module_name}", &method(:create_fat_binary))
   end
 
-  def merge_swift_headers(target)
-    merge_contents(target, "/Headers/#{target.product_module_name}-Swift.h") do |options|
+  def merge_swift_headers
+    merge_contents("/Headers/#{module_name}-Swift.h") do |options|
       merged_header = <<~HEREDOC
         #if TARGET_OS_SIMULATOR // merged by cocoapods-binary
         #{File.read(options[:simulator])}
@@ -100,19 +104,19 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def merge_swift_modules(target)
-    merge_contents(target, "/Modules/#{target.product_module_name}.swiftmodule") do |options|
+  def merge_swift_modules
+    merge_contents("/Modules/#{module_name}.swiftmodule") do |options|
       # Note: swiftmodules of `device` were copied beforehand,
       # here, we only need to copy swiftmodules of `simulator`
       FileUtils.cp_r(options[:simulator] + "/.", options[:output])
     end
   end
 
-  def merge_contents(target, path_suffix, &merger)
+  def merge_contents(path_suffix, &merger)
     simulator_, device_, output_ = [
-      framework_path_of(target, simulator),
-      framework_path_of(target, device),
-      "#{output_path(target)}/#{target.product_module_name}.framework"
+      framework_path_of(simulator),
+      framework_path_of(device),
+      "#{output_path}/#{module_name}.framework"
     ].map { |p| p + path_suffix }
     return unless File.exist?(simulator_) && File.exist?(device_)
 
@@ -123,23 +127,27 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
     cmd = ["lipo", " -create"]
     cmd << "-output" << options[:output]
     cmd << options[:simulator] << options[:device]
-    `#{cmd.join(" ")}`
+    Pod::UI.puts `#{cmd.join(" ")}`
   end
 
-  def collect_output(target, paths)
+  def collect_output(paths)
     paths = [paths] unless paths.is_a?(Array)
     paths.each do |path|
-      FileUtils.rm_rf(File.join(output_path(target), File.basename(path)))
-      FileUtils.cp_r(path, output_path(target))
+      FileUtils.rm_rf(File.join(output_path, File.basename(path)))
+      FileUtils.cp_r(path, output_path)
     end
   end
 
-  def target_products_dir_of(target, sdk)
+  def target_products_dir_of(sdk)
     "#{build_dir}/#{configuration}-#{sdk}/#{target.name}"
   end
 
-  def framework_path_of(target, sdk)
-    "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
+  def framework_path_of(sdk)
+    "#{target_products_dir_of(sdk)}/#{module_name}.framework"
+  end
+
+  def module_name
+    target.product_module_name
   end
 
   def sandbox
@@ -150,16 +158,12 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
     @options[:build_dir]
   end
 
-  def output_path(target)
-    "#{@options[:output_path]}/#{target.label}"
+  def output_path
+    @options[:output_path]
   end
 
-  def scheme
-    @options[:scheme]
-  end
-
-  def targets
-    @options[:targets]
+  def target
+    @options[:target]
   end
 
   def configuration
