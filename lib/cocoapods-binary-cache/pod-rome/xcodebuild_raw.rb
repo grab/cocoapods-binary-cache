@@ -9,15 +9,21 @@ PLATFORM_OF_SDK = {
 def xcodebuild(options)
   sdk = options[:sdk] || "iphonesimulator"
   targets = options[:targets] || [options[:target]]
+  scheme = options[:scheme]
   platform = PLATFORM_OF_SDK[sdk]
 
   cmd = ["xcodebuild"]
   cmd << "-project" << options[:sandbox].project_path.realdirpath
-  targets.each { |target| cmd << "-target" << target }
+  if scheme
+    cmd << "-scheme" << scheme
+  else
+    targets.each { |target| cmd << "-target" << target }
+  end
   cmd << "-configuration" << options[:configuration]
   cmd << "-sdk" << sdk
   cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
   cmd += options[:args] if options[:args]
+  cmd << "build"
   cmd << "2>&1"
   cmd = cmd.join(" ")
 

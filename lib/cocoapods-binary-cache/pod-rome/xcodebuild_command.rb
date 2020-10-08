@@ -63,6 +63,7 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   def build_for_sdk(sdk)
     xcodebuild(
       sandbox: sandbox,
+      scheme: scheme,
       targets: targets.map(&:label),
       configuration: configuration,
       sdk: sdk,
@@ -151,6 +152,10 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
 
   def output_path(target)
     "#{@options[:output_path]}/#{target.label}"
+  end
+
+  def scheme
+    @options[:scheme]
   end
 
   def targets

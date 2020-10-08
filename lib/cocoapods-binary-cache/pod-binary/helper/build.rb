@@ -5,7 +5,6 @@ module Pod
   class Prebuild
     def self.build(options)
       targets = options[:targets]
-      return if targets.empty?
 
       options[:sandbox] = Pod::Sandbox.new(Pathname(options[:sandbox])) unless options[:sandbox].is_a?(Pod::Sandbox)
       options[:build_dir] = build_dir(options[:sandbox].root)
@@ -16,6 +15,7 @@ module Pod
       when :osx
         xcodebuild(
           sandbox: options[:sandbox],
+          scheme: options[:scheme],
           targets: targets,
           configuration: options[:configuration],
           sdk: "macosx",

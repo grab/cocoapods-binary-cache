@@ -35,16 +35,34 @@ module Pod
       pod_targets.select { |target| to_build.include?(target.name) }
     end
 
+    def prebuild_scheme_name
+      "_Prebuild"
+    end
+
+    def create_prebuild_scheme(names)
+      Pod::UI.puts "Create a scheme '#{prebuild_scheme_name}' to prebuild #{names.count} given targets"
+
+      scheme = Xcodeproj::XCScheme.new
+      pods_project.targets
+        .select { |t| names.include?(t.name) }
+        .each { |t| scheme.add_build_target(t) }
+      scheme.test_action.code_coverage_enabled = "YES"
+      scheme.save_as(pods_project.path, prebuild_scheme_name, false)
+    end
+
     def prebuild_frameworks!
       sandbox_path = sandbox.root
-
       targets = targets_to_prebuild
       Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}".magenta
+      return if targets.empty?
+
+      create_prebuild_scheme(targets.map(&:name))
       run_code_gen!(targets)
 
       Pod::Prebuild.remove_build_dir(sandbox_path)
       Pod::Prebuild.build(
         sandbox: sandbox_path,
+        scheme: prebuild_scheme_name,
         targets: targets,
         configuration: PodPrebuild.config.prebuild_config,
         output_path: sandbox.generate_framework_path,
