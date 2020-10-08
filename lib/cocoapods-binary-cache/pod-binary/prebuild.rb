@@ -36,6 +36,7 @@ module Pod
     end
 
     def prebuild_frameworks!
+      existed_framework_folder = sandbox.generate_framework_path
       sandbox_path = sandbox.root
 
       targets = PodPrebuild::BuildOrder.order_targets(targets_to_prebuild)
@@ -100,6 +101,17 @@ module Pod
         Pod::UI.message "Remove: #{name}"
         path = sandbox.framework_folder_path_for_target_name(name)
         path.rmtree if path.exist?
+      end
+
+      if PodPrebuild.config.dont_remove_source_code?
+        # just remove the tmp files
+        path = sandbox.root + "Manifest.lock.tmp"
+        path.rmtree if path.exist?
+      else
+        # only keep manifest.lock and framework folder in _Prebuild
+        to_remain_files = ["Manifest.lock", File.basename(existed_framework_folder)]
+        to_delete_files = sandbox_path.children.reject { |file| to_remain_files.include?(File.basename(file)) }
+        to_delete_files.each { |file| file.rmtree if file.exist? }
       end
 
       prebuild_output.write_delta_file(

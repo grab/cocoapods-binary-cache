@@ -103,6 +103,10 @@ module PodPrebuild
       @dsl_config[:disable_dsym]
     end
 
+    def dont_remove_source_code?
+      @dsl_config[:dont_remove_source_code]
+    end
+
     def build_args
       @dsl_config[:build_args]
     end
@@ -158,6 +162,7 @@ module PodPrebuild
         :bitcode_enabled,
         :device_build_enabled,
         :disable_dsym,
+        :dont_remove_source_code,
         :build_args,
         :save_cache_validation_to,
         :validate_prebuilt_settings,
