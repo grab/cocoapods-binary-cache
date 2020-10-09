@@ -28,7 +28,7 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        mode: [flag-off, flag-on, prebuild-changes, prebuild-all]
+        mode: [flag-off, flag-on, prebuild-all]
     steps:
       - name: Checkout
         uses: actions/checkout@v2

@@ -45,31 +45,9 @@ end
 
 pre_install do |installer|
   must_be_dynamic_frameworks = []
-
-  def build_type_cls
-    Gem::Version.new(Pod::VERSION) >= Gem::Version.new("1.9.0") ? Pod::BuildType : Pod::Target::BuildType
-  end
-
-  def make_static(pod)
-    pod.instance_variable_set(
-      :@build_type,
-      build_type_cls.new(:linkage => :static, :packaging => :framework)
-    )
-  end
-
-  def make_dynamic(pod)
-    pod.instance_variable_set(
-      :@build_type,
-      build_type_cls.new(:linkage => :dynamic, :packaging => :framework)
-    )
-  end
-
   installer.pod_targets.each do |pod|
-    if must_be_dynamic_frameworks.include?(pod.name)
-      make_dynamic(pod)
-    else
-      make_static(pod)
-    end
+    linkage = must_be_dynamic_frameworks.include?(pod.name) ? :dynamic : :static
+    pod.instance_variable_set(:@build_type, Pod::BuildType.new(:linkage => linkage, :packaging => :framework))
   end
 end
 
