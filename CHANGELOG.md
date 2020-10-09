@@ -1,11 +1,20 @@
 # Changelog
 
+## 0.1.9
+### Enhancements
+None
+
+### Bug fixes
+None
+
 ## 0.1.8
 ### Enhancements
 - Prebuild targets with more dependencies first to ultilize build parallelism.
 
 ### Bug fixes
 - Abnormal integration when some prebuilt pods are detected as unchanged in the integration step https://github.com/grab/cocoapods-binary-cache/issues/21.
+- Wrong merge of `Info.plist` when prebuilding for simulators and devices https://github.com/grab/cocoapods-binary-cache/issues/25.
+- Cache validation when subspecs have empty source but the parent spec does have sources (https://github.com/grab/cocoapods-binary-cache/pull/26). Kudos to Christian Nadeau.
 
 ---
 ## 0.1.7
