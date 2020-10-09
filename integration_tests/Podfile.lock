@@ -27,6 +27,8 @@ PODS:
     - GTMSessionFetcher/Core (= 1.4.0)
   - IQKeyboardManagerSwift (6.1.1)
   - SwiftDate (6.1.0)
+  - UICommonsDynamic (0.0.1)
+  - UICommonsStatic (0.0.1)
 
 DEPENDENCIES:
   - BKMoneyKit (= 0.0.12)
@@ -34,6 +36,8 @@ DEPENDENCIES:
   - GoogleSignIn (= 4.2.0)
   - IQKeyboardManagerSwift (= 6.1.1)
   - SwiftDate (= 6.1.0)
+  - UICommonsDynamic (from `LocalPods/UICommonsDynamic`)
+  - UICommonsStatic (from `LocalPods/UICommonsStatic`)
 
 SPEC REPOS:
   https://cdn.cocoapods.org/:
@@ -46,6 +50,12 @@ SPEC REPOS:
     - IQKeyboardManagerSwift
     - SwiftDate
 
+EXTERNAL SOURCES:
+  UICommonsDynamic:
+    :path: LocalPods/UICommonsDynamic
+  UICommonsStatic:
+    :path: LocalPods/UICommonsStatic
+
 SPEC CHECKSUMS:
   BKMoneyKit: 1e075497e9b6d9c3ba37c646dcf647ca6358ec43
   GoogleMaps: f79af95cb24d869457b1f961c93d3ce8b2f3b848
@@ -55,7 +65,9 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
   IQKeyboardManagerSwift: 977affaeb4d6e971975c7790a6850f31d38f1207
   SwiftDate: fa2bb3962056bb44047b4b85a30044e5eae30b03
+  UICommonsDynamic: 91a56a831dc441d3e5439b11dd997c1331f38eed
+  UICommonsStatic: cdabede00ad1bdd269e5781144b8708aaa20814d
 
-PODFILE CHECKSUM: d5b324f54460b311fd23f1cc3970532d77b54710
+PODFILE CHECKSUM: 9189353fa79bd33e01170c92c8bc931caf118b2d
 
 COCOAPODS: 1.9.3

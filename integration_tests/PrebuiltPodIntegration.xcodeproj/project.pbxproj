@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		2DF46405F44B03BE417BF464 /* Pods_PrebuiltPodIntegrationTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DE635E1E3F113131056C5F4 /* Pods_PrebuiltPodIntegrationTests.framework */; };
 		AB21AB54FA37707CDEC04AC0 /* Pods_PrebuiltPodIntegration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 066F64AEFC43FE8574CEDF97 /* Pods_PrebuiltPodIntegration.framework */; };
+		C0DAAAFB2530946E00319FF3 /* UICommonsStaticTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DAAAFA2530946E00319FF3 /* UICommonsStaticTests.swift */; };
+		C0DAAAFD2530947B00319FF3 /* UICommonsDynamicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DAAAFC2530947B00319FF3 /* UICommonsDynamicTests.swift */; };
 		C0E6F360246921C200D89D3A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E6F35F246921C200D89D3A /* AppDelegate.swift */; };
 		C0E6F364246921C200D89D3A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E6F363246921C200D89D3A /* ViewController.swift */; };
 		C0E6F369246921C300D89D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0E6F368246921C300D89D3A /* Assets.xcassets */; };
@@ -32,6 +34,8 @@
 		1AB72549A72ABB5895E3DAE3 /* Pods-PrebuiltPodIntegration.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebuiltPodIntegration.release.xcconfig"; path = "Target Support Files/Pods-PrebuiltPodIntegration/Pods-PrebuiltPodIntegration.release.xcconfig"; sourceTree = "<group>"; };
 		8DE635E1E3F113131056C5F4 /* Pods_PrebuiltPodIntegrationTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PrebuiltPodIntegrationTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A27074B5437E1BEA124436D0 /* Pods-PrebuiltPodIntegrationTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PrebuiltPodIntegrationTests.debug.xcconfig"; path = "Target Support Files/Pods-PrebuiltPodIntegrationTests/Pods-PrebuiltPodIntegrationTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C0DAAAFA2530946E00319FF3 /* UICommonsStaticTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICommonsStaticTests.swift; sourceTree = "<group>"; };
+		C0DAAAFC2530947B00319FF3 /* UICommonsDynamicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UICommonsDynamicTests.swift; sourceTree = "<group>"; };
 		C0E6F35C246921C200D89D3A /* PrebuiltPodIntegration.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrebuiltPodIntegration.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0E6F35F246921C200D89D3A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C0E6F363246921C200D89D3A /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -73,6 +77,16 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		C0DAAAF92530944E00319FF3 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				C0E6F3812469268600D89D3A /* StaticFrameworkResourcesTests.swift */,
+				C0DAAAFA2530946E00319FF3 /* UICommonsStaticTests.swift */,
+				C0DAAAFC2530947B00319FF3 /* UICommonsDynamicTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		C0E6F353246921C200D89D3A = {
 			isa = PBXGroup;
 			children = (
@@ -108,7 +122,7 @@
 		C0E6F375246921C300D89D3A /* PrebuiltPodIntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
-				C0E6F3812469268600D89D3A /* StaticFrameworkResourcesTests.swift */,
+				C0DAAAF92530944E00319FF3 /* Tests */,
 				C0E6F378246921C300D89D3A /* Info.plist */,
 			);
 			path = PrebuiltPodIntegrationTests;
@@ -301,6 +315,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DAAAFB2530946E00319FF3 /* UICommonsStaticTests.swift in Sources */,
+				C0DAAAFD2530947B00319FF3 /* UICommonsDynamicTests.swift in Sources */,
 				C0E6F3822469268600D89D3A /* StaticFrameworkResourcesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

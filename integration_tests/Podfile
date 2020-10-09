@@ -23,6 +23,7 @@ if prebuilt_pods_enabled?
       }
     },
     excluded_pods: [],
+    dev_pods_enabled: true,
     save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
     strict_diagnosis: true # Fail if any abnormal integration is spotted
   )
@@ -37,6 +38,9 @@ target "PrebuiltPodIntegration" do
 
   # Has `*.bundle` inside the framework
   binary_pod "GoogleMaps", "2.7.0"
+
+  binary_pod "UICommonsStatic", :path => "LocalPods/UICommonsStatic"
+  binary_pod "UICommonsDynamic", :path => "LocalPods/UICommonsDynamic"
 
   target "PrebuiltPodIntegrationTests" do
     inherit! :search_paths
