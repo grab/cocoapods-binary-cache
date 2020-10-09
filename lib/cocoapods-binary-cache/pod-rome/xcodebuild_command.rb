@@ -127,6 +127,7 @@ class XcodebuildCommand # rubocop:disable Metrics/ClassLength
   end
 
   def collect_output(target, paths)
+    FileUtils.mkdir_p(output_path(target))
     paths = [paths] unless paths.is_a?(Array)
     paths.each do |path|
       FileUtils.rm_rf(File.join(output_path(target), File.basename(path)))
