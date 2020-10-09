@@ -8,36 +8,35 @@ PLATFORM_OF_SDK = {
 
 def xcodebuild(options)
   sdk = options[:sdk] || "iphonesimulator"
+  targets = options[:targets] || [options[:target]]
   platform = PLATFORM_OF_SDK[sdk]
 
   cmd = ["xcodebuild"]
   cmd << "-project" << options[:sandbox].project_path.realdirpath
-  cmd << "-scheme" << options[:target]
+  targets.each { |target| cmd << "-target" << target }
   cmd << "-configuration" << options[:configuration]
   cmd << "-sdk" << sdk
   cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
   cmd += options[:args] if options[:args]
+  cmd << "build"
   cmd << "2>&1"
   cmd = cmd.join(" ")
 
   Pod::UI.puts_indented "$ #{cmd}"
   log = `#{cmd}`
+  return if $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
 
-  succeeded = $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
-  unless succeeded
-    begin
-      raise "Unexpected error" unless log.include?("** BUILD FAILED **")
-
-      require "xcpretty" # TODO (thuyen): Revise this dependency
-      # use xcpretty to print build log
-      # 64 represent command invalid. http://www.manpagez.com/man/3/sysexits/
-      printer = XCPretty::Printer.new({:formatter => XCPretty::Simple, :colorize => "auto"})
-      log.each_line do |line|
-        printer.pretty_print(line)
-      end
-    rescue
-      Pod::UI.puts log.red
+  begin
+    require "xcpretty" # TODO (thuyen): Revise this dependency
+    # use xcpretty to print build log
+    # 64 represent command invalid. http://www.manpagez.com/man/3/sysexits/
+    printer = XCPretty::Printer.new({:formatter => XCPretty::Simple, :colorize => "auto"})
+    log.each_line do |line|
+      printer.pretty_print(line)
     end
+  rescue
+    Pod::UI.puts log.red
+  ensure
+    raise "Fail to build targets: #{targets}"
   end
-  [succeeded, log]
 end

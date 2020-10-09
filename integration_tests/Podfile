@@ -3,26 +3,17 @@ use_frameworks!
 
 source "https://cdn.cocoapods.org/"
 
-$binary_pods = Set.new
-
 def binary_pod(name, *args, **kwargs)
   kwargs_cloned = kwargs.clone
-  kwargs_cloned[:binary] = enabled_prebuilt_pods if kwargs_cloned[:binary].nil?
+  kwargs_cloned[:binary] = prebuilt_pods_enabled? if kwargs_cloned[:binary].nil?
   pod name, *args, **kwargs_cloned
-
-  $binary_pods << name if kwargs_cloned[:binary]
 end
 
-def enabled_prebuilt_pods
+def prebuilt_pods_enabled?
   ENV["ENABLE_PREBUILT_POD_LIBS"] == "true"
 end
 
-pods_originally_distributed_as_vendor = [
-  "GoogleMaps",
-  "GoogleSignIn"
-]
-
-if enabled_prebuilt_pods
+if prebuilt_pods_enabled?
   plugin "cocoapods-binary-cache"
   config_cocoapods_binary_cache(
     cache_repo: {
@@ -89,8 +80,4 @@ post_install do |installer|
       config.build_settings["GCC_WARN_INHIBIT_ALL_WARNINGS"] = "YES"
     end
   end
-
-  FileUtils.mkdir_p(".stats")
-  pods_to_integrate = ($binary_pods - pods_originally_distributed_as_vendor).to_a
-  File.open(".stats/pods_to_integrate.txt", "w") { |f| f.puts(pods_to_integrate) }
 end

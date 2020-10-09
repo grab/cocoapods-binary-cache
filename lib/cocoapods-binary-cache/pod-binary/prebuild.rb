@@ -38,27 +38,27 @@ module Pod
     def prebuild_frameworks!
       existed_framework_folder = sandbox.generate_framework_path
       sandbox_path = sandbox.root
+      targets = targets_to_prebuild
+      Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}".magenta
 
-      targets = PodPrebuild::BuildOrder.order_targets(targets_to_prebuild)
-      Pod::UI.puts "Prebuild frameworks (total #{targets.count}): #{targets.map(&:name)}"
-      Pod::Prebuild.remove_build_dir(sandbox_path)
       run_code_gen!(targets)
-      targets.each do |target|
-        output_path = sandbox.framework_folder_path_for_target_name(target.name)
-        output_path.mkpath unless output_path.exist?
-        Pod::Prebuild.build(
-          sandbox: sandbox_path,
-          target: target,
-          configuration: PodPrebuild.config.prebuild_config,
-          output_path: output_path,
-          bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
-          device_build_enabled: PodPrebuild.config.device_build_enabled?,
-          disable_dsym: PodPrebuild.config.disable_dsym?,
-          args: PodPrebuild.config.build_args
-        )
-        collect_metadata(target, output_path)
-      end
+
       Pod::Prebuild.remove_build_dir(sandbox_path)
+      Pod::Prebuild.build(
+        sandbox: sandbox_path,
+        targets: targets,
+        configuration: PodPrebuild.config.prebuild_config,
+        output_path: sandbox.generate_framework_path,
+        bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
+        device_build_enabled: PodPrebuild.config.device_build_enabled?,
+        disable_dsym: PodPrebuild.config.disable_dsym?,
+        args: PodPrebuild.config.build_args
+      )
+      Pod::Prebuild.remove_build_dir(sandbox_path)
+
+      targets.each do |target|
+        collect_metadata(target, sandbox.framework_folder_path_for_target_name(target.name))
+      end
 
       # copy vendored libraries and frameworks
       targets.each do |target|

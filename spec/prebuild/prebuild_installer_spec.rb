@@ -39,9 +39,12 @@ describe "Pod::PrebuildInstaller" do
     before do
       allow(@installer).to receive(:pod_targets).and_return([])
       allow(@installer).to receive(:targets_to_prebuild).and_return(targets_to_prebuild)
+      # TODO (thuyen): Structure method `build` in pod-binary/prebuild with smaller methods
+      # so that it's easier to stub/mock. Then update `targets_to_prebuild` to non-empty
       allow(sandbox).to receive(:exsited_framework_target_names).and_return([])
       allow(sandbox).to receive(:generate_framework_path).and_return(tmp_dir + "/Generated")
       allow(PodPrebuild.config).to receive(:prebuild_code_gen).and_return(prebuild_code_gen)
+      allow(Pod::Prebuild).to receive(:build)
     end
 
     it "runs code generation before building" do

@@ -4,26 +4,24 @@ require_relative "../../pod-rome/xcodebuild_command"
 module Pod
   class Prebuild
     def self.build(options)
-      target = options[:target]
-      return if target.nil?
+      targets = options[:targets]
 
-      Pod::UI.puts "Building target: #{target}...".magenta
       options[:sandbox] = Pod::Sandbox.new(Pathname(options[:sandbox])) unless options[:sandbox].is_a?(Pod::Sandbox)
       options[:build_dir] = build_dir(options[:sandbox].root)
 
-      case target.platform.name
+      case targets[0].platform.name
       when :ios, :tvos, :watchos
         XcodebuildCommand.new(options).run
       when :osx
         xcodebuild(
           sandbox: options[:sandbox],
-          target: target.label,
+          targets: targets,
           configuration: options[:configuration],
           sdk: "macosx",
           args: options[:args]
         )
       else
-        raise "Unsupported platform for '#{target.name}': '#{target.platform.name}'"
+        raise "Unsupported platform for '#{targets[0].name}': '#{targets[0].platform.name}'"
       end
       raise "The build directory was not found in the expected location" unless options[:build_dir].directory?
     end

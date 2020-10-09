@@ -1,7 +1,6 @@
 module Pod
   class Specification
     def empty_source_files?
-
       unless subspecs.empty?
         # return early if there are some files in subpec(s) but process the spec itself
         return false unless subspecs.all?(&:empty_source_files?)
