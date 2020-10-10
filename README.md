@@ -1,5 +1,9 @@
 # Cocoapods binary cache
 
+[![Test](https://img.shields.io/github/workflow/status/grab/cocoapods-binary-cache/test)](https://img.shields.io/github/workflow/status/grab/cocoapods-binary-cache/test)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat&color=blue)](https://github.com/grab/cocoapods-binary-cache/blob/master/LICENSE)
+[![Gem](https://img.shields.io/gem/v/cocoapods-binary-cache.svg?style=flat&color=blue)](https://rubygems.org/gems/cocoapods-binary-cache)
+
 A plugin that helps to reduce the build time of Xcode projects which use Cocoapods by prebuilding pod frameworks and cache them in a remote repository to share across multiple machines.
 
 ## Installation
