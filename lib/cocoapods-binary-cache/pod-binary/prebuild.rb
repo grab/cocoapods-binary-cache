@@ -1,7 +1,6 @@
 require "fileutils"
 require_relative "../prebuild_output/output"
 require_relative "../helper/lockfile"
-require_relative "../helper/prebuild_order"
 require_relative "helper/target_checker"
 require_relative "helper/build"
 
