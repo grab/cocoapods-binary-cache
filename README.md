@@ -148,7 +148,8 @@ In our real project with around 15% of swift/ObjC code from vendor pods. After a
 
 ## Known issues and roadmap
 
-- Support for development pods is currently under development and refactor. You are advised not to use `:binary => true` for development pods until further support.
+### Exporting IPA with Bitcode
+- When exporting an IPA with Bitcode, remember to disable the _rebuild from bitcode_ option. Refer to https://github.com/grab/cocoapods-binary-cache/issues/24.
 
 ## Best practices
 
