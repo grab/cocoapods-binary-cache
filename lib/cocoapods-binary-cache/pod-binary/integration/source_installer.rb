@@ -1,21 +1,27 @@
-# NOTE:
-# This file will only be loaded on normal pod install step
-# so there's no need to check is_prebuild_stage
-
-# Provide a special "download" process for prebuilded pods.
-#
-# As the frameworks is already exsited in local folder. We
-# just create a symlink to the original target folder.
-#
 module Pod
   class Installer
-    class PodSourceInstaller
-      def install_for_prebuild!(standard_sanbox)
-        return if !PodPrebuild.config.dev_pods_enabled? && standard_sanbox.local?(name)
+    class PrebuiltSourceInstaller < PodSourceInstaller
+      def initialize(*args, **kwargs)
+        @source_installer = kwargs.delete(:source_installer)
+        super(*args, **kwargs)
+      end
+
+      def prebuild_sandbox
+        @prebuild_sandbox ||= Pod::PrebuildSandbox.from_standard_sandbox(sandbox)
+      end
+
+      def install!
+        @source_installer.install! if PodPrebuild.config.still_download_sources?(name)
+        install_prebuilt_framework!
+      end
+
+      private
+
+      def install_prebuilt_framework!
+        return if !PodPrebuild.config.dev_pods_enabled? && sandbox.local?(name)
 
         # make a symlink to target folder
         # TODO (bang): Unify to 1 sandbox to optimize and avoid inconsistency
-        prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sanbox)
         # if spec used in multiple platforms, it may return multiple paths
         target_names = prebuild_sandbox.existed_target_names_for_pod_name(name)
         target_names.each do |name|
@@ -24,7 +30,7 @@ module Pod
           # If have only one platform, just place int the root folder of this pod.
           # If have multiple paths, we use a sperated folder to store different
           # platform frameworks. e.g. AFNetworking/AFNetworking-iOS/AFNetworking.framework
-          target_folder = standard_sanbox.pod_dir(self.name)
+          target_folder = sandbox.pod_dir(self.name)
           target_folder += real_file_folder.basename if target_names.count > 1
           target_folder += PodPrebuild.config.prebuilt_path
           target_folder.rmtree if target_folder.exist?
@@ -72,8 +78,6 @@ module Pod
           end
         end
       end
-
-      private
 
       def walk(path, &action)
         return unless path.exist?

@@ -42,6 +42,8 @@ bundle exec pod binary prebuild --config=Test
 
 - `disable_dsym` (default: `false`): Disable dSYM generation when prebuilding frameworks.
 
+- `still_download_sources` (default: `false`, can be a boolean or an array): By default, we don't download sources of prebuilt pods during CocoaPods installation. However, some pods still need some auxiliary files such as `FirebaseCrashlytics`. This option allows keeping the behavior of downloading sources of prebuilt pods.
+
 - `save_cache_validation_to` (default: `nil`): The path to save cache validation (missed/hit). Do nothing if not specified
 
 - `validate_prebuilt_settings` (default: `nil`): Validate build settings of the prebuilt frameworks. A framework that has incompatible build settings will be treated as a cache miss. If this option is not specified, only versions of the prebuilt pods are used to check for cache hit/miss. Below is a sample build settings validation:
