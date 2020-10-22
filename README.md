@@ -156,6 +156,10 @@ In our real project with around 15% of swift/ObjC code from vendor pods. After a
 ### Exporting IPA with Bitcode
 - When exporting an IPA with Bitcode, remember to disable the _rebuild from bitcode_ option. Refer to https://github.com/grab/cocoapods-binary-cache/issues/24.
 
+### Pods with headers only
+- By default, pods with empty sources (ie. pods with header files only) will be automatically excluded and they will be later integrated as normal. For now, we rely on the `source_files` patterns declared in podspec to heuristically detect empty-sources pods.
+- However, there are cases in which the `source_files` of a pod looks like non-empty sources (ex. `s.source_files = "**/*.{c,h,m,mm,cpp}"`) despite having header files only. For those cases, you need to manually add them to the `excluded_pods` option.
+
 ## Best practices
 
 Check out our [Best practices](/docs/best_practices.md) for for information.

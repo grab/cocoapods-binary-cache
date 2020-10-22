@@ -44,6 +44,10 @@ bundle exec pod binary prebuild --config=Test
 - Default: `[]`.
 - A list of pods to exclude (ie. treat them as non-prebuilt pods).
 
+Note:
+- By default, pods with empty sources (ie. pods with header files only) will be automatically excluded and they will be later integrated as normal. For now, we rely on the `source_files` patterns declared in podspec to heuristically detect empty-sources pods.
+- However, there are cases in which the `source_files` of a pod looks like non-empty sources (ex. `s.source_files = "**/*.{c,h,m,mm,cpp}"`) despite having header files only. For those cases, you need to manually add them to the `excluded_pods` option.
+
 ### `bitcode_enabled`
 - Default: `false`.
 - A list of pods to exclude (ie. treat them as non-prebuilt pods)
