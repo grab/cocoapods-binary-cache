@@ -17,7 +17,8 @@ module PodPrebuild
       comps << cmd
       comps << "&> /dev/null" if options[:ignore_output]
       comps << "|| true" if options[:can_fail]
-      `#{comps.join(" ")}`
+      cmd = comps.join(" ")
+      raise "Fail to run command '#{cmd}'" unless system(cmd)
     end
 
     def git_clone(cmd, options = {})

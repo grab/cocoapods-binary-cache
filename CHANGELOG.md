@@ -1,11 +1,11 @@
 # Changelog
 
-## 0.1.9
+## master (0.1.9)
 ### Enhancements
 - Provide an option to keep sources downloading behavior, useful for maintaining the `preserve_paths` of the podspecs.
 
 ### Bug fixes
-None
+- Handle git failures properly (throwing errors if any).
 
 ## 0.1.8
 ### Enhancements
