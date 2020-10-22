@@ -2,14 +2,14 @@
 
 ## 0.1.9
 ### Enhancements
-None
+- Provide an option to keep sources downloading behavior, useful for maintaining the `preserve_paths` of the podspecs.
 
 ### Bug fixes
 None
 
 ## 0.1.8
 ### Enhancements
-- Prebuild targets with more dependencies first to ultilize build parallelism.
+- Prebuild multiple targets concurently to ultilize build parallelism.
 
 ### Bug fixes
 - Abnormal integration when some prebuilt pods are detected as unchanged in the integration step https://github.com/grab/cocoapods-binary-cache/issues/21.

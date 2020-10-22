@@ -55,8 +55,13 @@ plugin "cocoapods-binary-cache"
 
 ```rb
 config_cocoapods_binary_cache(
-  prebuild_config: "Debug",
-  dev_pods_enabled: false
+  cache_repo: {
+    "default" => {
+      "remote" => "git@cache_repo.git",
+      "local" => "~/.cocoapods-binary-cache/prebuilt-frameworks"
+    }
+  },
+  prebuild_config: "Debug"
 )
 ```
 For details about options to use with the `config_cocoapods_binary_cache` function, check out [our guidelines on how to configure `cocoapods-binary-cache`](/docs/configure_cocoapods_binary_cache.md).
