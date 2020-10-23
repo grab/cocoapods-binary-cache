@@ -9,6 +9,7 @@ module Pod
         def self.options
           [
             ["--config", "Config (Debug, Test...) to prebuild"],
+            ["--repo-update", "Update pod repo before installing"],
             ["--push", "Push cache to repo upon completion"],
             ["--all", "Prebuild all binary pods regardless of cache validation"],
             ["--targets", "Targets to prebuild. Use comma (,) to specify a list of targets"]
@@ -28,6 +29,7 @@ module Pod
           @prebuilder = PodPrebuild::CachePrebuilder.new(
             config: prebuild_config,
             cache_branch: argv.shift_argument || "master",
+            repo_update: argv.flag?("repo-update"),
             push_cache: argv.flag?("push")
           )
         end

@@ -8,6 +8,7 @@ module PodPrebuild
       super(options)
       @cache_branch = options[:cache_branch]
       @push_cache = options[:push_cache]
+      @repo_update = options[:repo_update]
       @fetcher = PodPrebuild::CacheFetcher.new(options)
       @pusher = PodPrebuild::CachePusher.new(options)
     end
@@ -26,6 +27,7 @@ module PodPrebuild
 
     def prebuild
       Pod::UI.step("Installation") do
+        installer.repo_update = @repo_update
         installer.install!
       end
     end
