@@ -3,6 +3,8 @@ require_relative "../helper/zip"
 
 module PodPrebuild
   class CacheFetcher < CommandExecutor
+    attr_reader :cache_branch
+
     def initialize(options)
       super(options)
       @cache_branch = options[:cache_branch]

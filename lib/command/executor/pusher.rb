@@ -2,6 +2,8 @@ require_relative "base"
 
 module PodPrebuild
   class CachePusher < CommandExecutor
+    attr_reader :cache_branch
+
     def initialize(options)
       super(options)
       @cache_branch = options[:cache_branch]

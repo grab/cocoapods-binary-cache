@@ -4,15 +4,13 @@ require_relative "pusher"
 
 module PodPrebuild
   class CachePrebuilder < CommandExecutor
-    attr_reader :cache_branch, :push_cache, :repo_update, :fetcher, :pusher
+    attr_reader :repo_update, :fetcher, :pusher
 
     def initialize(options)
       super(options)
-      @cache_branch = options[:cache_branch]
-      @push_cache = options[:push_cache]
       @repo_update = options[:repo_update]
       @fetcher = PodPrebuild::CacheFetcher.new(options) unless options[:no_fetch]
-      @pusher = PodPrebuild::CachePusher.new(options)
+      @pusher = PodPrebuild::CachePusher.new(options) if options[:push_cache]
     end
 
     def run
@@ -22,7 +20,7 @@ module PodPrebuild
       return if changes.empty?
 
       sync_cache(changes)
-      @pusher.run if @push_cache
+      @pusher&.run
     end
 
     private

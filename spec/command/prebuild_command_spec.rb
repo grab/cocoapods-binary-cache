@@ -10,6 +10,31 @@ describe "Pod::Command::Binary::Prebuild" do
       PodPrebuild.config.reset!
     end
 
+    context "when no options is specified" do
+      it "creates fetcher with cache branch as master" do
+        expect(@command.prebuilder.fetcher&.cache_branch).to eq("master")
+      end
+      it "does not push to cache repo upon completion" do
+        expect(@command.prebuilder.pusher).to eq(nil)
+      end
+    end
+
+    context "cache branch is specified" do
+      let(:cache_branch) { "dummy" }
+      let(:args) { ["--push", cache_branch] }
+      it "creates fetcher & pusher with the given cache branch" do
+        expect(@command.prebuilder.fetcher&.cache_branch).to eq(cache_branch)
+        expect(@command.prebuilder.pusher&.cache_branch).to eq(cache_branch)
+      end
+    end
+
+    context "option --push is specified" do
+      let(:args) { ["--push"] }
+      it "creates pusher with cache branch as master" do
+        expect(@command.prebuilder.pusher&.cache_branch).to eq("master")
+      end
+    end
+
     context "option --all is specified" do
       let(:args) { ["--all"] }
       it "updates :prebuild_all_pods to CLI config" do
@@ -28,6 +53,13 @@ describe "Pod::Command::Binary::Prebuild" do
       let(:args) { ["--targets=A,B,C"] }
       it "updates :prebuild_targets to CLI config" do
         expect(PodPrebuild.config.cli_config[:prebuild_targets]).to eq(["A", "B", "C"])
+      end
+    end
+
+    context "option --repo-update is specified" do
+      let(:args) { ["--repo-update"] }
+      it "sets repo_update to the installer" do
+        expect(@command.prebuilder.repo_update).to eq(true)
       end
     end
 
