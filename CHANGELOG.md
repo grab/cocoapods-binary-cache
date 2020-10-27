@@ -1,6 +1,13 @@
 # Changelog
 
-## master (0.1.9)
+## master (0.1.10)
+### Enhancements
+- Add option `--no-fetch` to the `prebuild` command.
+
+### Bug fixes
+None
+
+## 0.1.9
 ### Enhancements
 - Provide an option to keep sources downloading behavior, useful for maintaining the `preserve_paths` of the podspecs.
 

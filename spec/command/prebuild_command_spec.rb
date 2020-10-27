@@ -30,5 +30,12 @@ describe "Pod::Command::Binary::Prebuild" do
         expect(PodPrebuild.config.cli_config[:prebuild_targets]).to eq(["A", "B", "C"])
       end
     end
+
+    context "option --no-fetch is specified" do
+      let(:args) { ["--no-fetch"] }
+      it "sets fetcher to nil" do
+        expect(@command.prebuilder.fetcher).to eq(nil)
+      end
+    end
   end
 end

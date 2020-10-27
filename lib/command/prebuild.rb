@@ -5,11 +5,14 @@ module Pod
   class Command
     class Binary < Command
       class Prebuild < Binary
+        attr_reader :prebuilder
+
         self.arguments = [CLAide::Argument.new("CACHE-BRANCH", false)]
         def self.options
           [
             ["--config", "Config (Debug, Test...) to prebuild"],
             ["--repo-update", "Update pod repo before installing"],
+            ["--no-fetch", "Do not perform a cache fetch beforehand"],
             ["--push", "Push cache to repo upon completion"],
             ["--all", "Prebuild all binary pods regardless of cache validation"],
             ["--targets", "Targets to prebuild. Use comma (,) to specify a list of targets"]
@@ -30,6 +33,7 @@ module Pod
             config: prebuild_config,
             cache_branch: argv.shift_argument || "master",
             repo_update: argv.flag?("repo-update"),
+            no_fetch: argv.flag?("fetch") == false,
             push_cache: argv.flag?("push")
           )
         end

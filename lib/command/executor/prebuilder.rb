@@ -4,17 +4,19 @@ require_relative "pusher"
 
 module PodPrebuild
   class CachePrebuilder < CommandExecutor
+    attr_reader :cache_branch, :push_cache, :repo_update, :fetcher, :pusher
+
     def initialize(options)
       super(options)
       @cache_branch = options[:cache_branch]
       @push_cache = options[:push_cache]
       @repo_update = options[:repo_update]
-      @fetcher = PodPrebuild::CacheFetcher.new(options)
+      @fetcher = PodPrebuild::CacheFetcher.new(options) unless options[:no_fetch]
       @pusher = PodPrebuild::CachePusher.new(options)
     end
 
     def run
-      @fetcher.run
+      @fetcher&.run
       prebuild
       changes = PodPrebuild::JSONFile.new(@config.prebuild_delta_path)
       return if changes.empty?
