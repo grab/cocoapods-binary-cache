@@ -2,13 +2,14 @@ module PodPrebuild
   class PreInstallHook
     include ObjectSpace
 
-    attr_reader :installer_context, :podfile, :prebuild_sandbox, :cache_validation
+    attr_reader :installer_context, :podfile, :prebuild_sandbox, :standard_sandbox, :cache_validation
 
     def initialize(installer_context)
       @installer_context = installer_context
       @podfile = installer_context.podfile
       @pod_install_options = {}
       @prebuild_sandbox = nil
+      @standard_sandbox = installer_context.sandbox
       @cache_validation = nil
     end
 
@@ -24,6 +25,7 @@ module PodPrebuild
       prebuild! if PodPrebuild.config.prebuild_job?
 
       PodPrebuild::Env.next_stage!
+      prepare_for_integration
       log_section "🤖  Resume pod installation"
       require_relative "../pod-binary/integration"
     end
@@ -51,7 +53,6 @@ module PodPrebuild
     end
 
     def create_prebuild_sandbox
-      standard_sandbox = installer_context.sandbox
       @prebuild_sandbox = Pod::PrebuildSandbox.from_standard_sandbox(standard_sandbox)
       Pod::UI.message "Create prebuild sandbox at #{@prebuild_sandbox.root}"
     end
@@ -99,6 +100,15 @@ module PodPrebuild
       Pod::UI.title("Prebuilding...") do
         binary_installer.clean_delta_file
         binary_installer.install!
+      end
+    end
+
+    def prepare_for_integration
+      # Remove local podspec of external sources so that it downloads sources correctly.
+      # Otherwise, with incremental pod installation, CocoaPods downloads the sources
+      # based on the `s.source` declaration in the podspecs which are sometimes incorrect.
+      PodPrebuild.config.prebuilt_pod_names.each do |name|
+        @standard_sandbox.remove_local_podspec(name) if @standard_sandbox.checkout_sources.key?(name)
       end
     end
 
