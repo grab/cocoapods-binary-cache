@@ -1,6 +1,13 @@
 # Changelog
 
-## master (0.1.10)
+## master (to be 0.1.11)
+### Enhancements
+None
+
+### Bug fixes
+- Project path was not escaped in the `xcodebuild` command.
+
+## 0.1.10
 ### Enhancements
 - Add option `--no-fetch` to the `prebuild` command.
 
