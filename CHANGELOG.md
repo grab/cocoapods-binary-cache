@@ -5,7 +5,8 @@
 - Add option `--no-fetch` to the `prebuild` command.
 
 ### Bug fixes
-None
+- Sources of external-sources pods are not fetched properly in incremental pod installation. It should use the checkout options declared in Podfile instead.
+- Conflict definition of `xcodebuild` in this plugin and in `cocoapods-rome` causing prebuild failures https://github.com/grab/cocoapods-binary-cache/issues/36.
 
 ## 0.1.9
 ### Enhancements
