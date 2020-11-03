@@ -42,8 +42,8 @@ module Pod
 
       run_code_gen!(targets)
 
-      Pod::Prebuild.remove_build_dir(sandbox_path)
-      Pod::Prebuild.build(
+      PodPrebuild.remove_build_dir(sandbox_path)
+      PodPrebuild.build(
         sandbox: sandbox_path,
         targets: targets,
         configuration: PodPrebuild.config.prebuild_config,
@@ -53,7 +53,7 @@ module Pod
         disable_dsym: PodPrebuild.config.disable_dsym?,
         args: PodPrebuild.config.build_args
       )
-      Pod::Prebuild.remove_build_dir(sandbox_path)
+      PodPrebuild.remove_build_dir(sandbox_path)
 
       targets.each do |target|
         collect_metadata(target, sandbox.framework_folder_path_for_target_name(target.name))
