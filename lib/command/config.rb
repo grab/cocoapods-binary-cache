@@ -38,7 +38,8 @@ module PodPrebuild
     end
 
     def prebuild_delta_path
-      @dsl_config[:prebuild_delta_path] || @deprecated_config["prebuild_delta_path"] || "#{Dir.pwd}/_Prebuild_delta/changes.json"
+      @dsl_config[:prebuild_delta_path] ||
+        @deprecated_config["prebuild_delta_path"] || "#{Dir.pwd}/_Prebuild_delta/changes.json"
     end
 
     def manifest_path(in_cache: false)
