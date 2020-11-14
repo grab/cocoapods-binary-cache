@@ -6,6 +6,7 @@ None
 
 ### Bug fixes
 - Project path was not escaped in the `xcodebuild` command.
+- By default, should set `ONLY_ACTIVE_ARCH=NO` when building for devices.
 
 ## 0.1.10
 ### Enhancements
