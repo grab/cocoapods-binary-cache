@@ -2,7 +2,7 @@
 
 ## master (to be 0.1.11)
 ### Enhancements
-None
+- Support local cache dir https://github.com/grab/cocoapods-binary-cache/issues/31.
 
 ### Bug fixes
 - Project path was not escaped in the `xcodebuild` command.

@@ -12,14 +12,28 @@ module PodPrebuild
 
     def run
       Pod::UI.step("Fetching cache") do
-        fetch_cache(@config.cache_repo, @cache_branch, @config.cache_path)
+        if @config.local_cache?
+          print_message_for_local_cache(@config.cache_path)
+        else
+          fetch_remote_cache(@config.cache_repo, @cache_branch, @config.cache_path)
+        end
         unzip_cache
       end
     end
 
     private
 
-    def fetch_cache(repo, branch, dest_dir)
+    def print_message_for_local_cache(cache_dir)
+      Pod::UI.puts "You're using local cache at: #{cache_dir}.".yellow
+      message = <<~HEREDOC
+        To enable remote cache (with a git repo), add the `remote` field to the repo config in the `cache_repo` option.
+        For more details, check out this doc:
+          https://github.com/grab/cocoapods-binary-cache/blob/master/docs/configure_cocoapods_binary_cache.md#cache_repo-
+      HEREDOC
+      Pod::UI.puts message
+    end
+
+    def fetch_remote_cache(repo, branch, dest_dir)
       Pod::UI.puts "Fetching cache from #{repo} (branch: #{branch})".green
       if Dir.exist?(dest_dir + "/.git")
         git("fetch origin #{branch}")

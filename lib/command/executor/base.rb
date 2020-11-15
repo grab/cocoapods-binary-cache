@@ -11,6 +11,10 @@ module PodPrebuild
       end
     end
 
+    def use_local_cache?
+      @config.cache_repo.nil?
+    end
+
     def git(cmd, options = {})
       comps = ["git"]
       comps << "-C" << @config.cache_path unless options[:cache_repo] == false

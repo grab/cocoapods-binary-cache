@@ -29,6 +29,10 @@ module PodPrebuild
       @cache_repo ||= cache_repo_config["remote"]
     end
 
+    def local_cache?
+      cache_repo.nil?
+    end
+
     def cache_path
       @cache_path ||= File.expand_path(cache_repo_config["local"])
     end
