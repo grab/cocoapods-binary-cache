@@ -1,6 +1,13 @@
 # Changelog
 
-## master (to be 0.1.11)
+## master (to be 0.1.12)
+### Enhancements
+None
+
+### Bug fixes
+None
+
+## 0.1.11
 ### Enhancements
 - Support local cache dir https://github.com/grab/cocoapods-binary-cache/issues/31.
 
