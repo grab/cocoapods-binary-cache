@@ -2,6 +2,7 @@ module PodPrebuild
   class CommandExecutor
     def initialize(options)
       @config = options[:config]
+      prepare_cache_dir
     end
 
     def installer
@@ -13,6 +14,10 @@ module PodPrebuild
 
     def use_local_cache?
       @config.cache_repo.nil?
+    end
+
+    def prepare_cache_dir
+      FileUtils.mkdir_p(@config.cache_path) if @config.cache_path
     end
 
     def git(cmd, options = {})
