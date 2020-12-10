@@ -1,3 +1,4 @@
+require "parallel"
 require_relative "base"
 require_relative "../helper/zip"
 
@@ -57,7 +58,8 @@ module PodPrebuild
           @config.manifest_path
         )
       end
-      Dir[@config.generated_frameworks_dir(in_cache: true) + "/*.zip"].each do |path|
+      zip_paths = Dir[@config.generated_frameworks_dir(in_cache: true) + "/*.zip"]
+      Parallel.each(zip_paths, in_threads: 8) do |path|
         ZipUtils.unzip(path, to_dir: @config.generated_frameworks_dir)
       end
     end

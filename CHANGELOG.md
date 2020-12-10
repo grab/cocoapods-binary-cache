@@ -2,7 +2,7 @@
 
 ## master (to be 0.1.12)
 ### Enhancements
-None
+- Speed up cache unzip by running them in parallel.
 
 ### Bug fixes
 None
