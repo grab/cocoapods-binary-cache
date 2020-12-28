@@ -60,10 +60,6 @@ Note:
 - Default: `false`.
 - Disable dSYM generation when prebuilding frameworks.
 
-### `still_download_sources`
-- Default: `false`. Can be a boolean or an array
-- By default, we don't download sources of prebuilt pods during CocoaPods installation. However, some pods still need some auxiliary files such as `FirebaseCrashlytics`. This option allows keeping the behavior of downloading sources of prebuilt pods.
-
 ### `save_cache_validation_to`
 - Default: `nil`.
 - The path to save cache validation (missed/hit). Do nothing if not specified.

@@ -11,7 +11,7 @@ module Pod
       end
 
       def install!
-        @source_installer.install! if PodPrebuild.config.still_download_sources?(name)
+        @source_installer.install!
         install_prebuilt_framework!
       end
 
@@ -58,10 +58,15 @@ module Pod
           next unless metadata.static_framework?
 
           metadata.resources.each do |path|
-            target_file_path = path
+            target_file_path = Pathname(path)
               .sub("${PODS_ROOT}", sandbox.root.to_path)
               .sub("${PODS_CONFIGURATION_BUILD_DIR}", sandbox.root.to_path)
+            next if target_file_path.exist?
+
             real_file_path = real_file_folder + metadata.framework_name + File.basename(path)
+
+            # TODO (thuyen): Fix https://github.com/grab/cocoapods-binary-cache/issues/45
+
             case File.extname(path)
             when ".xib"
               # https://github.com/grab/cocoapods-binary-cache/issues/7

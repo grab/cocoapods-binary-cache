@@ -23,13 +23,7 @@ describe "Pod::Installer::PrebuiltSourceInstaller" do
     end
 
     describe "download sources" do
-      it "does not downloads sources by default" do
-        expect(@source_installer).not_to receive(:install!)
-        @installer.install!
-      end
-
-      it "downloads sources if specified in DSL" do
-        allow(PodPrebuild.config).to receive(:still_download_sources?).with(name).and_return(true)
+      it "downloads sources by default" do
         expect(@source_installer).to receive(:install!)
         @installer.install!
       end

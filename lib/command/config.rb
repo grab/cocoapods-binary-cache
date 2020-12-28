@@ -107,11 +107,6 @@ module PodPrebuild
       @dsl_config[:disable_dsym]
     end
 
-    def still_download_sources?(name)
-      option = @dsl_config[:still_download_sources]
-      option.is_a?(Array) ? option.include?(name) : option
-    end
-
     def dont_remove_source_code?
       @dsl_config[:dont_remove_source_code]
     end
@@ -171,7 +166,6 @@ module PodPrebuild
         :bitcode_enabled,
         :device_build_enabled,
         :disable_dsym,
-        :still_download_sources,
         :dont_remove_source_code,
         :build_args,
         :save_cache_validation_to,

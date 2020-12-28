@@ -40,7 +40,7 @@ DEPENDENCIES:
   - UICommonsStatic (from `LocalPods/UICommonsStatic`)
 
 SPEC REPOS:
-  https://cdn.cocoapods.org/:
+  trunk:
     - BKMoneyKit
     - GoogleMaps
     - GoogleSignIn
