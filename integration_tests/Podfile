@@ -13,8 +13,7 @@ plugin "cocoapods-binary-cache"
 config_cocoapods_binary_cache(
   cache_repo: {
     "default" => {
-      "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
-      "local" => "~/.cocoapods-binary-cache/PrebuiltPodIntegration-libs"
+      "local" => ENV["PREBUILT_CACHE_LOCAL_DIR"] || "prebuilt_cache/default" # use local cache for integration tests
     }
   },
   excluded_pods: [],
