@@ -4,10 +4,10 @@
 ### Enhancements
 - Speed up cache unzip by running them in parallel.
 - Remove the `still_download_sources` option. Instead, always download sources to avoid improper integration.
-- Fix resources integration (for ex. using `SwiftDate` as a static framework).
+- Add `xcframework` support (instead of creating fat framework with `lipo`) https://github.com/grab/cocoapods-binary-cache/issues/54.
 
 ### Bug fixes
-None
+- Fix resources integration (for ex. using `SwiftDate` as a static framework).
 
 ## 0.1.11
 ### Enhancements

@@ -58,7 +58,9 @@ module PodPrebuild
     end
 
     def prebuilt_path(path: nil)
-      path.nil? ? "_Prebuilt" : "_Prebuilt/#{path}"
+      p = Pathname.new(path.nil? ? "_Prebuilt" : "_Prebuilt/#{path}")
+      p = p.sub_ext(".xcframework") if xcframework? && p.extname == ".framework"
+      p.to_s
     end
 
     def validate_dsl_config
@@ -101,6 +103,10 @@ module PodPrebuild
 
     def device_build_enabled?
       @dsl_config[:device_build_enabled]
+    end
+
+    def xcframework?
+      @dsl_config[:xcframework]
     end
 
     def disable_dsym?
@@ -165,6 +171,7 @@ module PodPrebuild
         :dev_pods_enabled,
         :bitcode_enabled,
         :device_build_enabled,
+        :xcframework,
         :disable_dsym,
         :dont_remove_source_code,
         :build_args,

@@ -19,25 +19,28 @@ module PodPrebuild
     end
 
     def run
-      build_for_sdk(simulator) if build_types.include?(:simulator)
-      build_for_sdk(device) if build_types.include?(:device)
-
+      sdks.each { |sdk| build_for_sdk(sdk) }
       targets.each do |target|
-        case build_types
-        when [:simulator]
-          collect_output(target, Dir[target_products_dir_of(target, simulator) + "/*"])
-        when [:device]
-          collect_output(target, Dir[target_products_dir_of(target, device) + "/*"])
+        if PodPrebuild.config.xcframework?
+          create_xcframework(target)
+        elsif sdks.count > 1
+          create_fat_framework(target)
         else
-          # When merging contents of `simulator` & `device`, prefer contents of `device` over `simulator`
-          # https://github.com/grab/cocoapods-binary-cache/issues/25
-          collect_output(target, Dir[target_products_dir_of(target, device) + "/*"])
-          create_universal_framework(target)
+          collect_output(target, Dir[target_products_dir_of(target, sdks[0]) + "/*"])
         end
       end
     end
 
     private
+
+    def sdks
+      @sdks ||= begin
+        sdks_ = []
+        sdks_ << simulator if build_types.include?(:simulator)
+        sdks_ << device if build_types.include?(:device)
+        sdks_
+      end
+    end
 
     def build_types
       @build_types ||= begin
@@ -55,6 +58,7 @@ module PodPrebuild
       args_[:device] ||= []
       args_[:default] += ["BITCODE_GENERATION_MODE=bitcode"] if bitcode_enabled?
       args_[:default] += ["DEBUG_INFORMATION_FORMAT=dwarf"] if disable_dsym?
+      args_[:default] += ["BUILD_LIBRARY_FOR_DISTRIBUTION=YES"] if PodPrebuild.config.xcframework?
       args_[:simulator] += ["ARCHS=x86_64", "ONLY_ACTIVE_ARCH=NO"] if simulator == "iphonesimulator"
       args_[:simulator] += args_[:default]
       args_[:device] += ["ONLY_ACTIVE_ARCH=NO"]
@@ -74,7 +78,21 @@ module PodPrebuild
       )
     end
 
-    def create_universal_framework(target)
+    def create_xcframework(target)
+      output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
+      FileUtils.rm_rf(output)
+
+      cmd = ["xcodebuild", " -create-xcframework"]
+      cmd += sdks.map { |sdk| "-framework #{framework_path_of(target, sdk)}" }
+      cmd << "-output" << output
+      `#{cmd.join(" ")}`
+    end
+
+    def create_fat_framework(target)
+      # When merging contents of `simulator` & `device`, prefer contents of `device` over `simulator`
+      # https://github.com/grab/cocoapods-binary-cache/issues/25
+      collect_output(target, Dir[target_products_dir_of(target, device) + "/*"])
+
       merge_framework_binary(target)
       merge_framework_dsym(target)
       merge_swift_headers(target)

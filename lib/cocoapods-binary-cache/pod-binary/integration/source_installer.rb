@@ -39,8 +39,10 @@ module Pod
           walk(real_file_folder) do |child|
             source = child
             # only make symlink to file and `.framework` folder
-            if child.directory? && [".framework", ".dSYM"].include?(child.extname)
-              mirror_with_symlink(source, real_file_folder, target_folder) if child.extname == ".framework"
+            if child.directory? && [".framework", ".xcframework", ".dSYM"].include?(child.extname)
+              if [".framework", ".xcframework"].include?(child.extname)
+                mirror_with_symlink(source, real_file_folder, target_folder)
+              end
               # Ignore dsym here to avoid cocoapods from adding install_dsym to buildphase-script
               # That can cause duplicated output files error in Xcode 11 (warning in Xcode 10)
               # We need more setup to support local debuging with prebuilt dSYM
