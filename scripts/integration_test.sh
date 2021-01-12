@@ -43,20 +43,13 @@ xcodebuild_test() {
 echo "Working dir: ${WORKING_DIR}"
 echo "Integeration tests dir: ${INTEGRATION_TESTS_DIR}"
 
-export ENABLE_PREBUILT_POD_LIBS=true
-
 TEST_MODE="${1:-prebuild-all}"
 cd "${INTEGRATION_TESTS_DIR}"
 echo "Running test with mode: ${TEST_MODE}..."
 
 rm -rf Pods _Prebuild DerivedData
 case ${TEST_MODE} in
-  flag-off )
-    export ENABLE_PREBUILT_POD_LIBS=false
-    pod_install
-    xcodebuild_test
-    ;;
-  flag-on )
+  non-prebuild )
     pod_bin_fetch
     pod_install
     xcodebuild_test

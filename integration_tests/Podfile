@@ -5,29 +5,23 @@ source "https://cdn.cocoapods.org/"
 
 def binary_pod(name, *args, **kwargs)
   kwargs_cloned = kwargs.clone
-  kwargs_cloned[:binary] = prebuilt_pods_enabled? if kwargs_cloned[:binary].nil?
+  kwargs_cloned[:binary] = true if kwargs_cloned[:binary].nil?
   pod name, *args, **kwargs_cloned
 end
 
-def prebuilt_pods_enabled?
-  ENV["ENABLE_PREBUILT_POD_LIBS"] == "true"
-end
-
-if prebuilt_pods_enabled?
-  plugin "cocoapods-binary-cache"
-  config_cocoapods_binary_cache(
-    cache_repo: {
-      "default" => {
-        "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
-        "local" => "~/.cocoapods-binary-cache/PrebuiltPodIntegration-libs"
-      }
-    },
-    excluded_pods: [],
-    dev_pods_enabled: true,
-    save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
-    strict_diagnosis: true # Fail if any abnormal integration is spotted
-  )
-end
+plugin "cocoapods-binary-cache"
+config_cocoapods_binary_cache(
+  cache_repo: {
+    "default" => {
+      "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
+      "local" => "~/.cocoapods-binary-cache/PrebuiltPodIntegration-libs"
+    }
+  },
+  excluded_pods: [],
+  dev_pods_enabled: true,
+  save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
+  strict_diagnosis: true # Fail if any abnormal integration is spotted
+)
 
 target "PrebuiltPodIntegration" do
   # Has `*.bundle` outside the framework
