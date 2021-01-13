@@ -52,16 +52,20 @@ module PodPrebuild
     end
 
     def make_up_build_args(args)
+      # Note: The build arguments explicitly passed from config_cocoapods_binary_cache
+      # should be preceded by the default arguments so that they could take higher priority
+      # when there are argument collisions in the xcodebuild command.
+      # For ex. `xcodebuild AN_ARG=1 AN_ARG=2` should use `AN_ARG=2` instead.
       args_ = args.clone
       args_[:default] ||= []
       args_[:simulator] ||= []
       args_[:device] ||= []
-      args_[:default] += ["BITCODE_GENERATION_MODE=bitcode"] if bitcode_enabled?
-      args_[:default] += ["DEBUG_INFORMATION_FORMAT=dwarf"] if disable_dsym?
-      args_[:default] += ["BUILD_LIBRARY_FOR_DISTRIBUTION=YES"] if PodPrebuild.config.xcframework?
-      args_[:simulator] += ["ARCHS=x86_64", "ONLY_ACTIVE_ARCH=NO"] if simulator == "iphonesimulator"
+      args_[:default].prepend("BITCODE_GENERATION_MODE=bitcode") if bitcode_enabled?
+      args_[:default].prepend("DEBUG_INFORMATION_FORMAT=dwarf") if disable_dsym?
+      args_[:default].prepend("BUILD_LIBRARY_FOR_DISTRIBUTION=YES") if PodPrebuild.config.xcframework?
+      args_[:simulator].prepend("ARCHS=x86_64", "ONLY_ACTIVE_ARCH=NO") if simulator == "iphonesimulator"
       args_[:simulator] += args_[:default]
-      args_[:device] += ["ONLY_ACTIVE_ARCH=NO"]
+      args_[:device].prepend("ONLY_ACTIVE_ARCH=NO")
       args_[:device] += args_[:default]
       args_
     end
