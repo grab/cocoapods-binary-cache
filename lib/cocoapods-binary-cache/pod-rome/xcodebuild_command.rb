@@ -79,6 +79,9 @@ module PodPrebuild
     end
 
     def create_xcframework(target)
+      non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] - [framework_path_of(target, sdks[0])]
+      collect_output(target, non_framework_paths)
+
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
       FileUtils.rm_rf(output)
 
