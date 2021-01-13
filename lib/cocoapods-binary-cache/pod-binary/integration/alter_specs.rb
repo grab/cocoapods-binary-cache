@@ -4,26 +4,43 @@ module Pod
       cache = []
       analysis_result.specifications
         .select { |spec| should_integrate_prebuilt_pod?(spec.root.name) }
-        .each { |spec| alter_spec(spec, cache) }
+        .group_by(&:root)
+        .each do |_, specs|
+          first_subspec_or_self = specs.find(&:subspec?) || specs[0]
+          specs.each do |spec|
+            alterations = {
+              :source_files => true,
+              :resources => true,
+              :license => true,
+              :vendored_framework => spec == first_subspec_or_self
+            }
+            alter_spec(spec, alterations, cache)
+          end
+        end
     end
 
-    def alter_spec(spec, cache)
+    private
+
+    def alter_spec(spec, alterations, cache)
       targets = Pod.fast_get_targets_for_pod_name(spec.root.name, pod_targets, cache)
-      targets.each do |target|
-        # Use the prebuild framworks as vendered frameworks.
-        # The framework_file_path rule is decided in `install_for_prebuild`,
-        # as to compitable with older version and be less wordy.
-        framework_file_path = target.framework_name
-        framework_file_path = target.name + "/" + framework_file_path if targets.count > 1
-        framework_file_path = PodPrebuild.config.prebuilt_path(path: framework_file_path)
-        add_vendered_framework(spec, target.platform.name.to_s, framework_file_path)
+      platforms = targets.map { |target| target.platform.name.to_s }.uniq
+
+      if alterations[:vendored_framework]
+        targets.each do |target|
+          # Use the prebuilt frameworks as vendered frameworks.
+          # The framework_file_path rule is decided in `install_for_prebuild`,
+          # as to compitable with older version and be less wordy.
+          framework_file_path = target.framework_name
+          framework_file_path = target.name + "/" + framework_file_path if targets.count > 1
+          framework_file_path = PodPrebuild.config.prebuilt_path(path: framework_file_path)
+          add_vendered_framework(spec, target.platform.name.to_s, framework_file_path)
+        end
       end
 
-      platforms = targets.map { |target| target.platform.name.to_s }.uniq
-      empty_source_files(spec, platforms)
-      tweak_resources_for_xib(spec, platforms)
-      tweak_resources_for_resource_bundles(spec, platforms)
-      empty_liscence(spec) # to avoid the warning of missing license
+      empty_source_files(spec, platforms) if alterations[:source_files]
+      tweak_resources_for_xib(spec, platforms) if alterations[:resources]
+      tweak_resources_for_resource_bundles(spec, platforms) if alterations[:resources]
+      empty_liscence(spec) if alterations[:license]
     end
 
     def tweak_resources_for_xib(spec, platforms)
