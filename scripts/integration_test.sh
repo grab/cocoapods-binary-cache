@@ -44,6 +44,8 @@ echo "Working dir: ${WORKING_DIR}"
 echo "Integeration tests dir: ${INTEGRATION_TESTS_DIR}"
 
 TEST_MODE="${1:-prebuild-all}"
+export USE_XCFRAMEWORK="${2:-false}"
+
 cd "${INTEGRATION_TESTS_DIR}"
 echo "Running test with mode: ${TEST_MODE}..."
 

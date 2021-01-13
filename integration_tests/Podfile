@@ -19,7 +19,8 @@ config_cocoapods_binary_cache(
   excluded_pods: [],
   dev_pods_enabled: true,
   save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
-  strict_diagnosis: true # Fail if any abnormal integration is spotted
+  strict_diagnosis: true, # Fail if any abnormal integration is spotted
+  xcframework: ENV["USE_XCFRAMEWORK"] == "true"
 )
 
 target "PrebuiltPodIntegration" do

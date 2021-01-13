@@ -29,6 +29,7 @@ jobs:
     strategy:
       matrix:
         mode: [non-prebuild, prebuild-changes, prebuild-all]
+        xcframework: [false, true]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -38,4 +39,4 @@ jobs:
           bundle install
       - name: Integration tests
         run: |
-          sh scripts/integration_test.sh ${{ matrix.mode }}
+          sh scripts/integration_test.sh ${{matrix.mode}} ${{matrix.xcframework}}
