@@ -19,8 +19,20 @@ module PodPrebuild
     end
 
     def run
-      sdks.each { |sdk| build_for_sdk(sdk) }
+      # build for fat framework
+      if !PodPrebuild.config.xcframework?
+        sdks.each { |sdk| build_for_sdk(sdk) }
+      end
+
       targets.each do |target|
+        # archive for xcframework
+        if PodPrebuild.config.xcframework?
+          Pod::UI.puts "    * Archiving: #{target}".magenta
+          sdks.each do |sdk|
+            archive_for_sdk(sdk, target)
+          end
+        end
+
         if PodPrebuild.config.xcframework?
           create_xcframework(target)
         elsif sdks.count > 1
@@ -61,7 +73,9 @@ module PodPrebuild
       args_[:simulator] ||= []
       args_[:device] ||= []
       args_[:default].prepend("BITCODE_GENERATION_MODE=bitcode") if bitcode_enabled?
-      args_[:default].prepend("DEBUG_INFORMATION_FORMAT=dwarf") if disable_dsym?
+      args_[:default].prepend("SKIP_INSTALL=NO") if PodPrebuild.config.xcframework?
+      debug_format = disable_dsym? ? "dwarf" : "dwarf-with-dsym"
+      args_[:default].prepend("DEBUG_INFORMATION_FORMAT=#{debug_format}")
       args_[:simulator].prepend("ARCHS=x86_64", "ONLY_ACTIVE_ARCH=NO") if simulator == "iphonesimulator"
       args_[:simulator] += args_[:default]
       args_[:device].prepend("ONLY_ACTIVE_ARCH=NO")
@@ -69,7 +83,7 @@ module PodPrebuild
       args_
     end
 
-    def build_for_sdk(sdk)
+    def build_for_sdk(sdk, target)
       PodPrebuild::XcodebuildCommand.xcodebuild(
         sandbox: sandbox,
         scheme: scheme,
@@ -81,8 +95,22 @@ module PodPrebuild
       )
     end
 
+    def archive_for_sdk(sdk, target)
+      PodPrebuild::XcodebuildCommand.xcodebuild_archive(
+        sandbox: sandbox,
+        target: target,
+        configuration: configuration,
+        sdk: sdk,
+        build_dir: build_dir,
+        args: sdk == simulator ? @build_args[:simulator] : @build_args[:device]
+      )
+    end
+
     def create_xcframework(target)
-      non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] - [framework_path_of(target, sdks[0])]
+      non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] \
+        - [framework_root_path_of(target, sdks[0])] \
+        - [dsym_path_of(target, sdks[0])] \
+        - [bcsymbolmap_path_of(target, sdks[0])]
       collect_output(target, non_framework_paths)
 
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
@@ -90,12 +118,30 @@ module PodPrebuild
 
       cmd = ["xcodebuild", "-create-xcframework", "-allow-internal-distribution"]
       cmd += sdks.map { |sdk| "-framework #{framework_path_of(target, sdk)}" }
-      cmd += sdks.map { |sdk| "-debug-symbols #{dsym_path_of(target, sdk)}" if Dir.exists?(dsym_path_of(target, sdk)) }.compact
+
+      sdks.each do |sdk|
+        # only include debug symbols for iphoneos sdk
+        if sdk != "iphoneos"
+          next
+        end
+
+        dsym_path = dsym_path_of(target, sdk)
+        if Dir.exists?(dsym_path)
+          dsyms = Dir["#{dsym_path}/*.dSYM"]
+          cmd += dsyms.map { |dsym| "-debug-symbols #{dsym}" }
+        end
+
+        bcsymbol_path = bcsymbolmap_path_of(target, sdk)
+        if Dir.exists?(bcsymbol_path)
+          bcsymbolmaps = Dir["#{bcsymbol_path}/*.bcsymbolmap"]
+          cmd += bcsymbolmaps.map { |bcsymbolmap| "-debug-symbols #{bcsymbolmap}" }
+        end
+      end
 
       cmd << "-output" << output
 
-      Pod::UI.puts "Create xcframework: #{target}".magenta
-      Pod::UI.puts "          $#{cmd.join(" ")}"
+      Pod::UI.puts "    * Create xcframework: #{target}".magenta
+      Pod::UI.puts_indented "$ #{cmd.join(" ")}"
 
       `#{cmd.join(" ")}`
     end
@@ -172,15 +218,35 @@ module PodPrebuild
     end
 
     def target_products_dir_of(target, sdk)
-      "#{build_dir}/#{configuration}-#{sdk}/#{target.name}"
+      if PodPrebuild.config.xcframework?
+        "#{build_dir}/#{configuration}-#{sdk}/#{target.name}.xcarchive"
+      else
+        "#{build_dir}/#{configuration}-#{sdk}/#{target.name}"
+      end
+    end
+
+    def framework_root_path_of(target, sdk)
+      "#{target_products_dir_of(target, sdk)}/Products"
     end
 
     def framework_path_of(target, sdk)
-      "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
+      if PodPrebuild.config.xcframework?
+        "#{target_products_dir_of(target, sdk)}/Products/Library/Frameworks/#{target.product_module_name}.framework"
+      else
+        "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
+      end
     end
 
     def dsym_path_of(target, sdk)
-      "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework.dSYM"
+      if PodPrebuild.config.xcframework?
+        "#{target_products_dir_of(target, sdk)}/dSYMs"
+      else
+        "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework.dSYM"
+      end
+    end
+
+    def bcsymbolmap_path_of(target, sdk)
+      "#{target_products_dir_of(target, sdk)}/BCSymbolMaps"
     end
 
     def sandbox
@@ -224,7 +290,7 @@ module PodPrebuild
     end
 
     def disable_dsym?
-      @options[:disable_dsym]
+      @options[:disable_dsym] || false
     end
   end
 end

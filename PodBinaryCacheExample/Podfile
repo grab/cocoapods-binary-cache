@@ -9,12 +9,20 @@ if is_pod_binary_cache_enabled
   config_cocoapods_binary_cache(
     cache_repo: {
       "default" => {
-        "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
-        "local" => "~/.cocoapods-binary-cache/PodBinaryCacheExample-libs"
+        # "remote" => "https://github.com/bigbangvn/demo-pod-binary-cache-prebuilt-libs.git",
+        "local" => ".cocoapods-binary-cache/PodBinaryCacheExample-libs"
       }
     },
     prebuild_config: "Debug",
-    dev_pods_enabled: true
+    device_build_enabled: true,
+    xcframework: true,
+    bitcode_enabled: true,
+    disable_dsym: false,
+    build_args: {
+      :simulator => [
+        "ARCHS='x86_64 i386 arm64'"
+    ]
+  }
   )
   # set_unbuilt_dev_pods(['ConfigSDK']) // To test ABI breaking (crash, call wrong function) when there're code change in ConfigSDK and don't rebuild it's clients (ConfigService)
 end
@@ -54,10 +62,10 @@ target 'PodBinCacheExample' do
   pod 'ConfigSDK', :path => 'DevPods/ConfigSDK', :binary => true
 end
 
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES' # Only work from Xcode 11
-    end
-  end
-end
+# post_install do |installer|
+#   installer.pods_project.targets.each do |target|
+#     target.build_configurations.each do |config|
+#       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES' # Only work from Xcode 11
+#     end
+#   end
+# end
