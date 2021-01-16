@@ -27,7 +27,7 @@ module PodPrebuild
       targets.each do |target|
         # archive for xcframework
         if PodPrebuild.config.xcframework?
-          Pod::UI.puts "    * Archiving: #{target}".magenta
+          Pod::UI.puts "- Archiving: #{target}".magenta
           sdks.each do |sdk|
             archive_for_sdk(sdk, target)
           end
@@ -117,13 +117,11 @@ module PodPrebuild
       FileUtils.rm_rf(output)
 
       cmd = ["xcodebuild", "-create-xcframework", "-allow-internal-distribution"]
-      cmd += sdks.map { |sdk| "-framework #{framework_path_of(target, sdk)}" }
 
+      # for each sdk, the order of params must be -framwork then -debug-symbols
+      # to prevent duplicated file error when copying dSYMs
       sdks.each do |sdk|
-        # only include debug symbols for iphoneos sdk
-        if sdk != "iphoneos"
-          next
-        end
+        cmd << "-framework" << framework_path_of(target, sdk)
 
         dsym_path = dsym_path_of(target, sdk)
         if Dir.exists?(dsym_path)
@@ -140,8 +138,11 @@ module PodPrebuild
 
       cmd << "-output" << output
 
-      Pod::UI.puts "    * Create xcframework: #{target}".magenta
-      Pod::UI.puts_indented "$ #{cmd.join(" ")}"
+      Pod::UI.puts "- Create xcframework: #{target}".magenta
+
+      if !PodPrebuild.config.silent_build?
+        Pod::UI.puts_indented "$ #{cmd.join(" ")}"
+      end
 
       `#{cmd.join(" ")}`
     end

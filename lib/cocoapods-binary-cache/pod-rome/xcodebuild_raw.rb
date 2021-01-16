@@ -31,7 +31,10 @@ module PodPrebuild
       cmd << "2>&1"
       cmd = cmd.join(" ")
 
-      Pod::UI.puts_indented "$ #{cmd}"
+      if !PodPrebuild.config.silent_build?
+        Pod::UI.puts_indented "$ #{cmd}"
+      end
+
       log = `#{cmd}`
       return if $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
 
@@ -72,7 +75,10 @@ module PodPrebuild
       cmd << "2>&1"
       cmd = cmd.join(" ")
 
-      Pod::UI.puts_indented "$ #{cmd}"
+      if !PodPrebuild.config.silent_build?
+        Pod::UI.puts_indented "$ #{cmd}"
+      end
+      
       log = `#{cmd}`
       return if $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
 
