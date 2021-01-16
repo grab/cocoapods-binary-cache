@@ -88,9 +88,15 @@ module PodPrebuild
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
       FileUtils.rm_rf(output)
 
-      cmd = ["xcodebuild", " -create-xcframework", "-allow-internal-distribution"]
+      cmd = ["xcodebuild", "-create-xcframework", "-allow-internal-distribution"]
       cmd += sdks.map { |sdk| "-framework #{framework_path_of(target, sdk)}" }
+      cmd += sdks.map { |sdk| "-debug-symbols #{dsym_path_of(target, sdk)}" if Dir.exists?(dsym_path_of(target, sdk)) }.compact
+
       cmd << "-output" << output
+
+      Pod::UI.puts "Create xcframework: #{target}".magenta
+      Pod::UI.puts "          $#{cmd.join(" ")}"
+
       `#{cmd.join(" ")}`
     end
 
@@ -171,6 +177,10 @@ module PodPrebuild
 
     def framework_path_of(target, sdk)
       "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
+    end
+
+    def dsym_path_of(target, sdk)
+      "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework.dSYM"
     end
 
     def sandbox
