@@ -19,9 +19,7 @@ module PodPrebuild
     end
 
     def run
-      if !should_archive?
-        sdks.each { |sdk| build_for_sdk(sdk) }
-      end
+      sdks.each { |sdk| build_for_sdk(sdk) } unless should_archive?
 
       targets.each do |target|
         if should_archive?
@@ -106,10 +104,10 @@ module PodPrebuild
 
     def create_xcframework(target)
       non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] \
-        - [ framework_path_of(target, sdks[0]),         # prevent collect .framework
-            framework_product_path_of(target, sdks[0]),    # prevent collect .framework
-            dsym_path_of(target, sdks[0]),              # prevent collect dSYMs
-            bcsymbolmap_path_of(target, sdks[0]) ]      # prevent collect BCSymbolMaps
+        - [framework_path_of(target, sdks[0]), # prevent collect .framework
+           framework_product_path_of(target, sdks[0]), # prevent collect .framework
+           dsym_path_of(target, sdks[0]), # prevent collect dSYMs
+           bcsymbolmap_path_of(target, sdks[0])] # prevent collect BCSymbolMaps
       collect_output(target, non_framework_paths)
 
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
@@ -123,13 +121,13 @@ module PodPrebuild
         cmd << "-framework" << framework_path_of(target, sdk)
 
         dsym_path = dsym_path_of(target, sdk)
-        if Dir.exists?(dsym_path)
+        if Dir.exist?(dsym_path)
           dsyms = Dir["#{dsym_path}/*.dSYM"]
           cmd += dsyms.map { |dsym| "-debug-symbols #{dsym}" }
         end
 
         bcsymbol_path = bcsymbolmap_path_of(target, sdk)
-        if Dir.exists?(bcsymbol_path)
+        if Dir.exist?(bcsymbol_path)
           bcsymbolmaps = Dir["#{bcsymbol_path}/*.bcsymbolmap"]
           cmd += bcsymbolmaps.map { |bcsymbolmap| "-debug-symbols #{bcsymbolmap}" }
         end
@@ -138,10 +136,7 @@ module PodPrebuild
       cmd << "-output" << output
 
       Pod::UI.puts "- Create xcframework: #{target}".magenta
-
-      if !PodPrebuild.config.silent_build?
-        Pod::UI.puts_indented "$ #{cmd.join(" ")}"
-      end
+      Pod::UI.puts_indented "$ #{cmd.join(' ')}" unless PodPrebuild.config.silent_build?
 
       `#{cmd.join(" ")}`
     end
@@ -252,7 +247,8 @@ module PodPrebuild
 
     def should_archive?
       # Use archive instead of build only when we have to generate bcsymbolmap or dSYM for xcframeworks,
-      # because archiving must be done on each scheme, hence it takes much more time, while building can be done simultaneously on all targets
+      # because archiving must be done on each scheme, hence it takes much more time,
+      # while building can be done simultaneously on all targets
       PodPrebuild.config.xcframework? && (bitcode_enabled? || !disable_dsym?)
     end
 
