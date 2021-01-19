@@ -19,14 +19,12 @@ module PodPrebuild
     end
 
     def run
-      # build for fat framework
-      if !PodPrebuild.config.xcframework?
+      if !should_archive?
         sdks.each { |sdk| build_for_sdk(sdk) }
       end
 
       targets.each do |target|
-        # archive for xcframework
-        if PodPrebuild.config.xcframework?
+        if should_archive?
           Pod::UI.puts "- Archiving: #{target}".magenta
           sdks.each do |sdk|
             archive_for_sdk(sdk, target)
@@ -83,7 +81,7 @@ module PodPrebuild
       args_
     end
 
-    def build_for_sdk(sdk, target)
+    def build_for_sdk(sdk)
       PodPrebuild::XcodebuildCommand.xcodebuild(
         sandbox: sandbox,
         scheme: scheme,
@@ -108,9 +106,10 @@ module PodPrebuild
 
     def create_xcframework(target)
       non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] \
-        - [framework_root_path_of(target, sdks[0])] \
-        - [dsym_path_of(target, sdks[0])] \
-        - [bcsymbolmap_path_of(target, sdks[0])]
+        - [ framework_path_of(target, sdks[0]),         # prevent collect .framework
+            framework_product_path_of(target, sdks[0]),    # prevent collect .framework
+            dsym_path_of(target, sdks[0]),              # prevent collect dSYMs
+            bcsymbolmap_path_of(target, sdks[0]) ]      # prevent collect BCSymbolMaps
       collect_output(target, non_framework_paths)
 
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
@@ -219,19 +218,20 @@ module PodPrebuild
     end
 
     def target_products_dir_of(target, sdk)
-      if PodPrebuild.config.xcframework?
+      if should_archive?
         "#{build_dir}/#{configuration}-#{sdk}/#{target.name}.xcarchive"
       else
         "#{build_dir}/#{configuration}-#{sdk}/#{target.name}"
       end
     end
 
-    def framework_root_path_of(target, sdk)
+    # only produced when archive xcframework
+    def framework_product_path_of(target, sdk)
       "#{target_products_dir_of(target, sdk)}/Products"
     end
 
     def framework_path_of(target, sdk)
-      if PodPrebuild.config.xcframework?
+      if should_archive?
         "#{target_products_dir_of(target, sdk)}/Products/Library/Frameworks/#{target.product_module_name}.framework"
       else
         "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
@@ -239,7 +239,7 @@ module PodPrebuild
     end
 
     def dsym_path_of(target, sdk)
-      if PodPrebuild.config.xcframework?
+      if should_archive?
         "#{target_products_dir_of(target, sdk)}/dSYMs"
       else
         "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework.dSYM"
@@ -248,6 +248,12 @@ module PodPrebuild
 
     def bcsymbolmap_path_of(target, sdk)
       "#{target_products_dir_of(target, sdk)}/BCSymbolMaps"
+    end
+
+    def should_archive?
+      # Use archive instead of build only when we have to generate bcsymbolmap or dSYM for xcframeworks,
+      # because archiving must be done on each scheme, hence it takes much more time, while building can be done simultaneously on all targets
+      PodPrebuild.config.xcframework? && (bitcode_enabled? || !disable_dsym?)
     end
 
     def sandbox

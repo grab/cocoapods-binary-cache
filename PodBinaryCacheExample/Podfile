@@ -17,8 +17,8 @@ if is_pod_binary_cache_enabled
     dev_pods_enabled: true,
     device_build_enabled: true,
     xcframework: true,
-    bitcode_enabled: true,
-    disable_dsym: false,
+    bitcode_enabled: false,
+    disable_dsym: true,
     build_args: {
       :simulator => [
         "ARCHS='x86_64 i386 arm64'"

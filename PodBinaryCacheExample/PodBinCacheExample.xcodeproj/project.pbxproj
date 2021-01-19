@@ -101,7 +101,7 @@
 				50F7EEB723A245B100876839 /* Frameworks */,
 				50F7EEB823A245B100876839 /* Resources */,
 				63DCFB7F4ABC9070B87E091B /* [CP] Embed Pods Frameworks */,
-				BE28AB80393D282AFCA69B82 /* [CP] Copy Pods Resources */,
+				1F083517C2714159623BF707 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -159,6 +159,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		1F083517C2714159623BF707 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		256D3A2EF8CF8D09FB3A7039 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -196,23 +213,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		BE28AB80393D282AFCA69B82 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
