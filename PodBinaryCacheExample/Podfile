@@ -14,6 +14,7 @@ if is_pod_binary_cache_enabled
       }
     },
     prebuild_config: "Debug",
+    dev_pods_enabled: true,
     device_build_enabled: true,
     xcframework: true,
     bitcode_enabled: true,

@@ -1,22 +1,111 @@
 PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - Alamofire (5.4.1)
   - CocoaLumberjack (3.6.0):
     - CocoaLumberjack/Core (= 3.6.0)
   - CocoaLumberjack/Core (3.6.0)
+  - ConfigSDK (0.0.1):
+    - SQLite.swift
+  - ConfigService (0.0.1):
+    - ConfigSDK
+    - RxSwift
+  - Kingfisher (6.0.1)
+  - Masonry (1.1.0)
+  - MBProgressHUD (1.2.0)
+  - MJRefresh (3.5.0)
+  - Realm (10.5.1):
+    - Realm/Headers (= 10.5.1)
+  - Realm/Headers (10.5.1)
+  - RxSwift (5.1.1)
+  - SDWebImage (5.10.2):
+    - SDWebImage/Core (= 5.10.2)
+  - SDWebImage/Core (5.10.2)
   - SnapKit (5.0.1)
+  - SQLite.swift (0.12.2):
+    - SQLite.swift/standard (= 0.12.2)
+  - SQLite.swift/standard (0.12.2)
+  - SVProgressHUD (2.2.5)
+  - SwiftyJSON (5.0.0)
 
 DEPENDENCIES:
+  - AFNetworking (= 3.2.1)
+  - Alamofire
   - CocoaLumberjack
+  - ConfigSDK (from `DevPods/ConfigSDK`)
+  - ConfigService (from `DevPods/ConfigService`)
+  - Kingfisher
+  - Masonry
+  - MBProgressHUD
+  - MJRefresh
+  - Realm
+  - RxSwift (from `https://github.com/ReactiveX/RxSwift.git`, commit `a580d07ed002217fd91d8446c3a852486e9beefa`)
+  - SDWebImage
   - SnapKit
+  - SVProgressHUD
+  - SwiftyJSON
 
 SPEC REPOS:
   trunk:
+    - AFNetworking
+    - Alamofire
     - CocoaLumberjack
+    - Kingfisher
+    - Masonry
+    - MBProgressHUD
+    - MJRefresh
+    - Realm
+    - SDWebImage
     - SnapKit
+    - SQLite.swift
+    - SVProgressHUD
+    - SwiftyJSON
+
+EXTERNAL SOURCES:
+  ConfigSDK:
+    :path: DevPods/ConfigSDK
+  ConfigService:
+    :path: DevPods/ConfigService
+  RxSwift:
+    :commit: a580d07ed002217fd91d8446c3a852486e9beefa
+    :git: https://github.com/ReactiveX/RxSwift.git
+
+CHECKOUT OPTIONS:
+  RxSwift:
+    :commit: a580d07ed002217fd91d8446c3a852486e9beefa
+    :git: https://github.com/ReactiveX/RxSwift.git
 
 SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
   CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
+  ConfigSDK: 2bed87967210887e08dc604e3185b9885675b14c
+  ConfigService: cae3fbae5b4bda148f481de790c4da1823443178
+  Kingfisher: adde87a4f74f6a3845395769354efff593581740
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  MJRefresh: 6afc955813966afb08305477dd7a0d9ad5e79a16
+  Realm: 77fcb4e0b9f2963ea06f584749a0d7dc9cab95e1
+  RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
+  SDWebImage: b969dcfc02c40a5da71eac0b03b8f1a0c794a86f
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  SwiftyJSON: 36413e04c44ee145039d332b4f4e2d3e8d6c4db7
 
-PODFILE CHECKSUM: e310d5307d1ca405fc61e34e60bb708c335f8935
+PODFILE CHECKSUM: 3a88615be39e04f3348f838ef78cc6724d89bb4f
 
 COCOAPODS: 1.10.1

@@ -16,5 +16,5 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
 
   s.dependency 'SQLite.swift'
-  s.dependency 'ProtocolBuffers-Swift'
+  # s.dependency 'ProtocolBuffers-Swift'
 end
