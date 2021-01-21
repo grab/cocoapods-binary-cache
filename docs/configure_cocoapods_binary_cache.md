@@ -50,7 +50,7 @@ Note:
 
 ### `bitcode_enabled`
 - Default: `false`.
-- A list of pods to exclude (ie. treat them as non-prebuilt pods)
+- Enable bitcode generation when building frameworks
 
 ### `device_build_enabled`
 - Default: `false`.
