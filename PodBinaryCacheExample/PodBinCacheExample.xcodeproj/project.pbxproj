@@ -100,8 +100,7 @@
 				50F7EEB623A245B100876839 /* Sources */,
 				50F7EEB723A245B100876839 /* Frameworks */,
 				50F7EEB823A245B100876839 /* Resources */,
-				63DCFB7F4ABC9070B87E091B /* [CP] Embed Pods Frameworks */,
-				1F083517C2714159623BF707 /* [CP] Copy Pods Resources */,
+				C84527E3D10B09EC3D6FB02D /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -159,23 +158,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		1F083517C2714159623BF707 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PodBinCacheExample/Pods-PodBinCacheExample-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		256D3A2EF8CF8D09FB3A7039 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -198,7 +180,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		63DCFB7F4ABC9070B87E091B /* [CP] Embed Pods Frameworks */ = {
+		C84527E3D10B09EC3D6FB02D /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
