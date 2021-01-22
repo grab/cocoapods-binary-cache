@@ -96,3 +96,7 @@ config_cocoapods_binary_cache(
   }
 )
 ```
+
+### `silent_build`
+- Default: `false`.
+- Suppress build output

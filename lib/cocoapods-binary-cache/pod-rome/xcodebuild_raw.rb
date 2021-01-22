@@ -16,17 +16,18 @@ module PodPrebuild
     def self.xcodebuild(options)
       sdk = options[:sdk] || "iphonesimulator"
       targets = options[:targets] || [options[:target]]
-      # platform = PLATFORM_OF_SDK[sdk]
+      platform = PLATFORM_OF_SDK[sdk]
 
       cmd = ["xcodebuild"]
       cmd << "-project" << options[:sandbox].project_path.realdirpath.shellescape
       targets.each { |target| cmd << "-target" << target }
       cmd << "-configuration" << options[:configuration]
       cmd << "-sdk" << sdk
-      # unless platform.nil?
-      #   cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target])
-      # end
-      cmd << "-destination" << DESTINATION_OF_SDK[sdk] if DESTINATION_OF_SDK.key?(sdk)
+      if DESTINATION_OF_SDK.key?(sdk)
+        cmd << "-destination" << DESTINATION_OF_SDK[sdk]
+      else
+        cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
+      end
       cmd += options[:args] if options[:args]
       cmd << "build"
       cmd << "2>&1"
