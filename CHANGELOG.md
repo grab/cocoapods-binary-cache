@@ -1,6 +1,13 @@
 # Changelog
 
-## master (to be 0.1.12)
+## master (to be 0.1.13)
+### Enhancements
+NA
+
+### Bug fixes
+NA
+
+## 0.1.12
 ### Enhancements
 - Speed up cache unzip by running them in parallel.
 - Remove the `still_download_sources` option. Instead, always download sources to avoid improper integration.
