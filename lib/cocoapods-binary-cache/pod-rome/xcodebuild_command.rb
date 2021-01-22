@@ -20,6 +20,7 @@ module PodPrebuild
 
     def run
       sdks.each { |sdk| build_for_sdk(sdk) }
+
       targets.each do |target|
         if PodPrebuild.config.xcframework?
           create_xcframework(target)
@@ -82,15 +83,38 @@ module PodPrebuild
     end
 
     def create_xcframework(target)
-      non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] - [framework_path_of(target, sdks[0])]
+      non_framework_paths = Dir[target_products_dir_of(target, sdks[0]) + "/*"] \
+        - [framework_path_of(target, sdks[0])] \
+        - dsym_paths_of(target, sdks[0]) \
+        - bcsymbolmap_paths_of(target, sdks[0])
       collect_output(target, non_framework_paths)
 
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
       FileUtils.rm_rf(output)
 
-      cmd = ["xcodebuild", " -create-xcframework", "-allow-internal-distribution"]
-      cmd += sdks.map { |sdk| "-framework #{framework_path_of(target, sdk)}" }
+      cmd = ["xcodebuild", "-create-xcframework", "-allow-internal-distribution"]
+
+      # for each sdk, the order of params must be -framework then -debug-symbols
+      # to prevent duplicated file error when copying dSYMs
+      sdks.each do |sdk|
+        cmd << "-framework" << framework_path_of(target, sdk)
+
+        unless disable_dsym?
+          dsyms = dsym_paths_of(target, sdk)
+          cmd += dsyms.map { |dsym| "-debug-symbols #{dsym}" }
+        end
+
+        if bitcode_enabled?
+          bcsymbolmaps = bcsymbolmap_paths_of(target, sdk)
+          cmd += bcsymbolmaps.map { |bcsymbolmap| "-debug-symbols #{bcsymbolmap}" }
+        end
+      end
+
       cmd << "-output" << output
+
+      Pod::UI.puts "- Create xcframework: #{target}".magenta
+      Pod::UI.puts_indented "$ #{cmd.join(' ')}" unless PodPrebuild.config.silent_build?
+
       `#{cmd.join(" ")}`
     end
 
@@ -171,6 +195,14 @@ module PodPrebuild
 
     def framework_path_of(target, sdk)
       "#{target_products_dir_of(target, sdk)}/#{target.product_module_name}.framework"
+    end
+
+    def dsym_paths_of(target, sdk)
+      Dir["#{target_products_dir_of(target, sdk)}/*.dSYM"]
+    end
+
+    def bcsymbolmap_paths_of(target, sdk)
+      Dir["#{target_products_dir_of(target, sdk)}/*.bcsymbolmap"]
     end
 
     def sandbox

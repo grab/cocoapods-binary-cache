@@ -8,6 +8,11 @@ module PodPrebuild
       "watchsimulator" => "watchOS"
     }.freeze
 
+    DESTINATION_OF_SDK = {
+      "iphoneos" => "\"generic/platform=iOS\"",
+      "iphonesimulator" => "\"generic/platform=iOS Simulator\""
+    }.freeze
+
     def self.xcodebuild(options)
       sdk = options[:sdk] || "iphonesimulator"
       targets = options[:targets] || [options[:target]]
@@ -18,15 +23,18 @@ module PodPrebuild
       targets.each { |target| cmd << "-target" << target }
       cmd << "-configuration" << options[:configuration]
       cmd << "-sdk" << sdk
-      unless platform.nil?
-        cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target])
+      if DESTINATION_OF_SDK.key?(sdk)
+        cmd << "-destination" << DESTINATION_OF_SDK[sdk]
+      else
+        cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
       end
       cmd += options[:args] if options[:args]
       cmd << "build"
       cmd << "2>&1"
       cmd = cmd.join(" ")
 
-      Pod::UI.puts_indented "$ #{cmd}"
+      Pod::UI.puts_indented "$ #{cmd}" unless PodPrebuild.config.silent_build?
+
       log = `#{cmd}`
       return if $?.exitstatus.zero? # rubocop:disable Style/SpecialGlobalVars
 

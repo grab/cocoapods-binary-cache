@@ -137,6 +137,10 @@ module PodPrebuild
       @dsl_config[:strict_diagnosis]
     end
 
+    def silent_build?
+      @dsl_config[:silent_build]
+    end
+
     def targets_to_prebuild_from_cli
       @cli_config[:prebuild_targets] || []
     end
@@ -178,7 +182,8 @@ module PodPrebuild
         :save_cache_validation_to,
         :validate_prebuilt_settings,
         :prebuild_code_gen,
-        :strict_diagnosis
+        :strict_diagnosis,
+        :silent_build
       ]
     end
 
