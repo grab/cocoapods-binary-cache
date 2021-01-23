@@ -26,7 +26,9 @@ module PodPrebuild
       if DESTINATION_OF_SDK.key?(sdk)
         cmd << "-destination" << DESTINATION_OF_SDK[sdk]
       else
-        cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target]) unless platform.nil?
+        unless platform.nil?
+          cmd << Fourflusher::SimControl.new.destination(:oldest, platform, options[:deployment_target])
+        end
       end
       cmd += options[:args] if options[:args]
       cmd << "build"
