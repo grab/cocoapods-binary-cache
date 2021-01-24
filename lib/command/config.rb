@@ -77,6 +77,10 @@ module PodPrebuild
       Pod::UI.puts message.yellow
     end
 
+    def fetch_repo_branch_before_preinstall
+      @dsl_config[:fetch_repo_branch_before_preinstall]
+    end
+
     def prebuild_config
       @cli_config[:prebuild_config] || @dsl_config[:prebuild_config] || "Debug"
     end
@@ -183,7 +187,8 @@ module PodPrebuild
         :validate_prebuilt_settings,
         :prebuild_code_gen,
         :strict_diagnosis,
-        :silent_build
+        :silent_build,
+        :fetch_repo_branch_before_preinstall
       ]
     end
 

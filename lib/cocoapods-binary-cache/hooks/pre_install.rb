@@ -16,6 +16,11 @@ module PodPrebuild
     def run
       return if @installer_context.sandbox.is_a?(Pod::PrebuildSandbox)
 
+      if PodPrebuild.config.fetch_repo_branch_before_preinstall
+        log_section "🚀  Fetching repo #{PodPrebuild.config.fetch_repo_branch_before_preinstall}"
+        fetch_repo_branch_before_preinstall
+      end
+
       log_section "🚀  Prebuild frameworks"
       ensure_valid_podfile
       save_installation_states
@@ -85,6 +90,17 @@ module PodPrebuild
       @cache_validation.update_to(path_to_save_cache_validation) unless path_to_save_cache_validation.nil?
       cache_validation.print_summary
       PodPrebuild.state.update(:cache_validation => cache_validation)
+    end
+
+    def fetch_repo_branch_before_preinstall
+      fetcher = PodPrebuild::CacheFetcher.new(
+        config: PodPrebuild.config,
+        cache_branch: PodPrebuild.config.fetch_repo_branch_before_preinstall
+      )
+
+      Pod::UI.title("Fetching...") do
+        fetcher.run
+      end
     end
 
     def prebuild!
