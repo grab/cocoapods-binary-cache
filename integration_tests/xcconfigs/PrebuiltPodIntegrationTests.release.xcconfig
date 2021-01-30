@@ -1,0 +1,2 @@
+#include "common.release.xcconfig"
+#include "../Pods/Target Support Files/Pods-PrebuiltPodIntegrationTests/Pods-PrebuiltPodIntegrationTests.release.xcconfig"

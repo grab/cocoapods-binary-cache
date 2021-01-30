@@ -1,0 +1,2 @@
+#include "common.release.xcconfig"
+#include "../Pods/Target Support Files/Pods-PrebuiltPodIntegration/Pods-PrebuiltPodIntegration.release.xcconfig"

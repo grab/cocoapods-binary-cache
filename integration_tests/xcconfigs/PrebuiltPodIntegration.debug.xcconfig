@@ -1,0 +1,2 @@
+#include "common.debug.xcconfig"
+#include "../Pods/Target Support Files/Pods-PrebuiltPodIntegration/Pods-PrebuiltPodIntegration.debug.xcconfig"
