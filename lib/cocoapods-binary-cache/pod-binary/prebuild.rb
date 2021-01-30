@@ -14,6 +14,13 @@ module Pod
       @lockfile_wrapper = lockfile && PodPrebuild::Lockfile.new(lockfile)
     end
 
+    def installation_options
+      # Skip integrating user targets for prebuild Pods project.
+      @installation_options ||= Pod::Installer::InstallationOptions.new(
+        super.to_h.merge(:integrate_targets => false)
+      )
+    end
+
     def run_code_gen!(targets)
       return if PodPrebuild.config.prebuild_code_gen.nil?
 
