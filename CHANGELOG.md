@@ -1,17 +1,25 @@
 # Changelog
 
-## master (to be 0.1.13)
+## master (to be 0.1.14)
 ### Enhancements
 NA
 
 ### Bug fixes
 NA
 
+## 0.1.13
+### Enhancements
+- Don't add Pods project of the prebuild sandbox to the workspace https://github.com/grab/cocoapods-binary-cache/issues/56.
+
+### Bug fixes
+- Fix `readlink` https://github.com/grab/cocoapods-binary-cache/issues/49. Kudos to [Roger Oba](https://github.com/rogerluan)
+
 ## 0.1.12
 ### Enhancements
 - Speed up cache unzip by running them in parallel.
 - Remove the `still_download_sources` option. Instead, always download sources to avoid improper integration.
 - Add `xcframework` support (instead of creating fat framework with `lipo`) https://github.com/grab/cocoapods-binary-cache/issues/54.
+- dSYMs and BCSymbolMaps for `xcframework`. Kudos to [Kien Nguyen](https://github.com/kientux).
 
 ### Bug fixes
 - Fix resources integration (for ex. using `SwiftDate` as a static framework).
