@@ -91,7 +91,6 @@ module PodPrebuild
         - [framework_path_of(target, preferred_sdk)] \
         - dsym_paths_of(target, preferred_sdk) \
         - bcsymbolmap_paths_of(target, preferred_sdk)
-      puts "non_framework_paths: #{non_framework_paths}"
       collect_output(target, non_framework_paths)
 
       output = "#{output_path(target)}/#{target.product_module_name}.xcframework"
