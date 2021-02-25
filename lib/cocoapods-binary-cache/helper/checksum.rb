@@ -5,7 +5,7 @@ require "digest/md5"
 
 class FolderChecksum
   def self.git_checksum(dir)
-    checksum_of_files(`git ls-files #{dir}`.split("\n"))
+    checksum_of_files(`git ls-files #{File.realdirpath(dir).shellescape}`.split("\n"))
   rescue => e
     Pod::UI.warn "Cannot get checksum of tracked files under #{dir}: #{e}"
     checksum_of_files(Dir["#{dir}/**/*"].reject { |f| File.directory?(f) })
