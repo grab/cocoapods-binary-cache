@@ -32,7 +32,13 @@ module PodPrebuild
       end
       cmd += options[:args] if options[:args]
       cmd << "build"
-      cmd << "2>&1"
+
+      if options[:log_path].nil?
+        cmd << "2>&1"
+      else
+        FileUtils.mkdir_p(File.dirname(options[:log_path]))
+        cmd << "> #{options[:log_path].shellescape}"
+      end
       cmd = cmd.join(" ")
 
       Pod::UI.puts_indented "$ #{cmd}" unless PodPrebuild.config.silent_build?

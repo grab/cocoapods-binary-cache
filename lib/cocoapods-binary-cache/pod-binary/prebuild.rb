@@ -58,6 +58,7 @@ module Pod
         bitcode_enabled: PodPrebuild.config.bitcode_enabled?,
         device_build_enabled: PodPrebuild.config.device_build_enabled?,
         disable_dsym: PodPrebuild.config.disable_dsym?,
+        log_path: PodPrebuild.config.xcodebuild_log_path,
         args: PodPrebuild.config.build_args
       )
       PodPrebuild.remove_build_dir(sandbox_path)

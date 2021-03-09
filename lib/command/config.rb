@@ -117,6 +117,10 @@ module PodPrebuild
       @dsl_config[:dont_remove_source_code]
     end
 
+    def xcodebuild_log_path
+      @dsl_config[:xcodebuild_log_path]
+    end
+
     def build_args
       @dsl_config[:build_args]
     end
@@ -178,6 +182,7 @@ module PodPrebuild
         :xcframework,
         :disable_dsym,
         :dont_remove_source_code,
+        :xcodebuild_log_path,
         :build_args,
         :save_cache_validation_to,
         :validate_prebuilt_settings,

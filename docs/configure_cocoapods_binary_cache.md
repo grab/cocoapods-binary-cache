@@ -99,4 +99,8 @@ config_cocoapods_binary_cache(
 
 ### `silent_build`
 - Default: `false`.
-- Suppress build output
+- Suppress build output.
+
+### `xcodebuild_log_path`
+- Default: `nil`.
+- The `xcodebuild` log when prebuilding frameworks.

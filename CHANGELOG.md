@@ -2,7 +2,7 @@
 
 ## master (to be 0.1.14)
 ### Enhancements
-NA
+- Add `xcodebuild_log_path` option.
 
 ### Bug fixes
 NA

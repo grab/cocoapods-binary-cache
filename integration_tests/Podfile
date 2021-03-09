@@ -20,6 +20,7 @@ config_cocoapods_binary_cache(
   dev_pods_enabled: true,
   save_cache_validation_to: ".stats/cocoapods_binary_cache.json",
   strict_diagnosis: true, # Fail if any abnormal integration is spotted
+  xcodebuild_log_path: ".logs/xcodebuild",
   xcframework: ENV["USE_XCFRAMEWORK"] == "true"
 )
 
