@@ -2,6 +2,11 @@ module Pod
   class Installer
     def alter_specs_for_prebuilt_pods
       cache = []
+
+      @original_specs = analysis_result.specifications
+        .map { |spec| [spec.name, Pod::Specification.from_file(spec.defined_in_file)] }
+        .to_h
+
       analysis_result.specifications
         .select { |spec| should_integrate_prebuilt_pod?(spec.root.name) }
         .group_by(&:root)

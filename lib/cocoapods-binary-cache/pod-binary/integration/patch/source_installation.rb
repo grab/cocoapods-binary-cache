@@ -18,8 +18,18 @@ module Pod
       original_create_pod_installer(name)
     end
 
+    def original_specs_by_platform(name)
+      specs_for_pod(name).map do |platform, specs|
+        specs_ = specs.map { |spec| @original_specs[spec.name] }
+        [platform, specs_]
+      end.to_h
+    end
+
     def create_prebuilt_source_installer(name)
-      source_installer = PodSourceInstaller.new(sandbox, podfile, specs_for_pod(name))
+      # A source installer needs to install with the original spec (instead of the altered spec).
+      # Otherwise, the cache will be corrupted because CocoaPods packs necessary dirs/files from temp dir
+      # to the cache dir based on the spec.
+      source_installer = PodSourceInstaller.new(sandbox, podfile, original_specs_by_platform(name))
       pod_installer = PrebuiltSourceInstaller.new(
         sandbox,
         podfile,
