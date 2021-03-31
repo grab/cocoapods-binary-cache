@@ -10,10 +10,12 @@ require_relative "graph_visualizer"
 # https://github.com/monora/rgl/blob/master/lib/rgl/adjacency.rb
 
 class DependenciesGraph
-  def initialize(lockfile)
-    @lockfile = lockfile
+  def initialize(options)
+    @lockfile = options[:lockfile]
+    @devpod_only = options[:devpod_only]
+    @max_deps = options[:max_deps].to_i if options[:max_deps]
     # A normal edge is an edge (one direction) from library A to library B which is a dependency of A.
-    @invert_edge = true
+    @invert_edge = options[:invert_edge] || false
   end
 
   # Input : a list of library names.
@@ -40,6 +42,10 @@ class DependenciesGraph
     @dependencies ||= (@lockfile && @lockfile.to_hash["PODS"])
   end
 
+  def dev_pod_sources
+    @dev_pod_sources ||= @lockfile.to_hash["EXTERNAL SOURCES"].select { |_, attributes| attributes.key?(:path) } || {}
+  end
+
   # Convert array of dictionaries -> a dictionary with format {A: [A's dependencies]}
   def pod_to_dependencies
     dependencies
@@ -49,6 +55,8 @@ class DependenciesGraph
 
   def add_vertex(graph, pod)
     node_name = sanitized_pod_name(pod)
+    return if @devpod_only && dev_pod_sources[node_name].nil?
+
     graph.add_vertex(node_name)
     node_name
   end
@@ -57,10 +65,20 @@ class DependenciesGraph
     Pod::Dependency.from_string(name).name
   end
 
+  def reach_max_deps(deps)
+    return unless @max_deps
+    return deps.count > @max_deps unless @devpod_only
+
+    deps = deps.reject { |name| dev_pod_sources[name].nil? }
+    deps.count > @max_deps
+  end
+
   def graph
     @graph ||= begin
       graph = RGL::DirectedAdjacencyGraph.new
       pod_to_dependencies.each do |pod, dependencies|
+        next if reach_max_deps(dependencies)
+
         pod_node = add_vertex(graph, pod)
         next if pod_node.nil?
 

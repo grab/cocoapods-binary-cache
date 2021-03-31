@@ -8,7 +8,7 @@ module PodPrebuild
     def validate(accumulated)
       return accumulated if library_evolution_supported? || @pod_lockfile.nil?
 
-      dependencies_graph = DependenciesGraph.new(@pod_lockfile.lockfile)
+      dependencies_graph = DependenciesGraph.new(lockfile: @pod_lockfile.lockfile, invert_edge: true)
       clients = dependencies_graph.get_clients(accumulated.discard(@ignored_pods).missed.to_a)
       unless PodPrebuild.config.dev_pods_enabled?
         clients = clients.reject { |client| @pod_lockfile.dev_pods.keys.include?(client) }
