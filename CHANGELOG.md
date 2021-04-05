@@ -1,11 +1,20 @@
 # Changelog
 
-## master (to be 0.1.14)
+## master (to be 0.1.15)
 ### Enhancements
-- Add `xcodebuild_log_path` option.
+NA
 
 ### Bug fixes
 NA
+
+## 0.1.14
+### Enhancements
+- Add `xcodebuild_log_path` option.
+- CLI: Add options to visualize dependencies of dev pods only.
+
+### Bug fixes
+- Fix invalid Info.plist https://github.com/grab/cocoapods-binary-cache/issues/69.
+- Fix incorrect CocoaPods cache caused by podspec alterations.
 
 ## 0.1.13
 ### Enhancements
