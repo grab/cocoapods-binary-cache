@@ -1,5 +1,6 @@
 require_relative "helper/podfile_options"
 require_relative "helper/prebuild_sandbox"
+require_relative "helper/sandbox"
 require_relative "helper/names"
 require_relative "helper/target_checker"
 require_relative "integration/alter_specs"

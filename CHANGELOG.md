@@ -5,7 +5,7 @@
 NA
 
 ### Bug fixes
-NA
+- Fix duplicate resources for dynamic frameworks https://github.com/grab/cocoapods-binary-cache/issues/74.
 
 ## 0.1.14
 ### Enhancements
