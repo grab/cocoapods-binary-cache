@@ -21,7 +21,7 @@ module PodPrebuild
       cmd = ["xcodebuild"]
       cmd << "-project" << options[:sandbox].project_path.realdirpath.shellescape
       targets.each { |target| cmd << "-target" << target }
-      cmd << "-configuration" << options[:configuration]
+      cmd << "-configuration" << options[:configuration].shellescape
       cmd << "-sdk" << sdk
       if DESTINATION_OF_SDK.key?(sdk)
         cmd << "-destination" << DESTINATION_OF_SDK[sdk]

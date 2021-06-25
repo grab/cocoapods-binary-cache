@@ -102,16 +102,16 @@ module PodPrebuild
       # for each sdk, the order of params must be -framework then -debug-symbols
       # to prevent duplicated file error when copying dSYMs
       sdks.each do |sdk|
-        cmd << "-framework" << framework_path_of(target, sdk)
+        cmd << "-framework" << framework_path_of(target, sdk).shellescape
 
         unless disable_dsym?
           dsyms = dsym_paths_of(target, sdk)
-          cmd += dsyms.map { |dsym| "-debug-symbols #{dsym}" }
+          cmd += dsyms.map { |dsym| "-debug-symbols #{dsym.shellescape}" }
         end
 
         if bitcode_enabled?
           bcsymbolmaps = bcsymbolmap_paths_of(target, sdk)
-          cmd += bcsymbolmaps.map { |bcsymbolmap| "-debug-symbols #{bcsymbolmap}" }
+          cmd += bcsymbolmaps.map { |bcsymbolmap| "-debug-symbols #{bcsymbolmap.shellescape}" }
         end
       end
 
@@ -181,7 +181,7 @@ module PodPrebuild
     def create_fat_binary(options)
       cmd = ["lipo", " -create"]
       cmd << "-output" << options[:output]
-      cmd << options[:simulator] << options[:device]
+      cmd << options[:simulator].shellescape << options[:device].shellescape
       `#{cmd.join(" ")}`
     end
 
