@@ -28,7 +28,7 @@ module PodPrebuild
     def commit_and_push_cache
       commit_message = "Update prebuilt cache"
       git("add .")
-      git("commit -m '#{commit_message}'")
+      git("commit -m '#{commit_message}'", can_fail: true)
       git("push origin #{@cache_branch}")
     end
   end
