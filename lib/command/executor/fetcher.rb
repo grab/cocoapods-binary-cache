@@ -37,7 +37,7 @@ module PodPrebuild
     def fetch_remote_cache(repo, branch, dest_dir)
       Pod::UI.puts "Fetching cache from #{repo} (branch: #{branch})".green
       if Dir.exist?(dest_dir + "/.git")
-        git("fetch origin #{branch}")
+        git("fetch --depth 10 origin", can_fail: true)
         git("checkout -f FETCH_HEAD", ignore_output: true)
         git("branch -D #{branch}", ignore_output: true, can_fail: true)
         git("checkout -b #{branch}")
