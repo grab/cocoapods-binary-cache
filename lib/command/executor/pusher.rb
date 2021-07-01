@@ -14,6 +14,7 @@ module PodPrebuild
         if @config.local_cache?
           print_message_for_local_cache
         else
+          checkout_if_needed
           commit_and_push_cache
         end
       end
@@ -23,6 +24,12 @@ module PodPrebuild
 
     def print_message_for_local_cache
       Pod::UI.puts "Skip pushing cache as you're using local cache".yellow
+    end
+
+    def checkout_if_needed
+      begin
+        git("checkout -b #{@cache_branch}", ignore_output: true, can_fail: true)
+      end
     end
 
     def commit_and_push_cache
