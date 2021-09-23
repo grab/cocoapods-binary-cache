@@ -21,6 +21,5 @@ jobs:
           bundle install
       - name: Rubocop
         run: |
-          TOKEN="81d188e40505c2079d08"
-          TOKEN+="d5f29235a9c89aa79ecf"
-          DANGER_GITHUB_API_TOKEN=${TOKEN} bundle exec danger --verbose
+          export DANGER_GITHUB_API_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          bundle exec danger --verbose || echo "Danger comments might not work with forked-repos"
