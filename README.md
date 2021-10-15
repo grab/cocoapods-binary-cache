@@ -18,7 +18,7 @@ Requirements
 Add the gem `cocoapods-binary-cache` to the `Gemfile` of your project.
 
 ```rb
-gem "cocoapods-binary-cache", :git => "https://github.com/grab/cocoapods-binary-cache.git", :tag => "0.1.11"
+gem "cocoapods-binary-cache", :git => "https://github.com/grab/cocoapods-binary-cache.git", :tag => "0.1.14"
 ```
 
 Then, run `bundle install` to install the added gem.
