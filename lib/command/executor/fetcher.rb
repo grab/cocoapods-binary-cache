@@ -9,6 +9,7 @@ module PodPrebuild
     def initialize(options)
       super(options)
       @cache_branch = options[:cache_branch]
+      @unpack_mutex = Mutex.new
     end
 
     def run
@@ -60,7 +61,9 @@ module PodPrebuild
       end
       zip_paths = Dir[@config.generated_frameworks_dir(in_cache: true) + "/*.zip"]
       Parallel.each(zip_paths, in_threads: 8) do |path|
-        ZipUtils.unzip(path, to_dir: @config.generated_frameworks_dir)
+        @unpack_mutex.synchronize do
+         ZipUtils.unzip(path, to_dir: @config.generated_frameworks_dir)
+        end
       end
     end
   end
