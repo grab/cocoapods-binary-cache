@@ -9,6 +9,8 @@ group :development do
   gem "mocha"
   gem "mocha-on-bacon"
   gem "prettybacon"
+  gem "ruby-debug-ide"
+  gem 'debase', '0.2.5.beta2'
 end
 
 group :test do
@@ -26,4 +28,6 @@ group :debug do
   gem "pry"
   gem "pry-nav"
   gem "pry-rescue"
+  gem "ruby-debug-ide"
+  gem 'debase', '0.2.5.beta2'
 end

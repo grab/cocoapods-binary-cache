@@ -1,10 +1,15 @@
 module Pod
+  $explict_none_prebuilt_pod_names = []
   class Podfile
     class TargetDefinition
       def detect_prebuilt_pod(name, requirements)
         @explicit_prebuilt_pod_names ||= []
         options = requirements.last || {}
-        @explicit_prebuilt_pod_names << Specification.root_name(name) if options.is_a?(Hash) && options[:binary]
+        if options.is_a?(Hash) && options[:binary]
+          @explicit_prebuilt_pod_names << Specification.root_name(name)
+        else
+          $explict_none_prebuilt_pod_names << Specification.root_name(name)
+        end
         options.delete(:binary) if options.is_a?(Hash)
         requirements.pop if options.empty?
       end
